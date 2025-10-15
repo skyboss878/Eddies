@@ -1,0 +1,26 @@
+🗺️ DEPENDENCY MAP
+=================
+Generated: Fri Aug 29 14:20:13 PDT 2025
+
+  ErrorBoundaryWithAuth.jsx -> utils:2, services:0
+0, api:1
+  SearchSystem.jsx -> utils:2, services:0
+0, api:0
+0
+  AppointmentCard.jsx -> utils:1, services:0
+0, api:1
+  JobCard.jsx -> utils:1, services:0
+0, api:1
+  TechnicianCard.jsx -> utils:1, services:0
+0, api:1
+  TimeClockWidget.jsx -> utils:2, services:0
+0, api:0
+0
+  AIChat.jsx -> utils:0
+0, services:1, api:0
+0
+  OBD2Lookup.jsx -> utils:0
+0, services:1, api:0
+0
+  IntegrationTest.jsx -> utils:4, services:0
+0, api:1

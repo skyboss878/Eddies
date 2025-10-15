@@ -1,0 +1,123 @@
+// src/contexts/CombinedProviders.jsx - Unified Context Provider
+import React from 'react';
+import { DataProvider, useData } from './DataContext';
+import { ShopProvider, useShop } from './ShopContext';
+import ErrorBoundary from '../components/ErrorBoundary';
+
+// Combined provider wrapper for cleaner App.jsx structure
+export const CombinedProviders = ({ children }) => {
+  return (
+    <ErrorBoundary>
+      <DataProvider>
+        <ShopProvider>
+          {children}
+        </ShopProvider>
+      </DataProvider>
+    </ErrorBoundary>
+  );
+};
+
+// Hook that combines both contexts for convenience
+export const useShopData = () => {
+  const dataContext = useData();
+  const shopContext = useShop();
+
+  return {
+    // Data context
+    ...dataContext,
+    // Shop context (will override any naming conflicts)
+    ...shopContext,
+    // Explicitly separate if needed
+    data: dataContext,
+    shop: shopContext
+  };
+};
+
+// Specific combined hooks for common use cases
+export const useCustomerOperations = () => {
+  const { customerOps, customersMap, customers } = useData();
+  const { formatCurrency } = useShop();
+
+  return {
+    customers,
+    customersMap,
+    ...customerOps,
+    formatCurrency
+  };
+};
+
+export const useJobOperations = () => {
+  const { jobOps, enrichedJobs, jobs } = useData();
+  const {
+    calculateLaborCost,
+    calculateTax,
+    calculateTotal,
+    formatCurrency,
+    createInvoiceFromJob,
+    generateJobNumber
+  } = useShop();
+
+  return {
+    jobs,
+    enrichedJobs,
+    ...jobOps,
+    calculateLaborCost,
+    calculateTax,
+    calculateTotal,
+    formatCurrency,
+    createInvoiceFromJob,
+    generateJobNumber
+  };
+};
+
+export const useEstimateOperations = () => {
+  const { estimateOps, estimates } = useData();
+  const {
+    calculateLaborCost,
+    calculateTax,
+    calculateTotal,
+    formatCurrency,
+    createJobFromEstimate,
+    generateEstimateNumber
+  } = useShop();
+
+  return {
+    estimates,
+    ...estimateOps,
+    calculateLaborCost,
+    calculateTax,
+    calculateTotal,
+    formatCurrency,
+    createJobFromEstimate,
+    generateEstimateNumber
+  };
+};
+
+export const useDashboardData = () => {
+  const { dataLoaded, customers, jobs, estimates } = useData();
+  const {
+    dashboardStats,
+    recentActivity,
+    isShopOpen,
+    todaysHours,
+    formattedRevenue,
+    refreshShopData
+  } = useShop();
+
+  return {
+    dataLoaded,
+    stats: {
+      totalCustomers: customers.length,
+      totalJobs: jobs.length,
+      totalEstimates: estimates.length,
+      ...dashboardStats
+    },
+    recentActivity,
+    isShopOpen,
+    todaysHours,
+    formattedRevenue,
+    refreshShopData
+  };
+};
+
+export default CombinedProviders;

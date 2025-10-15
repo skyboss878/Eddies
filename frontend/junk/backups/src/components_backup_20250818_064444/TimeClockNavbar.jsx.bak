@@ -1,0 +1,596 @@
+// TimeClockNavbar.jsx - Save this as src/components/TimeClockNavbar.jsx
+
+import React, { useState, useEffect } from 'react';
+import { Clock, Play, Square, Coffee, CoffeeIcon, Users, FileText, Calendar, DollarSign } from 'lucide-react';
+
+const TimeClockNavbar = () => {
+  const [timeStatus, setTimeStatus] = useState({
+    is_clocked_in: false,
+    current_entry: null,
+    on_break: false,
+    employee_name: ''
+  });
+  
+  const [currentTime, setCurrentTime] = useState(new Date());
+  const [showMenu, setShowMenu] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  
+  // Update current time every second
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentTime(new Date());
+    }, 1000);
+    
+    return () => clearInterval(timer);
+  }, []);
+  
+  // Load initial status
+  useEffect(() => {
+    loadTimeStatus();
+  }, []);
+  
+  const loadTimeStatus = async () => {
+    try {
+      const response = await fetch('/api/timeclock/status', {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        }
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        setTimeStatus(data.data);
+      }
+    } catch (error) {
+      console.error('Error loading time status:', error);
+    }
+  };
+  
+  const handleClockIn = async () => {
+    setIsLoading(true);
+    try {
+      const response = await fetch('/api/timeclock/clock-in', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+          'Content-Type': 'application/json'
+        }
+      });
+      
+      const data = await response.json();
+      if (response.ok) {
+        alert(data.message);
+        loadTimeStatus();
+      } else {
+        alert(data.error);
+      }
+    } catch (error) {
+      alert('Error clocking in');
+    }
+    setIsLoading(false);
+  };
+  
+  const handleClockOut = async () => {
+    if (!confirm('Are you sure you want to clock out?')) return;
+    
+    setIsLoading(true);
+    try {
+      const response = await fetch('/api/timeclock/clock-out', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+          'Content-Type': 'application/json'
+        }
+      });
+      
+      const data = await response.json();
+      if (response.ok) {
+        alert(`${data.message}\nTotal Hours: ${data.data.total_hours}\nOvertime: ${data.data.overtime_hours}`);
+        loadTimeStatus();
+      } else {
+        alert(data.error);
+      }
+    } catch (error) {
+      alert('Error clocking out');
+    }
+    setIsLoading(false);
+  };
+  
+  const handleBreakToggle = async () => {
+    const action = timeStatus.on_break ? 'break-end' : 'break-start';
+    setIsLoading(true);
+    
+    try {
+      const response = await fetch(`/api/timeclock/${action}`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+          'Content-Type': 'application/json'
+        }
+      });
+      
+      const data = await response.json();
+      if (response.ok) {
+        alert(data.message);
+        loadTimeStatus();
+      } else {
+        alert(data.error);
+      }
+    } catch (error) {
+      alert('Error with break');
+    }
+    setIsLoading(false);
+  };
+  
+  const formatTime = (date) => {
+    return date.toLocaleTimeString('en-US', {
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+      hour12: true
+    });
+  };
+  
+  const formatDate = (date) => {
+    return date.toLocaleDateString('en-US', {
+      weekday: 'short',
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric'
+    });
+  };
+  
+  const getHoursWorked = () => {
+    if (!timeStatus.current_entry) return '0.00';
+    return timeStatus.current_entry.hours_worked || '0.00';
+  };
+  
+  return (
+    <div className="relative">
+      {/* Main Time Clock Button */}
+      <div className="flex items-center space-x-4 bg-white rounded-lg shadow-md p-3 border border-gray-200">
+        {/* Current Time Display */}
+        <div className="text-center">
+          <div className="text-lg font-bold text-gray-800">{formatTime(currentTime)}</div>
+          <div className="text-xs text-gray-500">{formatDate(currentTime)}</div>
+        </div>
+        
+        {/* Divider */}
+        <div className="h-12 w-px bg-gray-200"></div>
+        
+        {/* Status Indicator */}
+        <div className="flex items-center space-x-2">
+          <div className={`w-3 h-3 rounded-full ${timeStatus.is_clocked_in ? 'bg-green-500' : 'bg-red-500'}`}></div>
+          <div className="text-sm">
+            <div className="font-medium text-gray-800">
+              {timeStatus.is_clocked_in ? 'Clocked In' : 'Clocked Out'}
+            </div>
+            {timeStatus.is_clocked_in && (
+              <div className="text-xs text-gray-500">
+                {timeStatus.on_break ? 'On Break' : `${getHoursWorked()} hrs`}
+              </div>
+            )}
+          </div>
+        </div>
+        
+        {/* Action Buttons */}
+        <div className="flex space-x-2">
+          {!timeStatus.is_clocked_in ? (
+            <button
+              onClick={handleClockIn}
+              disabled={isLoading}
+              className="flex items-center space-x-1 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md text-sm font-medium disabled:opacity-50"
+            >
+              <Play className="w-4 h-4" />
+              <span>Clock In</span>
+            </button>
+          ) : (
+            <div className="flex space-x-2">
+              {!timeStatus.on_break && (
+                <button
+                  onClick={handleBreakToggle}
+                  disabled={isLoading}
+                  className="flex items-center space-x-1 bg-yellow-600 hover:bg-yellow-700 text-white px-3 py-2 rounded-md text-sm font-medium disabled:opacity-50"
+                >
+                  <Coffee className="w-4 h-4" />
+                  <span>Break</span>
+                </button>
+              )}
+              
+              {timeStatus.on_break && (
+                <button
+                  onClick={handleBreakToggle}
+                  disabled={isLoading}
+                  className="flex items-center space-x-1 bg-orange-600 hover:bg-orange-700 text-white px-3 py-2 rounded-md text-sm font-medium disabled:opacity-50 animate-pulse"
+                >
+                  <CoffeeIcon className="w-4 h-4" />
+                  <span>End Break</span>
+                </button>
+              )}
+              
+              <button
+                onClick={handleClockOut}
+                disabled={isLoading}
+                className="flex items-center space-x-1 bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md text-sm font-medium disabled:opacity-50"
+              >
+                <Square className="w-4 h-4" />
+                <span>Clock Out</span>
+              </button>
+            </div>
+          )}
+        </div>
+        
+        {/* Management Menu Button */}
+        <button
+          onClick={() => setShowMenu(!showMenu)}
+          className="p-2 text-gray-600 hover:text-blue-600 hover:bg-gray-50 rounded-md"
+          title="Time Clock Management"
+        >
+          <Clock className="w-5 h-5" />
+        </button>
+      </div>
+      
+      {/* Management Dropdown Menu */}
+      {showMenu && (
+        <div className="absolute right-0 top-full mt-2 w-64 bg-white rounded-lg shadow-xl border z-50">
+          <div className="p-4 border-b bg-gray-50">
+            <h3 className="font-semibold text-gray-900 flex items-center">
+              <Clock className="w-4 h-4 mr-2" />
+              Time Clock Management
+            </h3>
+          </div>
+          
+          <div className="py-2">
+            <button
+              onClick={() => {
+                setShowMenu(false);
+                window.location.href = '/timeclock/dashboard';
+              }}
+              className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+            >
+              <Clock className="w-4 h-4 mr-3 text-gray-400" />
+              My Timesheet
+            </button>
+            
+            <button
+              onClick={() => {
+                setShowMenu(false);
+                window.location.href = '/employees';
+              }}
+              className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+            >
+              <Users className="w-4 h-4 mr-3 text-gray-400" />
+              Employee Management
+            </button>
+            
+            <button
+              onClick={() => {
+                setShowMenu(false);
+                window.location.href = '/payroll/periods';
+              }}
+              className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+            >
+              <Calendar className="w-4 h-4 mr-3 text-gray-400" />
+              Pay Periods
+            </button>
+            
+            <button
+              onClick={() => {
+                setShowMenu(false);
+                window.location.href = '/payroll/reports';
+              }}
+              className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+            >
+              <FileText className="w-4 h-4 mr-3 text-gray-400" />
+              Payroll Reports
+            </button>
+            
+            <hr className="my-2" />
+            
+            <button
+              onClick={() => {
+                setShowMenu(false);
+                window.location.href = '/payroll/export';
+              }}
+              className="flex items-center w-full px-4 py-2 text-sm text-green-600 hover:bg-green-50"
+            >
+              <DollarSign className="w-4 h-4 mr-3" />
+              Export Payroll
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+// Time Clock Dashboard Component
+const TimeClockDashboard = () => {
+  const [employees, setEmployees] = useState([]);
+  const [payPeriods, setPayPeriods] = useState([]);
+  const [selectedPeriod, setSelectedPeriod] = useState(null);
+  const [payrollData, setPayrollData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  
+  useEffect(() => {
+    loadDashboardData();
+  }, []);
+  
+  const loadDashboardData = async () => {
+    try {
+      setLoading(true);
+      
+      // Load employees and pay periods
+      const [employeesRes, payPeriodsRes] = await Promise.all([
+        fetch('/api/employees', {
+          headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+        }),
+        fetch('/api/pay-periods', {
+          headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+        })
+      ]);
+      
+      if (employeesRes.ok && payPeriodsRes.ok) {
+        const employeesData = await employeesRes.json();
+        const payPeriodsData = await payPeriodsRes.json();
+        
+        setEmployees(employeesData.data);
+        setPayPeriods(payPeriodsData.data);
+        
+        // Set current pay period
+        const currentPeriod = payPeriodsData.data.find(p => !p.is_closed) || payPeriodsData.data[0];
+        if (currentPeriod) {
+          setSelectedPeriod(currentPeriod);
+          loadPayrollReport(currentPeriod.id);
+        }
+      }
+    } catch (error) {
+      console.error('Error loading dashboard data:', error);
+    }
+    setLoading(false);
+  };
+  
+  const loadPayrollReport = async (periodId) => {
+    try {
+      const response = await fetch(`/api/reports/payroll/${periodId}`, {
+        headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        setPayrollData(data.data);
+      }
+    } catch (error) {
+      console.error('Error loading payroll report:', error);
+    }
+  };
+  
+  const exportPayroll = async () => {
+    if (!selectedPeriod) return;
+    
+    try {
+      const response = await fetch(`/api/reports/export/payroll/${selectedPeriod.id}`, {
+        headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+      });
+      
+      if (response.ok) {
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.style.display = 'none';
+        a.href = url;
+        a.download = `payroll_report_${selectedPeriod.id}.csv`;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        alert('Payroll report exported successfully!');
+      }
+    } catch (error) {
+      alert('Error exporting payroll report');
+    }
+  };
+  
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center h-64">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+      </div>
+    );
+  }
+  
+  return (
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold text-gray-900">Time Clock Dashboard</h1>
+        <p className="text-gray-600">Manage employee time tracking and payroll</p>
+      </div>
+      
+      {/* Quick Stats */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+        <div className="bg-white p-6 rounded-lg shadow border">
+          <div className="flex items-center">
+            <Users className="w-8 h-8 text-blue-600" />
+            <div className="ml-4">
+              <p className="text-sm text-gray-600">Active Employees</p>
+              <p className="text-2xl font-bold text-gray-900">{employees.length}</p>
+            </div>
+          </div>
+        </div>
+        
+        <div className="bg-white p-6 rounded-lg shadow border">
+          <div className="flex items-center">
+            <Clock className="w-8 h-8 text-green-600" />
+            <div className="ml-4">
+              <p className="text-sm text-gray-600">Total Hours</p>
+              <p className="text-2xl font-bold text-gray-900">
+                {payrollData?.totals?.total_regular_hours || 0}
+              </p>
+            </div>
+          </div>
+        </div>
+        
+        <div className="bg-white p-6 rounded-lg shadow border">
+          <div className="flex items-center">
+            <DollarSign className="w-8 h-8 text-yellow-600" />
+            <div className="ml-4">
+              <p className="text-sm text-gray-600">Overtime Hours</p>
+              <p className="text-2xl font-bold text-gray-900">
+                {payrollData?.totals?.total_overtime_hours || 0}
+              </p>
+            </div>
+          </div>
+        </div>
+        
+        <div className="bg-white p-6 rounded-lg shadow border">
+          <div className="flex items-center">
+            <FileText className="w-8 h-8 text-purple-600" />
+            <div className="ml-4">
+              <p className="text-sm text-gray-600">Total Payroll</p>
+              <p className="text-2xl font-bold text-gray-900">
+                ${payrollData?.totals?.total_gross_pay || 0}
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      {/* Pay Period Selector */}
+      <div className="bg-white p-6 rounded-lg shadow border mb-8">
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="text-xl font-semibold text-gray-900">Current Pay Period</h2>
+          <button
+            onClick={exportPayroll}
+            className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md text-sm font-medium"
+            disabled={!selectedPeriod}
+          >
+            Export Payroll
+          </button>
+        </div>
+        
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <select
+            value={selectedPeriod?.id || ''}
+            onChange={(e) => {
+              const period = payPeriods.find(p => p.id === parseInt(e.target.value));
+              setSelectedPeriod(period);
+              if (period) loadPayrollReport(period.id);
+            }}
+            className="border border-gray-300 rounded-md px-3 py-2"
+          >
+            <option value="">Select Pay Period</option>
+            {payPeriods.map(period => (
+              <option key={period.id} value={period.id}>
+                {period.start_date} to {period.end_date}
+              </option>
+            ))}
+          </select>
+          
+          {selectedPeriod && (
+            <>
+              <div className="text-sm text-gray-600">
+                <p><strong>Start:</strong> {selectedPeriod.start_date}</p>
+                <p><strong>End:</strong> {selectedPeriod.end_date}</p>
+              </div>
+              <div className="text-sm text-gray-600">
+                <p><strong>Pay Date:</strong> {selectedPeriod.pay_date}</p>
+                <p><strong>Status:</strong> 
+                  <span className={`ml-1 ${selectedPeriod.is_closed ? 'text-red-600' : 'text-green-600'}`}>
+                    {selectedPeriod.is_closed ? 'Closed' : 'Active'}
+                  </span>
+                </p>
+              </div>
+            </>
+          )}
+        </div>
+      </div>
+      
+      {/* Employee Payroll Table */}
+      {payrollData && (
+        <div className="bg-white rounded-lg shadow border overflow-hidden">
+          <div className="px-6 py-4 border-b">
+            <h2 className="text-xl font-semibold text-gray-900">Employee Payroll Summary</h2>
+          </div>
+          
+          <div className="overflow-x-auto">
+            <table className="min-w-full divide-y divide-gray-200">
+              <thead className="bg-gray-50">
+                <tr>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Employee
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Regular Hours
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Overtime Hours
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Hourly Rate
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Gross Pay
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-200">
+                {payrollData.employees.map((employee) => (
+                  <tr key={employee.id} className="hover:bg-gray-50">
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="flex items-center">
+                        <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                          <span className="text-blue-600 font-medium text-sm">
+                            {employee.name.charAt(0)}
+                          </span>
+                        </div>
+                        <div className="ml-3">
+                          <div className="text-sm font-medium text-gray-900">
+                            {employee.name}
+                          </div>
+                          <div className="text-sm text-gray-500">
+                            {employee.position}
+                          </div>
+                        </div>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      {employee.regular_hours}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      {employee.overtime_hours}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      ${employee.hourly_rate}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                      ${employee.gross_pay}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+              <tfoot className="bg-gray-50">
+                <tr>
+                  <td className="px-6 py-4 text-sm font-bold text-gray-900">TOTALS</td>
+                  <td className="px-6 py-4 text-sm font-bold text-gray-900">
+                    {payrollData.totals.total_regular_hours}
+                  </td>
+                  <td className="px-6 py-4 text-sm font-bold text-gray-900">
+                    {payrollData.totals.total_overtime_hours}
+                  </td>
+                  <td className="px-6 py-4 text-sm font-bold text-gray-900">-</td>
+                  <td className="px-6 py-4 text-sm font-bold text-green-600">
+                    ${payrollData.totals.total_gross_pay}
+                  </td>
+                </tr>
+              </tfoot>
+            </table>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+// inside TimeClockNavbar.jsx
+export function TimeClockDashboard() { /*...*/ }
+// or
+export const TimeClockDashboard = () => { /*...*/ }

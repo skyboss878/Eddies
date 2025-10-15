@@ -1,0 +1,22 @@
+// src/utils/index.js - Central utilities export
+export { api, uploadApi, healthApi, API_BASE_URL } from './api';
+export { apiEndpoints } from './apiEndpoints';
+export { showError, showSuccess, showInfo, showWarning } from './toast';
+export * from './dateUtils';
+export * from './calculations';
+export * from './statusUtils';
+export * from './vehicleHelpers';
+
+// Re-export services
+export { default as customerService } from './services/customerService';
+export { default as vehicleService } from './services/vehicleService';
+export { default as jobService } from './services/jobService';
+export { default as estimateService } from './services/estimateService';
+export { default as invoiceService } from './services/invoiceService';
+export { default as reportService } from './services/reportService';
+export { default as dashboardService } from './services/dashboardService';
+export { default as diagnosticsService } from './services/diagnosticsService';
+export { default as aiService } from './services/aiService';
+export { default as appointmentService } from './services/appointmentService';
+export { default as migrationService } from './services/migrationServices';
+export { default as timeclockService } from './services/timeclockService';

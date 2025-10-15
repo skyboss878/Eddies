@@ -1,0 +1,673 @@
+API Data Flow Analysis
+Generated: Fri Aug 29 14:35:23 PDT 2025
+Project: /data/data/com.termux/files/home/eddies-asian-automotive/frontend
+=====================================
+
+APP.JSX ANALYSIS
+================
+
+App file: src/App.jsx
+
+Imports in App.jsx:
+  1:import React from 'react';
+  2:import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+  3:import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+  4:import { CombinedProviders } from './contexts/CombinedProviders';
+  7:import Layout from './layouts/Layout';
+  8:import ProtectedRoute from './components/auth/ProtectedRoute';
+  11:import SearchSystem from './components/SearchSystem';
+  12:import RealTimeNotifications from './components/RealTimeNotifications';
+  13:import CustomerPortal from './components/CustomerPortal';
+  16:import {
+  39:import PartsLaborManagement from './pages/PartsLaborManagement';
+  40:import TimeClock from './pages/TimeClock';
+  41:import Inventory from './pages/Inventory';
+
+Components rendered in App.jsx:
+  - AIDiagnostics
+  - AppointmentCalendar
+  - BrowserRouter
+  - CombinedProviders
+  - CustomerDetail
+  - CustomerPortal
+  - Customers
+  - Dashboard
+  - EstimateDetail
+  - Estimates
+  - Inventory
+  - InvoiceDetail
+  - Invoices
+  - JobDetail
+  - Jobs
+  - Landing
+  - Layout
+  - Login
+  - Navigate
+  - PartsLaborManagement
+  - ProtectedRoute
+  - QueryClientProvider
+  - RealTimeNotifications
+  - Register
+  - Reports
+  - Route
+  - Routes
+  - SearchSystem
+  - Settings
+  - TimeClock
+  - VehicleDetail
+  - Vehicles
+
+Context Providers in App.jsx:
+  98:    </QueryClientProvider>
+
+COMPONENT TO API CONNECTIONS
+===========================
+
+=== components directory ===
+📡 ErrorBoundaryWithAuth.jsx:
+    Import: 3:import { apiUtils } from '../utils/api';
+
+📡 HealthCheck.jsx:
+    9:        const response = await fetch('http://127.0.0.1:5001/health');
+
+📡 SearchSystem.jsx:
+
+📡 TimeClockNavbar.jsx:
+
+📡 AppointmentCard.jsx:
+    24:      const response = await api.get(`/appointments?date=${today}&limit=5`);
+    Import: 11:import api from "../utils/api";
+
+📡 JobCard.jsx:
+    24:      const response = await api.get('/jobs?status=pending,in_progress&limit=5');
+    Import: 12:import api from "../utils/api";
+
+📡 TechnicianCard.jsx:
+    23:      const response = await api.get('/users?role=technician&limit=5');
+    Import: 11:import api from "../utils/api";
+
+📡 TimeclockHistory.jsx:
+    16:      const response = await fetch(`/api/timeclock/entries?${params}`, {
+
+📡 CustomerPortal.jsx:
+
+📡 AIProvider.js:
+    12:    const openAIResp = await axios.post(
+    13:      'https://api.openai.com/v1/chat/completions',
+    29:      const openRouterResp = await axios.post(
+    43:        const hfResp = await axios.post(
+
+📡 AIDashboard.jsx:
+
+📡 AIChat.jsx:
+    Import: 5:import { aiService } from '../../services/aiService';
+
+📡 AppointmentBar.jsx:
+
+📡 index.js:
+    Import: 30:export { default as ApiTest } from './ApiTest';
+
+📡 IntegrationTest.jsx:
+    22:      const response = await fetch('http://localhost:3001/health');
+    45:        const response = await fetch(endpoint.url);
+    98:      const response = await fetch(apiEndpoints.auth.verify, {
+    132:      const response = await fetch(apiEndpoints.vehicles.create, {
+    144:          const deleteResponse = await fetch(apiEndpoints.vehicles.delete(data.id), {
+    Import: 2:import { apiEndpoints } from '../../utils/apiEndpoints';
+
+=== pages directory ===
+📡 Invoice.jsx:
+
+📡 CustomerList.jsx:
+    79:      const response = await fetch('/api/auth/customers');
+    274:      const response = await fetch(`/api/auth/customers/${customer.id}`, {
+    317:        fetch(`/api/auth/customers/${id}`, { method: 'DELETE' })
+
+📡 AddVehicle.jsx:
+
+📡 CreateJob.jsx:
+    56:        const customersResponse = await fetch('/api/auth/customers');
+    63:        const vehiclesResponse = await fetch('/api/auth/vehicles');
+    70:        const techniciansResponse = await fetch('/api/technicians');
+    175:          const response = await fetch('/api/ai/openai-diagnosis', {
+    198:          const response = await fetch('/api/ai/openrouter-diagnosis', {
+
+📡 Dashboard.jsx:
+
+📡 Landing.jsx:
+    72:      const response = await fetch("/api/appointments", {
+
+📡 VehicleForm.jsx:
+    29:      const response = await fetch('/api/auth/customers', {
+    336:      const response = await fetch('/api/auth/vehicles', {
+
+📡 AppointmentCalendar.jsx:
+
+📡 CreateEditEstimate.jsx:
+    30:        const res = await fetch(`/api/auth/estimates/${id}`);
+    50:      const res = await fetch(url, {
+
+📡 CreateInvoice.jsx:
+
+📡 EstimatesList.jsx:
+
+📡 Settings.jsx:
+    79:        const res = await fetch('/api/settings', {
+    141:      const res = await fetch('/api/settings', {
+
+📡 PartsLaborManagement.jsx:
+    246:      if (editingItem) await api.update(editingItem.id, form);
+    247:      else await api.create(form);
+    269:        await api.delete(id);
+
+📡 Customers.jsx:
+    79:      const response = await fetch('/api/auth/customers');
+    274:      const response = await fetch(`/api/auth/customers/${customer.id}`, {
+    317:        fetch(`/api/auth/customers/${id}`, { method: 'DELETE' })
+
+📡 Estimates.jsx:
+
+📡 Invoices.jsx:
+
+📡 TimeClock.jsx:
+    20:      const response = await fetch('/api/timeclock/status', {
+    34:      const response = await fetch('/api/timeclock/history', {
+    49:      const response = await fetch('/api/timeclock/clock-in', {
+    72:      const response = await fetch('/api/timeclock/clock-out', {
+
+📡 AIDiagnostics.jsx:
+    Import: 3:import api from "../utils/api";
+
+📡 AppointmentDetailsModal.jsx:
+
+=== hooks directory ===
+📡 useDataOperations.js:
+    Import: 12:} from "../utils/services";
+
+📡 useApi.jsx:
+    Import: 3:import api, { enhancedGet, apiUtils } from '../utils/api';
+
+📡 useAuth.js:
+    Import: 3:import { apiEndpoints, apiUtils } from '../utils/api';
+
+📡 index.js:
+    Import: 13:export { useApi } from './useApi.jsx';
+
+=== utils/services directory ===
+📡 customerService.js:
+    15:    const response = await api.get(baseURL, { params });
+    24:    const response = await api.get(`${baseURL}/${id}`);
+    33:    const response = await api.post(baseURL, customerData);
+    42:    const response = await api.put(`${baseURL}/${id}`, customerData);
+    51:    const response = await api.delete(`${baseURL}/${id}`);
+    Import: 2:import api from '../api'; // your api instance (axios or similar)
+
+📡 vehicleService.js:
+    15:    const response = await api.get(baseURL, { params });
+    24:    const response = await api.get(`${baseURL}/${id}`);
+    33:    const response = await api.post(baseURL, vehicleData);
+    42:    const response = await api.put(`${baseURL}/${id}`, vehicleData);
+    51:    const response = await api.delete(`${baseURL}/${id}`);
+    Import: 2:import api from '../api';
+
+📡 jobService.js:
+    15:    const response = await api.get(baseURL, { params });
+    24:    const response = await api.get(`${baseURL}/${id}`);
+    33:    const response = await api.post(baseURL, jobData);
+    42:    const response = await api.put(`${baseURL}/${id}`, jobData);
+    51:    const response = await api.patch(`${baseURL}/${id}/status`, statusData);
+    Import: 2:import api from '../api';
+
+📡 estimateService.js:
+    15:    const response = await api.get(baseURL, { params });
+    24:    const response = await api.get(`${baseURL}/${id}`);
+    33:    const response = await api.post(baseURL, estimateData);
+    42:    const response = await api.put(`${baseURL}/${id}`, estimateData);
+    51:    const response = await api.delete(`${baseURL}/${id}`);
+    Import: 2:import api from '../api';
+
+📡 invoiceService.js:
+    15:    const response = await api.get(baseURL, { params });
+    24:    const response = await api.get(`${baseURL}/${id}`);
+    33:    const response = await api.post(baseURL, invoiceData);
+    42:    const response = await api.put(`${baseURL}/${id}`, invoiceData);
+    51:    const response = await api.delete(`${baseURL}/${id}`);
+    Import: 2:import api from '../api';
+
+📡 appointmentService.js:
+    15:    const response = await api.get(baseURL, { params });
+    24:    const response = await api.get(`${baseURL}/${id}`);
+    33:    const response = await api.post(baseURL, appointmentData);
+    42:    const response = await api.put(`${baseURL}/${id}`, appointmentData);
+    51:    const response = await api.delete(`${baseURL}/${id}`);
+    Import: 2:import api from '../api';
+
+📡 timeclockService.js:
+    15:    const response = await api.get(`${baseURL}/status`);
+    24:    const response = await api.post(`${baseURL}/clock-in`);
+    33:    const response = await api.post(`${baseURL}/clock-out`);
+    Import: 2:import api from '../api';
+
+📡 reportService.js:
+    16:    const response = await api.get(baseURL, { params });
+    26:    const response = await api.get(`${baseURL}/${reportType}`, { params });
+    36:    const response = await api.post(`${baseURL}/custom`, reportData);
+    Import: 2:import api from '../api';
+
+📡 diagnosticsService.js:
+    16:    const response = await api.get(`${baseURL}/status`);
+    26:    const response = await api.post(`${baseURL}/run`, { type: testType });
+    Import: 2:import api from '../api';
+
+📡 migrationServices.js:
+    Import: 2:import { uploadApi, apiCache } from '../apiEndpoints';
+
+CONTEXT FLOW ANALYSIS
+=====================
+
+Context providers found:
+  📁 AuthContext
+    2:import React, { createContext, useState, useContext, useEffect } from 'react';
+    5:const AuthContext = createContext();
+    16:  const [user, setUser] = useState(null);
+    Used in 18 files
+
+  📁 DataContext
+    2:import React, { createContext, useContext, useState, useCallback } from 'react';
+    13:const DataContext = createContext();
+    18:  const [state, setState] = useState({
+    Used in 17 files
+
+  📁 ShopContext
+    1:import React, { createContext, useContext, useState } from 'react';
+    3:const ShopContext = createContext();
+    6:  const [shopInfo, setShopInfo] = useState({
+    Used in 3 files
+
+  📁 SettingsProvider
+    2:import React, { createContext, useContext, useState, useEffect } from 'react';
+    6:const SettingsContext = createContext();
+    10:  const [settings, setSettings] = useState({
+    Used in 4 files
+
+  📁 CombinedProviders
+    Used in 3 files
+
+  📁 index
+    Used in 20 files
+
+IMPORT/EXPORT FLOW MAP
+======================
+
+=== components ===
+📄 Navbar.jsx:
+  Imports:
+    - react
+    - react-router-dom
+    - lucide-react
+    - ./TimeClockNavbar
+    - ./UserDropdown
+  Exports:
+    - export default Navbar;
+
+📄 ConfirmModal.jsx:
+  Imports:
+    - react
+    - @heroicons/react/24/outline
+  Exports:
+    - export default function ConfirmModal({ 
+
+📄 PromptModal.jsx:
+  Imports:
+    - react
+  Exports:
+    - export default PromptModal;
+
+📄 ErrorBoundaryWithAuth.jsx:
+  Imports:
+    - react
+    - ../utils/toast
+    - ../utils/api
+  Exports:
+    - export default ErrorBoundaryWithAuth;
+
+📄 GlobalToastDisplay.jsx:
+  Imports:
+    - react
+    - react-hot-toast
+  Exports:
+    - export default function GlobalToastDisplay() {
+
+📄 DashboardCard.jsx:
+  Imports:
+    - react
+  Exports:
+    - export default DashboardCard;
+
+📄 UserDropdown.jsx:
+  Imports:
+    - react
+    - @headlessui/react
+    - react-router-dom
+    - ../contexts/AuthContext
+  Exports:
+    - export default function UserDropdown() {
+
+📄 HealthCheck.jsx:
+  Imports:
+    - react
+  Exports:
+    - export default HealthCheck;
+
+📄 LoadingSpinner.jsx:
+  Imports:
+    - react
+  Exports:
+    - export default function LoadingSpinner({ size = 'md', className = '' }) {
+
+📄 SearchSystem.jsx:
+  Imports:
+    - react
+    - react-router-dom
+    - lucide-react
+    - ../contexts/DataContext
+    - ../utils
+  Exports:
+    - export const useGlobalSearch = () => {
+    - export const SearchButton = ({ onClick }) => (
+    - export default SearchSystem;
+
+
+=== pages ===
+📄 Invoice.jsx:
+  Imports:
+    - react-router-dom
+    - react
+    - ../utils
+    - html2pdf.js
+  Exports:
+    - export default Invoice;
+
+📄 CustomerList.jsx:
+  Imports:
+    - react
+    - ../hooks
+    - ../components/SmartBreadcrumb
+  Exports:
+    - export default CustomerList;
+
+📄 AddVehicle.jsx:
+  Imports:
+    - react
+    - react-router-dom
+    - ../utils
+    - ../contexts/DataContext
+  Exports:
+    - export default function AddVehicle() {
+
+📄 CreateJob.jsx:
+  Imports:
+    - react
+  Exports:
+    - export default CreateJob;
+
+📄 ViewJobs.jsx:
+  Imports:
+    - react
+    - react-router-dom
+    - react-icons/fa
+    - date-fns
+    - ../hooks
+  Exports:
+    - export default ViewJobs;
+
+📄 Login.jsx:
+  Imports:
+    - react
+    - ../contexts/AuthContext
+    - react-router-dom
+    - lucide-react
+  Exports:
+    - export default Login;
+
+📄 Dashboard.jsx:
+  Imports:
+    - react
+    - react-router-dom
+    - ../contexts/AuthContext
+    - ../contexts/DataContext
+    - ../components/LoadingSpinner
+  Exports:
+    - export default Dashboard;
+
+📄 VehicleList.jsx:
+  Imports:
+    - react
+    - react-router-dom
+    - ../hooks
+    - ../hooks
+    - ../components/modals/ConfirmModal
+  Exports:
+    - export default function VehicleList() {
+
+📄 Landing.jsx:
+  Imports:
+    - react
+    - react-router-dom
+  Exports:
+    - export default Landing;
+
+📄 Mobile.jsx:
+  Imports:
+    - react
+  Exports:
+    - export default Mobile;
+
+
+=== hooks ===
+📄 useSearchFilter.js:
+  Imports:
+    - react
+  Exports:
+    - export const useSearchFilter = (data = [], searchFields = []) => {
+
+📄 useDataOperations.js:
+  Imports:
+    - react
+    - ../utils/toast
+  Exports:
+    - export const useDataOperations = () => {
+
+📄 useLocalStorage.js:
+  Imports:
+    - react
+  Exports:
+    - export const useLocalStorage = (key, defaultValue) => {
+
+📄 useApi.jsx:
+  Imports:
+    - react
+    - ../utils/api
+    - ../utils/toast
+  Exports:
+    - export const useApi = () => {
+
+📄 useAuth.js:
+  Imports:
+    - react
+    - ../utils/api
+    - ../utils/tokenManager
+  Exports:
+    - export const useAuth = () => {
+
+📄 useEnhancedNavigation.js:
+  Imports:
+    - react
+    - react-router-dom
+  Exports:
+    - export const useEnhancedNavigation = () => {
+
+📄 index.js:
+  Imports:
+  Exports:
+    - export { useSearchFilter } from './useSearchFilter';
+    - export { useDataOperations } from './useDataOperations';
+    - export { useLocalStorage } from './useLocalStorage';
+
+📄 usePrintable.js:
+  Imports:
+    - react
+  Exports:
+    - export const usePrintable = (title, isActive = false) => {
+
+
+=== utils/services ===
+📄 customerService.js:
+  Imports:
+    - ../api
+    - ../toast
+  Exports:
+    - export const getAll = async (params = {}) => {
+    - export const getById = async (id) => {
+    - export const create = async (customerData) => {
+
+📄 vehicleService.js:
+  Imports:
+    - ../api
+    - ../toast
+  Exports:
+    - export const getAll = async (params = {}) => {
+    - export const getById = async (id) => {
+    - export const create = async (vehicleData) => {
+
+📄 jobService.js:
+  Imports:
+    - ../api
+    - ../toast
+  Exports:
+    - export const getAll = async (params = {}) => {
+    - export const getById = async (id) => {
+    - export const create = async (jobData) => {
+
+📄 estimateService.js:
+  Imports:
+    - ../api
+    - ../toast
+  Exports:
+    - export const getAll = async (params = {}) => {
+    - export const getById = async (id) => {
+    - export const create = async (estimateData) => {
+
+📄 invoiceService.js:
+  Imports:
+    - ../api
+    - ../toast
+  Exports:
+    - export const getAll = async (params = {}) => {
+    - export const getById = async (id) => {
+    - export const create = async (invoiceData) => {
+
+📄 appointmentService.js:
+  Imports:
+    - ../api
+    - ../toast
+  Exports:
+    - export const getAll = async (params = {}) => {
+    - export const getById = async (id) => {
+    - export const create = async (appointmentData) => {
+
+📄 timeclockService.js:
+  Imports:
+    - ../api
+    - ../toast
+  Exports:
+    - export const status = async () => {
+    - export const clockIn = async () => {
+    - export const clockOut = async () => {
+
+📄 reportService.js:
+  Imports:
+    - ../api
+    - ../toast
+  Exports:
+    - export const getAll = async (params = {}) => {
+    - export const getByType = async (reportType, params = {}) => {
+    - export const generateCustomReport = async (reportData) => {
+
+📄 diagnosticsService.js:
+  Imports:
+    - ../api
+    - ../toast
+  Exports:
+    - export const getSystemStatus = async () => {
+    - export const runTest = async (testType) => {
+    - export default {
+
+📄 index.js:
+  Imports:
+    - ./customerService
+    - ./vehicleService
+    - ./jobService
+    - ./estimateService
+    - ./invoiceService
+  Exports:
+    - export {
+
+
+=== contexts ===
+📄 AuthContext.jsx:
+  Imports:
+    - react
+    - ../utils/api
+  Exports:
+    - export const useAuth = () => {
+    - export const AuthProvider = ({ children }) => {
+
+📄 DataContext.jsx:
+  Imports:
+    - react
+    - ./AuthContext
+  Exports:
+    - export const DataProvider = ({ children }) => {
+    - export const useData = () => {
+
+📄 ShopContext.jsx:
+  Imports:
+    - react
+  Exports:
+    - export const ShopProvider = ({ children }) => {
+    - export const useShop = () => {
+
+📄 SettingsProvider.jsx:
+  Imports:
+    - react
+    - ../utils/api
+    - ./AuthContext
+  Exports:
+    - export const SettingsProvider = ({ children }) => {
+    - export const useSettings = () => {
+
+📄 CombinedProviders.jsx:
+  Imports:
+    - react
+    - ./AuthContext
+    - ./DataContext
+    - ./SettingsProvider
+    - ./ShopContext
+  Exports:
+    - export const CombinedProviders = ({ children }) => (
+
+📄 index.js:
+  Imports:
+  Exports:
+    - export { useAuth } from './AuthContext';
+    - export { useData } from './DataContext';
+    - export { useSettings } from './SettingsProvider';
+
+
+
+SUMMARY
+=======
+Total files analyzed: 144
+Files with API connections: 59
+Analysis completed at: Fri Aug 29 14:35:48 PDT 2025

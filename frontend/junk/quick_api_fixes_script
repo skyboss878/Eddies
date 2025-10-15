@@ -1,0 +1,88 @@
+#!/bin/bash
+
+echo "=== QUICK API FIXES FOR PAGES ==="
+echo
+
+cd src/pages
+
+# Fix 1: Settings.jsx - Replace direct fetch with /api prefix
+echo "1. Fixing Settings.jsx..."
+if [ -f "Settings.jsx" ]; then
+    # Fix the fetch calls to use proper API endpoints
+    sed -i.backup "s|'/settings/'|'/api/settings'|g" Settings.jsx
+    echo "✅ Fixed Settings.jsx API endpoints"
+    echo "   Changed '/settings/' to '/api/settings'"
+else
+    echo "❌ Settings.jsx not found"
+fi
+
+echo
+
+# Check what we actually have
+echo "2. Current pages analysis:"
+echo "========================="
+
+critical_pages=("Dashboard.jsx" "EstimateAI.jsx" "CustomerList.jsx" "VehicleList.jsx" "EstimatesList.jsx")
+
+for page in "${critical_pages[@]}"; do
+    if [ -f "$page" ]; then
+        echo "✅ $page found"
+        
+        # Check if it uses proper patterns
+        if grep -q "useDataOperations" "$page" 2>/dev/null; then
+            echo "   ✅ Uses useDataOperations hook"
+        elif grep -q "apiClient" "$page" 2>/dev/null; then
+            echo "   ✅ Uses apiClient"
+        elif grep -q "fetch\|axios" "$page" 2>/dev/null; then
+            echo "   ⚠️  Uses direct API calls - may need manual fix"
+        else
+            echo "   ❓ No obvious API usage"
+        fi
+    else
+        echo "❌ $page not found"
+    fi
+done
+
+echo
+echo "3. Pages with potential issues:"
+echo "==============================="
+
+# Check for pages that might need manual fixes
+for file in *.jsx; do
+    # Look for direct fetch without /api prefix
+    if grep -q "fetch.*'/[^a]" "$file" 2>/dev/null; then
+        echo "⚠️  $file has direct fetch calls:"
+        grep -n "fetch.*'/[^a]" "$file" 2>/dev/null | head -2
+        echo
+    fi
+done
+
+echo "4. MANUAL FIXES NEEDED:"
+echo "======================="
+
+echo "A. CustomerList.jsx - Replace fetchCustomers with useDataOperations:"
+echo "   // REMOVE: manual fetchCustomers function"
+echo "   // ADD: const { customers, loading } = useDataOperations();"
+echo
+
+echo "B. AddVehicle.jsx - Replace direct fetch with apiClient:"
+echo "   // CHANGE: fetch('/api/initial-data')"
+echo "   // TO: apiClient.get('/api/initial-data')"
+echo
+
+echo "C. Settings.jsx - Should be fixed automatically by this script"
+echo
+
+echo "5. TESTING ORDER:"
+echo "================="
+echo "After making manual fixes, test in this order:"
+echo "1. Dashboard.jsx"
+echo "2. EstimateAI.jsx (should work now!)" 
+echo "3. CustomerList.jsx (after manual fix)"
+echo "4. VehicleList.jsx"
+echo "5. EstimatesList.jsx"
+
+echo
+echo "=== RUN THESE COMMANDS TO START TESTING ==="
+echo "cd ../backend && python run.py    # Terminal 1"
+echo "cd ../frontend && npm start       # Terminal 2"

@@ -1,0 +1,78 @@
+🔍 Eddie's Automotive Full System Analysis - Sun Sep 28 12:20:22 PDT 2025
+📝 Logging to: /data/data/com.termux/files/home/eddies-asian-automotive/system_analysis_20250928_122022.log
+===============================================
+[INFO] 1. System Environment Check
+Python Version: Python 3.12.11
+Node Version: v24.7.0
+NPM Version: 11.5.1
+Current Directory: /data/data/com.termux/files/home/eddies-asian-automotive
+User: u0_a612
+OS: Linux localhost 5.10.198-android12-9-00085-g226a9632f13d-ab11136126 #1 SMP PREEMPT Wed Nov 22 14:16:37 UTC 2023 aarch64 Android
+[INFO] 2. Backend / Database Analysis
+[WARN] Database file sqlite:///eddie_automotive.db
+postgresql://user:password@localhost:5432/eddies_automotive does NOT exist
+[INFO] Checking database schema...
+[INFO] Table: settings
+[ERROR] Missing column: settings.id
+[ERROR] Missing column: settings.shop_name
+[ERROR] Missing column: settings.address
+[ERROR] Missing column: settings.phone
+[ERROR] Missing column: settings.email
+[INFO] Table: vehicles
+[ERROR] Missing column: vehicles.id
+[ERROR] Missing column: vehicles.customer_id
+[ERROR] Missing column: vehicles.make
+[ERROR] Missing column: vehicles.model
+[ERROR] Missing column: vehicles.year
+[ERROR] Missing column: vehicles.color
+[INFO] Table: jobs
+[ERROR] Missing column: jobs.id
+[ERROR] Missing column: jobs.vehicle_id
+[ERROR] Missing column: jobs.customer_id
+[ERROR] Missing column: jobs.symptoms
+[ERROR] Missing column: jobs.status
+[INFO] Table: estimates
+[ERROR] Missing column: estimates.id
+[ERROR] Missing column: estimates.customer_id
+[ERROR] Missing column: estimates.job_id
+[ERROR] Missing column: estimates.total_amount
+[ERROR] Missing column: estimates.status
+[INFO] Table: invoices
+[ERROR] Missing column: invoices.id
+[ERROR] Missing column: invoices.customer_id
+[ERROR] Missing column: invoices.estimate_id
+[ERROR] Missing column: invoices.total_amount
+[ERROR] Missing column: invoices.paid
+[INFO] Table: appointments
+[ERROR] Missing column: appointments.id
+[ERROR] Missing column: appointments.customer_id
+[ERROR] Missing column: appointments.vehicle_id
+[ERROR] Missing column: appointments.service_date
+[ERROR] Missing column: appointments.is_active
+[INFO] Table: customers
+[ERROR] Missing column: customers.id
+[ERROR] Missing column: customers.name
+[ERROR] Missing column: customers.email
+[ERROR] Missing column: customers.phone
+[INFO] Table: time_entries
+[ERROR] Missing column: time_entries.id
+[ERROR] Missing column: time_entries.employee_id
+[ERROR] Missing column: time_entries.start_time
+[ERROR] Missing column: time_entries.end_time
+[ERROR] Missing column: time_entries.break_duration
+[INFO] 3. Backend API Route Check
+[SUCCESS] Route exists: settings
+[SUCCESS] Route exists: invoices
+[SUCCESS] Route exists: estimates
+[SUCCESS] Route exists: customers
+[SUCCESS] Route exists: vehicles
+[SUCCESS] Route exists: jobs
+[SUCCESS] Route exists: appointments
+[SUCCESS] Route exists: timeclock
+[SUCCESS] Route exists: dashboard
+[INFO] 4. Frontend Analysis
+[SUCCESS] Found frontend file: pages/Customers.jsx
+[SUCCESS] Found frontend file: pages/Dashboard.jsx
+[SUCCESS] Found frontend file: pages/Estimates.jsx
+[SUCCESS] Found frontend file: pages/Invoices.jsx
+[INFO] 5. Fix Script Generated: /data/data/com.termux/files/home/eddies-asian-automotive/fix_script_20250928_122022.sh

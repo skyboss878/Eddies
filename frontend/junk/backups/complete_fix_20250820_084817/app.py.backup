@@ -1,0 +1,2377 @@
+#!/usr/bin/env python3
+"""
+Version 2.0 - Million Dollar Experience Edition
+"""
+
+import os
+import logging
+from datetime import datetime, timedelta
+from functools import wraps
+import secrets
+import openai
+import requests
+import time
+from collections import defaultdict, deque
+from sqlalchemy import inspect
+import json
+from decimal import Decimal
+from ai_services import AIManager
+from flask import Flask, request, jsonify, send_file
+from flask_cors import CORS
+from flask_sqlalchemy import SQLAlchemy
+from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt_identity
+from flask_migrate import Migrate
+from flask_mail import Mail, Message
+from werkzeug.security import generate_password_hash, check_password_hash
+from werkzeug.utils import secure_filename
+from sqlalchemy.orm import relationship
+from sqlalchemy import func, and_, or_, desc, asc
+from dotenv import load_dotenv
+import pandas as pd
+from reportlab.lib.pagesizes import letter, A4
+from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer
+from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+from reportlab.lib import colors
+from reportlab.lib.units import inch
+import io
+import base64
+
+# Load environment variables
+load_dotenv()
+
+# Initialize Flask app
+app = Flask(__name__)
+CORS(app, origins=['http://localhost:5173'], supports_credentials=True)
+# Configuration
+app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', secrets.token_hex(32))
+app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL', 'sqlite:///eddies_automotive.db')
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+app.config['JWT_SECRET_KEY'] = os.getenv('JWT_SECRET_KEY', secrets.token_hex(32))
+app.config['JWT_ACCESS_TOKEN_EXPIRES'] = timedelta(hours=24)
+app.config['UPLOAD_FOLDER'] = os.path.join(os.getcwd(), 'uploads')
+app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16MB max file size
+
+# AI Configuration
+openai.api_key = os.getenv('OPENAI_API_KEY')
+OPENROUTER_API_KEY = os.getenv('OPENROUTER_API_KEY')
+OPENROUTER_BASE_URL = os.getenv('OPENROUTER_BASE_URL', 'https://openrouter.ai/api/v1')
+HUGGINGFACE_TOKEN = os.getenv('HUGGINGFACE_API_TOKEN')
+AI_PROVIDER = os.getenv('AI_PROVIDER', 'openai')
+ENABLE_AI_FEATURES = os.getenv('ENABLE_AI_FEATURES', 'true').lower() == 'true'
+
+
+# Mail configuration
+app.config['MAIL_SERVER'] = os.getenv('MAIL_SERVER', 'localhost')
+app.config['MAIL_PORT'] = int(os.getenv('MAIL_PORT', 587))
+app.config['MAIL_USE_TLS'] = os.getenv('MAIL_USE_TLS', 'True').lower() == 'true'
+app.config['MAIL_USERNAME'] = os.getenv('MAIL_USERNAME')
+app.config['MAIL_PASSWORD'] = os.getenv('MAIL_PASSWORD')
+app.config['MAIL_DEFAULT_SENDER'] = os.getenv('MAIL_DEFAULT_SENDER')
+
+# Initialize extensions
+db = SQLAlchemy(app)
+migrate = Migrate(app, db)
+jwt = JWTManager(app)
+mail = Mail(app)
+
+CORS(app, resources={
+    r"/api/*": {
+        "origins": [
+            "http://localhost:5173",    # Vite dev server
+            "http://127.0.0.1:5173",   # Vite dev server (alt)
+            "http://localhost:3000",    # React dev server
+            "http://127.0.0.1:3000"
+        ],
+        "methods": ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+        "allow_headers": ["Content-Type", "Authorization"],
+        "supports_credentials": True
+    }
+})# Ensure upload directory exists
+os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
+
+# Logging setup
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
+# ===================== DATABASE MODELS =====================
+
+class User(db.Model):
+    """User authentication and profile management"""
+    __tablename__ = 'users'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    email = db.Column(db.String(120), unique=True, nullable=False, index=True)
+    password_hash = db.Column(db.String(255), nullable=False)
+    first_name = db.Column(db.String(50), nullable=False)
+    last_name = db.Column(db.String(50), nullable=False)
+    role = db.Column(db.String(20), default='technician')  # admin, manager, technician
+    phone = db.Column(db.String(20))
+    avatar_url = db.Column(db.String(255))
+    is_active = db.Column(db.Boolean, default=True)
+    hourly_rate = db.Column(db.Numeric(10, 2))
+    hire_date = db.Column(db.Date)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    
+    # Relationships
+    time_entries = db.relationship('TimeEntry', backref='user', lazy=True)
+    jobs_assigned = db.relationship('Job', backref='assigned_technician', lazy=True)
+    
+    def set_password(self, password):
+        self.password_hash = generate_password_hash(password)
+        
+    def check_password(self, password):
+        return check_password_hash(self.password_hash, password)
+    
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'email': self.email,
+            'first_name': self.first_name,
+            'last_name': self.last_name,
+            'full_name': f"{self.first_name} {self.last_name}",
+            'role': self.role,
+            'phone': self.phone,
+            'avatar_url': self.avatar_url,
+            'is_active': self.is_active,
+            'hourly_rate': float(self.hourly_rate) if self.hourly_rate else None,
+            'hire_date': self.hire_date.isoformat() if self.hire_date else None,
+            'created_at': self.created_at.isoformat(),
+            'updated_at': self.updated_at.isoformat()
+        }
+
+# ===================== AI CONFIGURATION SECTION =====================
+# Add this section after line 86 (after logger setup, before your models)
+
+# AI Configuration
+openai.api_key = os.getenv('OPENAI_API_KEY')
+OPENROUTER_API_KEY = os.getenv('OPENROUTER_API_KEY')
+OPENROUTER_BASE_URL = os.getenv('OPENROUTER_BASE_URL', 'https://openrouter.ai/api/v1')
+HUGGINGFACE_TOKEN = os.getenv('HUGGINGFACE_API_TOKEN')
+AI_PROVIDER = os.getenv('AI_PROVIDER', 'openai')
+ENABLE_AI_FEATURES = os.getenv('ENABLE_AI_FEATURES', 'true').lower() == 'true'
+
+# ===================== AI RATE LIMITER =====================
+
+class RateLimiter:
+    """Simple rate limiter for AI API calls"""
+    
+    def __init__(self):
+        self.calls = defaultdict(deque)
+        self.limits = {
+            'openai': {'calls': 60, 'period': 60},  # 60 calls per minute
+            'openrouter': {'calls': 100, 'period': 60},  # 100 calls per minute
+            'huggingface': {'calls': 30, 'period': 60}  # 30 calls per minute
+        }
+    
+    def can_make_call(self, provider):
+        """Check if we can make a call to the provider"""
+        now = time.time()
+        if provider not in self.limits:
+            return True
+        
+        limit_info = self.limits[provider]
+        calls_queue = self.calls[provider]
+        
+        # Remove old calls outside the time window
+        while calls_queue and calls_queue[0] <= now - limit_info['period']:
+            calls_queue.popleft()
+        
+        # Check if we're under the limit
+        return len(calls_queue) < limit_info['calls']
+    
+    def record_call(self, provider):
+        """Record a successful API call"""
+        if provider in self.limits:
+            self.calls[provider].append(time.time())
+
+# Global rate limiter instance
+rate_limiter = RateLimiter()
+
+# ===================== AI SERVICE CLASS =====================
+
+class AIDiagnosis(db.Model):
+    """AI Diagnostics storage"""
+    __tablename__ = 'ai_diagnostics'
+
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    vehicle_info = db.Column(db.JSON)
+    symptoms = db.Column(db.Text)
+    obd_codes = db.Column(db.String(200))
+    additional_notes = db.Column(db.Text)
+    diagnosis_result = db.Column(db.JSON)
+    ai_provider = db.Column(db.String(20))
+    processing_time = db.Column(db.Float)  # Time taken to generate diagnosis
+    generated_at = db.Column(db.DateTime, default=datetime.utcnow)
+    
+    # Relationship
+    user = db.relationship('User', backref='ai_diagnoses')
+    
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'user_id': self.user_id,
+            'vehicle_info': self.vehicle_info,
+            'symptoms': self.symptoms,
+            'obd_codes': self.obd_codes,
+            'additional_notes': self.additional_notes,
+            'diagnosis': self.diagnosis_result,
+            'ai_provider': self.ai_provider,
+            'processing_time': self.processing_time,
+            'generated_at': self.generated_at.isoformat(),
+            'success': True if self.diagnosis_result else False
+        }
+
+class AIService:
+    """AI service handler for different providers"""
+    
+    @staticmethod
+    def get_automotive_diagnosis(prompt, provider=None):
+        """Get AI diagnosis from specified provider"""
+        if not ENABLE_AI_FEATURES:
+            raise Exception("AI features are disabled")
+            
+        provider = provider or AI_PROVIDER
+        
+        # Check rate limiting
+        if not rate_limiter.can_make_call(provider):
+            logger.warning(f"Rate limit exceeded for {provider}, using fallback")
+            return AIService._mock_diagnosis(prompt)
+        
+        try:
+            if provider == 'openai':
+                result = AIService._openai_diagnosis(prompt)
+            elif provider == 'openrouter':
+                result = AIService._openrouter_diagnosis(prompt)
+            elif provider == 'huggingface':
+                result = AIService._huggingface_diagnosis(prompt)
+            else:
+                raise Exception(f"Unknown AI provider: {provider}")
+            
+            rate_limiter.record_call(provider)
+            return result
+            
+        except Exception as e:
+            logger.error(f"AI diagnosis error with {provider}: {str(e)}")
+            # Fallback to mock response
+            return AIService._mock_diagnosis(prompt)
+    
+    @staticmethod
+    def _openai_diagnosis(prompt):
+        """OpenAI GPT diagnosis"""
+        try:
+            response = openai.ChatCompletion.create(
+                model=os.getenv('OPENAI_MODEL', 'gpt-3.5-turbo'),
+                messages=[
+                    {
+                        "role": "system",
+                        "content": """You are an expert automotive diagnostic technician with 20+ years of experience. 
+                        Provide detailed, professional diagnostic analysis in JSON format. Always include:
+                        - primary_issue: Main problem identified
+                        - root_cause: Underlying cause explanation  
+                        - severity: Critical/High/Medium/Low
+                        - confidence_level: High/Medium/Low
+                        - recommended_parts: Array of parts with estimates
+                        - repair_procedures: Step-by-step repair instructions
+                        - cost_estimate: Parts, labor, and total estimates
+                        - testing_procedures: Diagnostic tests to confirm
+                        - safety_warnings: Any safety concerns
+                        Be conservative with cost estimates and always recommend proper diagnostic confirmation."""
+                    },
+                    {
+                        "role": "user",
+                        "content": prompt
+                    }
+                ],
+                temperature=0.1,  # Low temperature for consistent responses
+                max_tokens=2000
+            )
+            
+            content = response.choices[0].message.content
+            try:
+                return json.loads(content)
+            except json.JSONDecodeError:
+                # If response isn't JSON, wrap it
+                return {"diagnosis": content, "confidence_level": "Medium"}
+                
+        except Exception as e:
+            logger.error(f"OpenAI API error: {str(e)}")
+            raise
+    
+    @staticmethod
+    def _openrouter_diagnosis(prompt):
+        """OpenRouter diagnosis with fallback models"""
+        headers = {
+            "Authorization": f"Bearer {OPENROUTER_API_KEY}",
+            "Content-Type": "application/json",
+            "HTTP-Referer": "https://eddiesauto.com",
+            "X-Title": "Eddie's Automotive Diagnostics"
+        }
+        
+        # Try multiple models in order of preference
+        models = [
+            "openai/gpt-4-turbo",
+            "openai/gpt-3.5-turbo",
+            "anthropic/claude-3-haiku",
+            "meta-llama/llama-3-8b-instruct"
+        ]
+        
+        for model in models:
+            try:
+                data = {
+                    "model": model,
+                    "messages": [
+                        {
+                            "role": "system",
+                            "content": """You are an ASE-certified master automotive technician specializing in diagnostics.
+                            Analyze the provided vehicle information and symptoms to provide professional diagnostic recommendations.
+                            Format your response as JSON with these required fields:
+                            {
+                                "primary_issue": "Main problem description",
+                                "root_cause": "Technical explanation of the cause",
+                                "severity": "Critical|High|Medium|Low", 
+                                "confidence_level": "High|Medium|Low",
+                                "recommended_parts": [{"part_name": "name", "part_number": "PN", "estimated_cost": "$XX.XX", "priority": "Critical|High|Medium"}],
+                                "repair_procedures": [{"step": 1, "description": "action", "estimated_time": "XX minutes", "tools_required": []}],
+                                "cost_estimate": {"parts_total": "$XX.XX", "labor_total": "$XX.XX", "total_estimate": "$XX.XX"},
+                                "testing_procedures": [{"test": "test name", "description": "how to perform", "expected_result": "what to expect"}],
+                                "safety_warnings": ["warning 1", "warning 2"]
+                            }"""
+                        },
+                        {
+                            "role": "user",
+                            "content": prompt
+                        }
+                    ],
+                    "temperature": 0.1,
+                    "max_tokens": 2000
+                }
+                
+                response = requests.post(
+                    f"{OPENROUTER_BASE_URL}/chat/completions",
+                    headers=headers,
+                    json=data,
+                    timeout=30
+                )
+                
+                if response.status_code == 200:
+                    result = response.json()
+                    content = result['choices'][0]['message']['content']
+                    try:
+                        return json.loads(content)
+                    except json.JSONDecodeError:
+                        return {"diagnosis": content, "confidence_level": "Medium", "model_used": model}
+                else:
+                    logger.warning(f"OpenRouter model {model} failed: {response.status_code}")
+                    continue
+                    
+            except Exception as e:
+                logger.warning(f"OpenRouter model {model} error: {str(e)}")
+                continue
+        
+        raise Exception("All OpenRouter models failed")
+    
+    @staticmethod
+    def _huggingface_diagnosis(prompt):
+        """Hugging Face diagnosis"""
+        headers = {"Authorization": f"Bearer {HUGGINGFACE_TOKEN}"}
+        
+        # Use a good automotive/technical model
+        api_url = "https://api-inference.huggingface.co/models/microsoft/DialoGPT-large"
+        
+        payload = {
+            "inputs": f"Automotive Diagnostic Analysis:\n{prompt}\n\nProfessional diagnostic response:",
+            "parameters": {
+                "max_length": 500,
+                "temperature": 0.1,
+                "return_full_text": False
+            }
+        }
+        
+        response = requests.post(api_url, headers=headers, json=payload, timeout=30)
+        
+        if response.status_code == 200:
+            result = response.json()
+            if isinstance(result, list) and len(result) > 0:
+                return {"diagnosis": result[0].get("generated_text", ""), "confidence_level": "Medium"}
+        
+        raise Exception(f"Hugging Face API error: {response.status_code}")
+    
+    @staticmethod
+    def _mock_diagnosis(prompt):
+        """Mock diagnosis for development/fallback"""
+        return {
+            "primary_issue": "System requires professional diagnostic inspection",
+            "root_cause": "Multiple potential causes identified from symptoms provided",
+            "severity": "Medium",
+            "confidence_level": "Low",
+            "recommended_parts": [
+                {
+                    "part_name": "Diagnostic Inspection",
+                    "part_number": "DIAG001",
+                    "estimated_cost": "$125.00",
+                    "priority": "High",
+                    "reason": "Professional diagnosis required"
+                }
+            ],
+            "repair_procedures": [
+                {
+                    "step": 1,
+                    "description": "Perform comprehensive diagnostic inspection",
+                    "estimated_time": "60 minutes",
+                    "tools_required": ["OBD-II scanner", "multimeter"]
+                }
+            ],
+            "cost_estimate": {
+                "parts_total": "$0.00",
+                "labor_total": "$125.00",
+                "total_estimate": "$125.00"
+            },
+            "testing_procedures": [
+                {
+                    "test": "OBD-II Code Scan",
+                    "description": "Connect scanner and retrieve fault codes",
+                    "expected_result": "Active and pending codes"
+                }
+            ],
+            "safety_warnings": ["Ensure vehicle is properly secured before inspection"],
+            "note": "This is a mock response - AI features may be disabled or unavailable"
+        }
+
+class Customer(db.Model):
+    """Customer management with comprehensive contact information"""
+    __tablename__ = 'customers'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    first_name = db.Column(db.String(50), nullable=False)
+    last_name = db.Column(db.String(50), nullable=False)
+    company = db.Column(db.String(100))
+    email = db.Column(db.String(120), index=True)
+    phone = db.Column(db.String(20))
+    phone_alt = db.Column(db.String(20))
+    address_line1 = db.Column(db.String(255))
+    address_line2 = db.Column(db.String(255))
+    city = db.Column(db.String(100))
+    state = db.Column(db.String(2))
+    zip_code = db.Column(db.String(10))
+    preferred_contact = db.Column
+#!/usr/bin/env bash
+# =========================================================
+# Eddie's "Million Dollar Experience" Bootstrapper v2.0 - PART 2
+# Continuing from the cutoff point with complete backend generation
+# =========================================================
+
+# Continuing the Flask app.py generation from where it was cut off
+    preferred_contact = db.Column(db.String(20), default='email')  # email, phone, text
+    customer_type = db.Column(db.String(20), default='individual')  # individual, business
+    tax_exempt = db.Column(db.Boolean, default=False)
+    tax_exempt_number = db.Column(db.String(50))
+    credit_limit = db.Column(db.Numeric(10, 2))
+    payment_terms = db.Column(db.String(50), default='net_30')
+    discount_percentage = db.Column(db.Numeric(5, 2), default=0)
+    notes = db.Column(db.Text)
+    is_active = db.Column(db.Boolean, default=True)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    
+    # Relationships
+    vehicles = db.relationship('Vehicle', backref='owner', lazy=True, cascade='all, delete-orphan')
+    jobs = db.relationship('Job', backref='customer', lazy=True)
+    estimates = db.relationship('Estimate', backref='customer', lazy=True)
+    invoices = db.relationship('Invoice', backref='customer', lazy=True)
+    appointments = db.relationship('Appointment', backref='customer', lazy=True)
+    
+    def to_dict(self, include_relationships=False):
+        data = {
+            'id': self.id,
+            'first_name': self.first_name,
+            'last_name': self.last_name,
+            'full_name': f"{self.first_name} {self.last_name}",
+            'company': self.company,
+            'email': self.email,
+            'phone': self.phone,
+            'phone_alt': self.phone_alt,
+            'address_line1': self.address_line1,
+            'address_line2': self.address_line2,
+            'city': self.city,
+            'state': self.state,
+            'zip_code': self.zip_code,
+            'preferred_contact': self.preferred_contact,
+            'customer_type': self.customer_type,
+            'tax_exempt': self.tax_exempt,
+            'tax_exempt_number': self.tax_exempt_number,
+            'credit_limit': float(self.credit_limit) if self.credit_limit else None,
+            'payment_terms': self.payment_terms,
+            'discount_percentage': float(self.discount_percentage) if self.discount_percentage else 0,
+            'notes': self.notes,
+            'is_active': self.is_active,
+            'created_at': self.created_at.isoformat(),
+            'updated_at': self.updated_at.isoformat()
+        }
+        
+        if include_relationships:
+            data['vehicles'] = [v.to_dict() for v in self.vehicles]
+            data['vehicle_count'] = len(self.vehicles)
+            data['job_count'] = len(self.jobs)
+            data['total_spent'] = sum([float(j.total_amount or 0) for j in self.jobs if j.status == 'completed'])
+        
+        return data
+
+class Vehicle(db.Model):
+    """Vehicle information with VIN lookup and maintenance tracking"""
+    __tablename__ = 'vehicles'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    customer_id = db.Column(db.Integer, db.ForeignKey('customers.id'), nullable=False)
+    vin = db.Column(db.String(17), unique=True, index=True)
+    year = db.Column(db.Integer)
+    make = db.Column(db.String(50))
+    model = db.Column(db.String(50))
+    trim = db.Column(db.String(50))
+    engine = db.Column(db.String(100))
+    transmission = db.Column(db.String(50))
+    fuel_type = db.Column(db.String(20))
+    body_style = db.Column(db.String(20))
+    exterior_color = db.Column(db.String(30))
+    interior_color = db.Column(db.String(30))
+    license_plate = db.Column(db.String(20))
+    license_state = db.Column(db.String(2))
+    mileage = db.Column(db.Integer)
+    condition = db.Column(db.String(20), default='good')  # excellent, good, fair, poor
+    purchase_date = db.Column(db.Date)
+    notes = db.Column(db.Text)
+    is_active = db.Column(db.Boolean, default=True)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    
+    # Relationships
+    jobs = db.relationship('Job', backref='vehicle', lazy=True)
+    maintenance_records = db.relationship('MaintenanceRecord', backref='vehicle', lazy=True)
+    
+    def to_dict(self, include_relationships=False):
+        data = {
+            'id': self.id,
+            'customer_id': self.customer_id,
+            'vin': self.vin,
+            'year': self.year,
+            'make': self.make,
+            'model': self.model,
+            'trim': self.trim,
+            'engine': self.engine,
+            'transmission': self.transmission,
+            'fuel_type': self.fuel_type,
+            'body_style': self.body_style,
+            'exterior_color': self.exterior_color,
+            'interior_color': self.interior_color,
+            'license_plate': self.license_plate,
+            'license_state': self.license_state,
+            'mileage': self.mileage,
+            'condition': self.condition,
+            'purchase_date': self.purchase_date.isoformat() if self.purchase_date else None,
+            'display_name': f"{self.year} {self.make} {self.model}" if self.year and self.make and self.model else "Unknown Vehicle",
+            'notes': self.notes,
+            'is_active': self.is_active,
+            'created_at': self.created_at.isoformat(),
+            'updated_at': self.updated_at.isoformat()
+        }
+        
+        if include_relationships:
+            data['job_count'] = len(self.jobs)
+            data['maintenance_count'] = len(self.maintenance_records)
+            data['last_service'] = max([j.created_at for j in self.jobs], default=None)
+            if data['last_service']:
+                data['last_service'] = data['last_service'].isoformat()
+        
+        return data
+
+class Job(db.Model):
+    """Work orders and service jobs"""
+    __tablename__ = 'jobs'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    job_number = db.Column(db.String(20), unique=True, nullable=False)
+    customer_id = db.Column(db.Integer, db.ForeignKey('customers.id'), nullable=False)
+    vehicle_id = db.Column(db.Integer, db.ForeignKey('vehicles.id'), nullable=False)
+    technician_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+    title = db.Column(db.String(200), nullable=False)
+    description = db.Column(db.Text)
+    status = db.Column(db.String(20), default='pending')  # pending, in_progress, completed, cancelled
+    priority = db.Column(db.String(10), default='normal')  # low, normal, high, urgent
+    odometer_in = db.Column(db.Integer)
+    odometer_out = db.Column(db.Integer)
+    estimated_hours = db.Column(db.Numeric(8, 2))
+    actual_hours = db.Column(db.Numeric(8, 2))
+    labor_rate = db.Column(db.Numeric(10, 2))
+    parts_total = db.Column(db.Numeric(10, 2), default=0)
+    labor_total = db.Column(db.Numeric(10, 2), default=0)
+    tax_amount = db.Column(db.Numeric(10, 2), default=0)
+    total_amount = db.Column(db.Numeric(10, 2), default=0)
+    started_at = db.Column(db.DateTime)
+    completed_at = db.Column(db.DateTime)
+    due_date = db.Column(db.DateTime)
+    warranty_months = db.Column(db.Integer, default=12)
+    internal_notes = db.Column(db.Text)
+    customer_notes = db.Column(db.Text)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    
+    # Relationships
+    job_parts = db.relationship('JobPart', backref='job', lazy=True, cascade='all, delete-orphan')
+    job_labor = db.relationship('JobLabor', backref='job', lazy=True, cascade='all, delete-orphan')
+    time_entries = db.relationship('TimeEntry', backref='job', lazy=True)
+    
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        if not self.job_number:
+            self.job_number = self.generate_job_number()
+    
+    @staticmethod
+    def generate_job_number():
+        """Generate unique job number"""
+        today = datetime.now().strftime('%y%m%d')
+        count = db.session.query(Job).filter(Job.job_number.like(f'{today}%')).count()
+        return f"{today}{count + 1:04d}"
+    
+    def calculate_totals(self):
+        """Calculate job totals from parts and labor"""
+        self.parts_total = sum([jp.total_amount for jp in self.job_parts])
+        self.labor_total = sum([jl.total_amount for jl in self.job_labor])
+        subtotal = self.parts_total + self.labor_total
+        tax_rate = Decimal('0.0875')  # 8.75% default tax rate
+        self.tax_amount = subtotal * tax_rate
+        self.total_amount = subtotal + self.tax_amount
+    
+    def to_dict(self, include_relationships=False):
+        data = {
+            'id': self.id,
+            'job_number': self.job_number,
+            'customer_id': self.customer_id,
+            'vehicle_id': self.vehicle_id,
+            'technician_id': self.technician_id,
+            'title': self.title,
+            'description': self.description,
+            'status': self.status,
+            'priority': self.priority,
+            'odometer_in': self.odometer_in,
+            'odometer_out': self.odometer_out,
+            'estimated_hours': float(self.estimated_hours) if self.estimated_hours else None,
+            'actual_hours': float(self.actual_hours) if self.actual_hours else None,
+            'labor_rate': float(self.labor_rate) if self.labor_rate else None,
+            'parts_total': float(self.parts_total) if self.parts_total else 0,
+            'labor_total': float(self.labor_total) if self.labor_total else 0,
+            'tax_amount': float(self.tax_amount) if self.tax_amount else 0,
+            'total_amount': float(self.total_amount) if self.total_amount else 0,
+            'started_at': self.started_at.isoformat() if self.started_at else None,
+            'completed_at': self.completed_at.isoformat() if self.completed_at else None,
+            'due_date': self.due_date.isoformat() if self.due_date else None,
+            'warranty_months': self.warranty_months,
+            'internal_notes': self.internal_notes,
+            'customer_notes': self.customer_notes,
+            'created_at': self.created_at.isoformat(),
+            'updated_at': self.updated_at.isoformat()
+        }
+        
+        if include_relationships:
+            data['customer'] = self.customer.to_dict() if self.customer else None
+            data['vehicle'] = self.vehicle.to_dict() if self.vehicle else None
+            data['technician'] = self.assigned_technician.to_dict() if self.assigned_technician else None
+            data['parts'] = [jp.to_dict() for jp in self.job_parts]
+            data['labor'] = [jl.to_dict() for jl in self.job_labor]
+            data['time_entries'] = [te.to_dict() for te in self.time_entries]
+        
+        return data
+
+class Part(db.Model):
+    """Parts inventory management"""
+    __tablename__ = 'parts'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    part_number = db.Column(db.String(50), unique=True, nullable=False, index=True)
+    name = db.Column(db.String(200), nullable=False)
+    description = db.Column(db.Text)
+    category = db.Column(db.String(50))
+    brand = db.Column(db.String(50))
+    cost_price = db.Column(db.Numeric(10, 2))
+    sell_price = db.Column(db.Numeric(10, 2))
+    markup_percentage = db.Column(db.Numeric(5, 2), default=30)
+    quantity_on_hand = db.Column(db.Integer, default=0)
+    minimum_quantity = db.Column(db.Integer, default=5)
+    location = db.Column(db.String(50))
+    supplier = db.Column(db.String(100))
+    supplier_part_number = db.Column(db.String(50))
+    weight = db.Column(db.Numeric(8, 3))
+    dimensions = db.Column(db.String(50))
+    warranty_months = db.Column(db.Integer, default=12)
+    is_active = db.Column(db.Boolean, default=True)
+    is_taxable = db.Column(db.Boolean, default=True)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    
+    # Relationships
+    job_parts = db.relationship('JobPart', backref='part', lazy=True)
+    
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'part_number': self.part_number,
+            'name': self.name,
+            'description': self.description,
+            'category': self.category,
+            'brand': self.brand,
+            'cost_price': float(self.cost_price) if self.cost_price else None,
+            'sell_price': float(self.sell_price) if self.sell_price else None,
+            'markup_percentage': float(self.markup_percentage) if self.markup_percentage else None,
+            'quantity_on_hand': self.quantity_on_hand,
+            'minimum_quantity': self.minimum_quantity,
+            'location': self.location,
+            'supplier': self.supplier,
+            'supplier_part_number': self.supplier_part_number,
+            'weight': float(self.weight) if self.weight else None,
+            'dimensions': self.dimensions,
+            'warranty_months': self.warranty_months,
+            'is_active': self.is_active,
+            'is_taxable': self.is_taxable,
+            'needs_reorder': self.quantity_on_hand <= self.minimum_quantity,
+            'created_at': self.created_at.isoformat(),
+            'updated_at': self.updated_at.isoformat()
+        }
+
+class JobPart(db.Model):
+    """Parts used in jobs"""
+    __tablename__ = 'job_parts'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    job_id = db.Column(db.Integer, db.ForeignKey('jobs.id'), nullable=False)
+    part_id = db.Column(db.Integer, db.ForeignKey('parts.id'), nullable=False)
+    quantity = db.Column(db.Integer, nullable=False, default=1)
+    unit_price = db.Column(db.Numeric(10, 2), nullable=False)
+    total_amount = db.Column(db.Numeric(10, 2), nullable=False)
+    markup_percentage = db.Column(db.Numeric(5, 2))
+    warranty_months = db.Column(db.Integer, default=12)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        if self.quantity and self.unit_price:
+            self.total_amount = self.quantity * self.unit_price
+    
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'job_id': self.job_id,
+            'part_id': self.part_id,
+            'part': self.part.to_dict() if self.part else None,
+            'quantity': self.quantity,
+            'unit_price': float(self.unit_price),
+            'total_amount': float(self.total_amount),
+            'markup_percentage': float(self.markup_percentage) if self.markup_percentage else None,
+            'warranty_months': self.warranty_months,
+            'created_at': self.created_at.isoformat()
+        }
+
+class LaborCode(db.Model):
+    """Labor codes and rates"""
+    __tablename__ = 'labor_codes'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    code = db.Column(db.String(20), unique=True, nullable=False)
+    name = db.Column(db.String(100), nullable=False)
+    description = db.Column(db.Text)
+    category = db.Column(db.String(50))
+    standard_hours = db.Column(db.Numeric(8, 2))
+    hourly_rate = db.Column(db.Numeric(10, 2))
+    flat_rate = db.Column(db.Numeric(10, 2))
+    is_active = db.Column(db.Boolean, default=True)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    
+    # Relationships
+    job_labor = db.relationship('JobLabor', backref='labor_code', lazy=True)
+    
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'code': self.code,
+            'name': self.name,
+            'description': self.description,
+            'category': self.category,
+            'standard_hours': float(self.standard_hours) if self.standard_hours else None,
+            'hourly_rate': float(self.hourly_rate) if self.hourly_rate else None,
+            'flat_rate': float(self.flat_rate) if self.flat_rate else None,
+            'is_active': self.is_active,
+            'created_at': self.created_at.isoformat(),
+            'updated_at': self.updated_at.isoformat()
+        }
+
+class JobLabor(db.Model):
+    """Labor performed on jobs"""
+    __tablename__ = 'job_labor'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    job_id = db.Column(db.Integer, db.ForeignKey('jobs.id'), nullable=False)
+    labor_code_id = db.Column(db.Integer, db.ForeignKey('labor_codes.id'), nullable=False)
+    technician_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+    hours = db.Column(db.Numeric(8, 2), nullable=False)
+    hourly_rate = db.Column(db.Numeric(10, 2), nullable=False)
+    total_amount = db.Column(db.Numeric(10, 2), nullable=False)
+    description = db.Column(db.Text)
+    started_at = db.Column(db.DateTime)
+    completed_at = db.Column(db.DateTime)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    
+    # Relationships
+    technician = db.relationship('User', backref='labor_entries')
+    
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        if self.hours and self.hourly_rate:
+            self.total_amount = self.hours * self.hourly_rate
+    
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'job_id': self.job_id,
+            'labor_code_id': self.labor_code_id,
+            'labor_code': self.labor_code.to_dict() if self.labor_code else None,
+            'technician_id': self.technician_id,
+            'technician': self.technician.to_dict() if self.technician else None,
+            'hours': float(self.hours),
+            'hourly_rate': float(self.hourly_rate),
+            'total_amount': float(self.total_amount),
+            'description': self.description,
+            'started_at': self.started_at.isoformat() if self.started_at else None,
+            'completed_at': self.completed_at.isoformat() if self.completed_at else None,
+            'created_at': self.created_at.isoformat()
+        }
+
+class Estimate(db.Model):
+    """Customer estimates"""
+    __tablename__ = 'estimates'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    estimate_number = db.Column(db.String(20), unique=True, nullable=False)
+    customer_id = db.Column(db.Integer, db.ForeignKey('customers.id'), nullable=False)
+    vehicle_id = db.Column(db.Integer, db.ForeignKey('vehicles.id'))
+    title = db.Column(db.String(200), nullable=False)
+    description = db.Column(db.Text)
+    status = db.Column(db.String(20), default='draft')  # draft, sent, approved, declined, expired
+    subtotal = db.Column(db.Numeric(10, 2), default=0)
+    tax_amount = db.Column(db.Numeric(10, 2), default=0)
+    total_amount = db.Column(db.Numeric(10, 2), default=0)
+    valid_until = db.Column(db.Date)
+    terms = db.Column(db.Text)
+    notes = db.Column(db.Text)
+    sent_at = db.Column(db.DateTime)
+    approved_at = db.Column(db.DateTime)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    
+    # Relationships
+    estimate_items = db.relationship('EstimateItem', backref='estimate', lazy=True, cascade='all, delete-orphan')
+    
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        if not self.estimate_number:
+            self.estimate_number = self.generate_estimate_number()
+        if not self.valid_until:
+            self.valid_until = datetime.now().date() + timedelta(days=30)
+    
+    @staticmethod
+    def generate_estimate_number():
+        """Generate unique estimate number"""
+        today = datetime.now().strftime('%y%m%d')
+        count = db.session.query(Estimate).filter(Estimate.estimate_number.like(f'EST{today}%')).count()
+        return f"EST{today}{count + 1:04d}"
+    
+    def calculate_totals(self):
+        """Calculate estimate totals"""
+        self.subtotal = sum([item.total_amount for item in self.estimate_items])
+        tax_rate = Decimal('0.0875')  # 8.75% default tax rate
+        self.tax_amount = self.subtotal * tax_rate
+        self.total_amount = self.subtotal + self.tax_amount
+    
+    def to_dict(self, include_relationships=False):
+        data = {
+            'id': self.id,
+            'estimate_number': self.estimate_number,
+            'customer_id': self.customer_id,
+            'vehicle_id': self.vehicle_id,
+            'title': self.title,
+            'description': self.description,
+            'status': self.status,
+            'subtotal': float(self.subtotal) if self.subtotal else 0,
+            'tax_amount': float(self.tax_amount) if self.tax_amount else 0,
+            'total_amount': float(self.total_amount) if self.total_amount else 0,
+            'valid_until': self.valid_until.isoformat() if self.valid_until else None,
+            'terms': self.terms,
+            'notes': self.notes,
+            'sent_at': self.sent_at.isoformat() if self.sent_at else None,
+            'approved_at': self.approved_at.isoformat() if self.approved_at else None,
+            'created_at': self.created_at.isoformat(),
+            'updated_at': self.updated_at.isoformat()
+        }
+        
+        if include_relationships:
+            data['customer'] = self.customer.to_dict() if self.customer else None
+            data['vehicle'] = self.vehicle.to_dict() if self.vehicle else None
+            data['items'] = [item.to_dict() for item in self.estimate_items]
+        
+        return data
+
+class EstimateItem(db.Model):
+    """Items on estimates"""
+    __tablename__ = 'estimate_items'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    estimate_id = db.Column(db.Integer, db.ForeignKey('estimates.id'), nullable=False)
+    item_type = db.Column(db.String(20), nullable=False)  # part, labor, misc
+    description = db.Column(db.String(255), nullable=False)
+    quantity = db.Column(db.Numeric(8, 2), default=1)
+    unit_price = db.Column(db.Numeric(10, 2), nullable=False)
+    total_amount = db.Column(db.Numeric(10, 2), nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        if self.quantity and self.unit_price:
+            self.total_amount = self.quantity * self.unit_price
+    
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'estimate_id': self.estimate_id,
+            'item_type': self.item_type,
+            'description': self.description,
+            'quantity': float(self.quantity),
+            'unit_price': float(self.unit_price),
+            'total_amount': float(self.total_amount),
+            'created_at': self.created_at.isoformat()
+        }
+
+class Invoice(db.Model):
+    """Customer invoices"""
+    __tablename__ = 'invoices'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    invoice_number = db.Column(db.String(20), unique=True, nullable=False)
+    customer_id = db.Column(db.Integer, db.ForeignKey('customers.id'), nullable=False)
+    job_id = db.Column(db.Integer, db.ForeignKey('jobs.id'))
+    status = db.Column(db.String(20), default='pending')  # pending, sent, paid, overdue, void
+    subtotal = db.Column(db.Numeric(10, 2), default=0)
+    tax_amount = db.Column(db.Numeric(10, 2), default=0)
+    total_amount = db.Column(db.Numeric(10, 2), default=0)
+    amount_paid = db.Column(db.Numeric(10, 2), default=0)
+    balance_due = db.Column(db.Numeric(10, 2), default=0)
+    due_date = db.Column(db.Date)
+    terms = db.Column(db.String(50), default='net_30')
+    notes = db.Column(db.Text)
+    sent_at = db.Column(db.DateTime)
+    paid_at = db.Column(db.DateTime)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    
+    # Relationships
+    payments = db.relationship('Payment', backref='invoice', lazy=True)
+    
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        if not self.invoice_number:
+            self.invoice_number = self.generate_invoice_number()
+        if not self.due_date:
+            self.due_date = datetime.now().date() + timedelta(days=30)
+    
+    @staticmethod
+    def generate_invoice_number():
+        """Generate unique invoice number"""
+        today = datetime.now().strftime('%y%m%d')
+        count = db.session.query(Invoice).filter(Invoice.invoice_number.like(f'INV{today}%')).count()
+        return f"INV{today}{count + 1:04d}"
+    
+    def calculate_balance(self):
+        """Calculate remaining balance"""
+        self.amount_paid = sum([p.amount for p in self.payments])
+        self.balance_due = self.total_amount - self.amount_paid
+        if self.balance_due <= 0:
+            self.status = 'paid'
+            self.paid_at = datetime.utcnow()
+    
+    def to_dict(self, include_relationships=False):
+        data = {
+            'id': self.id,
+            'invoice_number': self.invoice_number,
+            'customer_id': self.customer_id,
+            'job_id': self.job_id,
+            'status': self.status,
+            'subtotal': float(self.subtotal) if self.subtotal else 0,
+            'tax_amount': float(self.tax_amount) if self.tax_amount else 0,
+            'total_amount': float(self.total_amount) if self.total_amount else 0,
+            'amount_paid': float(self.amount_paid) if self.amount_paid else 0,
+            'balance_due': float(self.balance_due) if self.balance_due else 0,
+            'due_date': self.due_date.isoformat() if self.due_date else None,
+            'terms': self.terms,
+            'notes': self.notes,
+            'sent_at': self.sent_at.isoformat() if self.sent_at else None,
+            'paid_at': self.paid_at.isoformat() if self.paid_at else None,
+            'is_overdue': self.due_date and datetime.now().date() > self.due_date and self.balance_due > 0,
+            'created_at': self.created_at.isoformat(),
+            'updated_at': self.updated_at.isoformat()
+        }
+        
+        if include_relationships:
+            data['customer'] = self.customer.to_dict() if self.customer else None
+            data['job'] = self.job.to_dict() if self.job else None
+            data['payments'] = [p.to_dict() for p in self.payments]
+        
+        return data
+
+class Payment(db.Model):
+    """Invoice payments"""
+    __tablename__ = 'payments'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    invoice_id = db.Column(db.Integer, db.ForeignKey('invoices.id'), nullable=False)
+    amount = db.Column(db.Numeric(10, 2), nullable=False)
+    payment_method = db.Column(db.String(20), nullable=False)  # cash, check, card, ach
+    reference_number = db.Column(db.String(50))
+    notes = db.Column(db.Text)
+    processed_by = db.Column(db.Integer, db.ForeignKey('users.id'))
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'invoice_id': self.invoice_id,
+            'amount': float(self.amount),
+            'payment_method': self.payment_method,
+            'reference_number': self.reference_number,
+            'notes': self.notes,
+            'processed_by': self.processed_by,
+            'created_at': self.created_at.isoformat()
+        }
+
+class Appointment(db.Model):
+    """Customer appointments and scheduling"""
+    __tablename__ = 'appointments'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    customer_id = db.Column(db.Integer, db.ForeignKey('customers.id'), nullable=False)
+    vehicle_id = db.Column(db.Integer, db.ForeignKey('vehicles.id'))
+    technician_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+    title = db.Column(db.String(200), nullable=False)
+    description = db.Column(db.Text)
+    appointment_date = db.Column(db.DateTime, nullable=False)
+    duration_minutes = db.Column(db.Integer, default=60)
+    status = db.Column(db.String(20), default='scheduled')  # scheduled, confirmed, in_progress, completed, cancelled, no_show
+    service_type = db.Column(db.String(50))
+    priority = db.Column(db.String(10), default='normal')
+    estimated_cost = db.Column(db.Numeric(10, 2))
+    reminder_sent = db.Column(db.Boolean, default=False)
+    notes = db.Column(db.Text)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    
+    def to_dict(self, include_relationships=False):
+        data = {
+            'id': self.id,
+            'customer_id': self.customer_id,
+            'vehicle_id': self.vehicle_id,
+            'technician_id': self.technician_id,
+            'title': self.title,
+            'description': self.description,
+            'appointment_date': self.appointment_date.isoformat(),
+            'duration_minutes': self.duration_minutes,
+            'status': self.status,
+            'service_type': self.service_type,
+            'priority': self.priority,
+            'estimated_cost': float(self.estimated_cost) if self.estimated_cost else None,
+            'reminder_sent': self.reminder_sent,
+            'notes': self.notes,
+            'created_at': self.created_at.isoformat(),
+            'updated_at': self.updated_at.isoformat()
+        }
+        
+        if include_relationships:
+            data['customer'] = self.customer.to_dict() if self.customer else None
+            data['vehicle'] = self.vehicle.to_dict() if self.vehicle else None
+            data['technician'] = self.assigned_technician.to_dict() if self.assigned_technician else None
+        
+        return data
+
+class TimeEntry(db.Model):
+    """Time tracking for employees"""
+    __tablename__ = 'time_entries'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    job_id = db.Column(db.Integer, db.ForeignKey('jobs.id'))
+    clock_in = db.Column(db.DateTime, nullable=False)
+    clock_out = db.Column(db.DateTime)
+    break_minutes = db.Column(db.Integer, default=0)
+    total_minutes = db.Column(db.Integer)
+    hourly_rate = db.Column(db.Numeric(10, 2))
+    total_pay = db.Column(db.Numeric(10, 2))
+    notes = db.Column(db.Text)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    
+    def calculate_totals(self):
+        """Calculate time and pay totals"""
+        if self.clock_out:
+            total_time = self.clock_out - self.clock_in
+            self.total_minutes = int(total_time.total_seconds() / 60) - self.break_minutes
+            if self.hourly_rate:
+                hours = self.total_minutes / 60
+                self.total_pay = hours * self.hourly_rate
+    
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'user_id': self.user_id,
+            'job_id': self.job_id,
+            'clock_in': self.clock_in.isoformat(),
+            'clock_out': self.clock_out.isoformat() if self.clock_out else None,
+            'break_minutes': self.break_minutes,
+            'total_minutes': self.total_minutes,
+            'total_hours': round(self.total_minutes / 60, 2) if self.total_minutes else None,
+            'hourly_rate': float(self.hourly_rate) if self.hourly_rate else None,
+            'total_pay': float(self.total_pay) if self.total_pay else None,
+            'notes': self.notes,
+            'created_at': self.created_at.isoformat()
+        }
+
+class MaintenanceRecord(db.Model):
+    """Vehicle maintenance history"""
+    __tablename__ = 'maintenance_records'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    vehicle_id = db.Column(db.Integer, db.ForeignKey('vehicles.id'), nullable=False)
+    service_type = db.Column(db.String(100), nullable=False)
+    description = db.Column(db.Text)
+    odometer = db.Column(db.Integer)
+    date_performed = db.Column(db.Date, nullable=False)
+    next_service_date = db.Column(db.Date)
+    next_service_odometer = db.Column(db.Integer)
+    cost = db.Column(db.Numeric(10, 2))
+    performed_by = db.Column(db.String(100))
+    notes = db.Column(db.Text)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'vehicle_id': self.vehicle_id,
+            'service_type': self.service_type,
+            'description': self.description,
+            'odometer': self.odometer,
+            'date_performed': self.date_performed.isoformat(),
+            'next_service_date': self.next_service_date.isoformat() if self.next_service_date else None,
+            'next_service_odometer': self.next_service_odometer,
+            'cost': float(self.cost) if self.cost else None,
+            'performed_by': self.performed_by,
+            'notes': self.notes,
+            'created_at': self.created_at.isoformat()
+        }
+
+class ShopSettings(db.Model):
+    """Shop configuration and settings"""
+    __tablename__ = 'shop_settings'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    shop_name = db.Column(db.String(100), nullable=False)
+    address_line1 = db.Column(db.String(255))
+    address_line2 = db.Column(db.String(255))
+    city = db.Column(db.String(100))
+    state = db.Column(db.String(2))
+    zip_code = db.Column(db.String(10))
+    phone = db.Column(db.String(20))
+    email = db.Column(db.String(120))
+    website = db.Column(db.String(255))
+    license_number = db.Column(db.String(50))
+    tax_id = db.Column(db.String(20))
+    default_tax_rate = db.Column(db.Numeric(5, 4), default=0.0875)
+    default_labor_rate = db.Column(db.Numeric(10, 2), default=125.00)
+    currency = db.Column(db.String(3), default='USD')
+    timezone = db.Column(db.String(50), default='America/New_York')
+    business_hours = db.Column(db.JSON)
+    logo_url = db.Column(db.String(255))
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'shop_name': self.shop_name,
+            'address_line1': self.address_line1,
+            'address_line2': self.address_line2,
+            'city': self.city,
+            'state': self.state,
+            'zip_code': self.zip_code,
+            'phone': self.phone,
+            'email': self.email,
+            'website': self.website,
+            'license_number': self.license_number,
+            'tax_id': self.tax_id,
+            'default_tax_rate': float(self.default_tax_rate),
+            'default_labor_rate': float(self.default_labor_rate),
+            'currency': self.currency,
+            'timezone': self.timezone,
+            'business_hours': self.business_hours,
+            'logo_url': self.logo_url,
+            'created_at': self.created_at.isoformat(),
+            'updated_at': self.updated_at.isoformat()
+        }
+
+# ===================== HELPER FUNCTIONS =====================
+
+def admin_required(f):
+    """Decorator for admin-only routes"""
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        current_user = get_current_user()
+        if not current_user or current_user.role != 'admin':
+            return jsonify({'error': 'Admin access required'}), 403
+        return f(*args, **kwargs)
+    return decorated_function
+
+def get_current_user():
+    """Get current user from JWT token"""
+    try:
+        user_id = get_jwt_identity()
+        return User.query.get(user_id) if user_id else None
+    except Exception:
+        return None
+
+def validate_json(required_fields):
+    """Decorator to validate JSON request data"""
+    def decorator(f):
+        @wraps(f)
+        def decorated_function(*args, **kwargs):
+            if not request.is_json:
+                return jsonify({'error': 'Content-Type must be application/json'}), 400
+            
+            data = request.get_json()
+            missing_fields = [field for field in required_fields if field not in data]
+            
+            if missing_fields:
+                return jsonify({
+                    'error': f'Missing required fields: {", ".join(missing_fields)}'
+                }), 400
+            
+            return f(*args, **kwargs)
+        return decorated_function
+    return decorator
+
+def paginate_query(query, page=1, per_page=50):
+    """Helper for pagination"""
+    try:
+        page = int(request.args.get('page', page))
+        per_page = min(int(request.args.get('per_page', per_page)), 100)
+    except (ValueError, TypeError):
+        page, per_page = 1, 50
+    
+    paginated = query.paginate(
+        page=page, 
+        per_page=per_page, 
+        error_out=False
+    )
+    
+    return {
+        'items': [item.to_dict() for item in paginated.items],
+        'pagination': {
+            'page': paginated.page,
+            'pages': paginated.pages,
+            'per_page': paginated.per_page,
+            'total': paginated.total,
+            'has_next': paginated.has_next,
+            'has_prev': paginated.has_prev,
+        }
+    }
+
+# ===================== AUTHENTICATION ROUTES =====================
+
+# ===================== AUTHENTICATION ROUTES =====================
+
+@app.route('/api/auth/register', methods=['POST'])
+@validate_json(['email', 'password', 'first_name', 'last_name'])
+def register_user():
+    """Register new user"""
+    data = request.get_json()
+
+    if User.query.filter_by(email=data['email']).first():
+        return jsonify({'error': 'Email already registered'}), 409
+
+    user = User(
+        email=data['email'],
+        first_name=data['first_name'],
+        last_name=data['last_name'],
+        role=data.get('role', 'technician'),
+        phone=data.get('phone'),
+        hourly_rate=data.get('hourly_rate')
+    )
+    user.set_password(data['password'])
+
+    db.session.add(user)
+    db.session.commit()
+
+    token = create_access_token(identity=user.id)
+
+    return jsonify({
+        'message': 'User registered successfully',
+        'token': token,
+        'user': user.to_dict()
+    }), 201
+
+
+@app.route('/api/auth/login', methods=['POST'])
+def login():
+    try:
+        data = request.get_json()
+        email = data.get('email')
+        password = data.get('password')
+
+        # DB lookup
+        user = User.query.filter_by(email=email).first()
+
+        # Verify hash
+        if user and check_password_hash(user.password_hash, password):
+            token = create_access_token(identity=str(user.id))  # identity as string
+            return jsonify({
+                'message': 'Login successful',
+                'token': token,
+                'user': user.to_dict()
+            }), 200
+
+        return jsonify({'error': 'Invalid credentials'}), 401
+
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
+@app.route('/api/auth/me', methods=['GET'])
+def get_current_user_profile():
+    """Get current user profile"""
+    user = get_current_user()
+    if not user:
+        return jsonify({'error': 'User not found'}), 404
+
+    return jsonify({'user': user.to_dict()})
+
+
+
+
+@app.route('/api/auth/register-with-code', methods=['POST'])  
+def register():
+    try:
+        data = request.get_json()
+        registration_code = data.get('registration_code')
+        
+        valid_codes = ['EDDIE2024', 'STAFF2024', 'MANAGER2024']
+        if registration_code not in valid_codes:
+            return jsonify({'message': 'Invalid registration code'}), 400
+            
+        role = 'shop_manager' if registration_code == 'MANAGER2024' else 'staff'
+        
+        # Generate JWT token
+        email = data.get('email')
+        token = jwt.encode({
+            'user_id': hash(email),
+            'email': email,
+            'exp': datetime.datetime.utcnow() + datetime.timedelta(hours=24)
+        }, 'your-secret-key', algorithm='HS256')
+        
+        return jsonify({
+            'token': token,
+            'user': {
+                'id': hash(email),
+                'email': email,
+                'name': f"{data.get('firstName', '')} {data.get('lastName', '')}",
+                'role': role,
+                'permissions': ['all'] if role == 'shop_manager' else ['read', 'update']
+            }
+        }), 201
+        
+    except Exception as e:
+        return jsonify({'message': str(e)}), 500
+
+@app.route('/api/auth/change-password', methods=['PUT'])
+@validate_json(['oldPassword', 'newPassword'])
+def change_password():
+    """Change user password"""
+    user = get_current_user()
+    if not user:
+        return jsonify({'error': 'User not found'}), 404
+    
+    data = request.get_json()
+    
+    if not user.check_password(data['oldPassword']):
+        return jsonify({'error': 'Current password is incorrect'}), 400
+    
+    user.set_password(data['newPassword'])
+    user.updated_at = datetime.utcnow()
+    db.session.commit()
+    
+    return jsonify({'message': 'Password changed successfully'})
+
+@app.route("/api/auth/customers/<int:user_id>", methods=["DELETE"])
+def delete_user(user_id):
+    user = User.query.get(user_id)
+    if not user:
+        return {"error": "User not found"}, 404
+    db.session.delete(user)
+    db.session.commit()
+    return {"message": "User deleted"}, 200
+
+# ===================== CUSTOMER ROUTES =====================
+
+@app.route('/api/auth/customers', methods=['GET'])
+def get_customers():
+    """Get all customers with pagination and search"""
+    query = Customer.query.filter_by(is_active=True)
+    
+    # Search functionality
+    search = request.args.get('search')
+    if search:
+        search_term = f"%{search}%"
+        query = query.filter(
+            or_(
+                Customer.first_name.ilike(search_term),
+                Customer.last_name.ilike(search_term),
+                Customer.email.ilike(search_term),
+                Customer.phone.ilike(search_term),
+                Customer.company.ilike(search_term)
+            )
+        )
+    
+    # Sorting
+    sort_by = request.args.get('sort_by', 'last_name')
+    sort_order = request.args.get('sort_order', 'asc')
+    
+    if hasattr(Customer, sort_by):
+        if sort_order == 'desc':
+            query = query.order_by(desc(getattr(Customer, sort_by)))
+        else:
+            query = query.order_by(asc(getattr(Customer, sort_by)))
+    
+    return jsonify(paginate_query(query))
+
+@app.route('/api/auth/customers', methods=['POST'])
+@validate_json(['first_name', 'last_name'])
+def create_customer():
+    """Create new customer"""
+    data = request.get_json()
+    
+    customer = Customer(**{k: v for k, v in data.items() if hasattr(Customer, k)})
+    
+    db.session.add(customer)
+    db.session.commit()
+    
+    return jsonify({
+        'message': 'Customer created successfully',
+        'customer': customer.to_dict()
+    }), 201
+
+@app.route('/api/auth/customers/<int:customer_id>', methods=['GET'])
+def get_customer(customer_id):
+    """Get specific customer"""
+    customer = Customer.query.get_or_404(customer_id)
+    return jsonify({'customer': customer.to_dict(include_relationships=True)})
+
+@app.route('/api/auth/customers/<int:customer_id>', methods=['PUT'])
+def update_customer(customer_id):
+    """Update customer"""
+    customer = Customer.query.get_or_404(customer_id)
+    data = request.get_json()
+    
+    for field in ['first_name', 'last_name', 'company', 'email', 'phone', 'phone_alt',
+                  'address_line1', 'address_line2', 'city', 'state', 'zip_code',
+                  'preferred_contact', 'customer_type', 'tax_exempt', 'tax_exempt_number',
+                  'credit_limit', 'payment_terms', 'discount_percentage', 'notes']:
+        if field in data:
+            setattr(customer, field, data[field])
+    
+    customer.updated_at = datetime.utcnow()
+    db.session.commit()
+    
+    return jsonify({
+        'message': 'Customer updated successfully',
+        'customer': customer.to_dict()
+    })
+
+@app.route('/api/auth/customers/<int:customer_id>/vehicles', methods=['GET'])
+def get_customer_vehicles(customer_id):
+    """Get customer's vehicles"""
+    customer = Customer.query.get_or_404(customer_id)
+    vehicles = Vehicle.query.filter_by(customer_id=customer_id, is_active=True).all()
+    return jsonify({'vehicles': [v.to_dict() for v in vehicles]})
+
+@app.route('/api/auth/customers/search', methods=['GET'])
+def search_customers():
+    """Search customers"""
+    q = request.args.get('q', '')
+    if not q:
+        return jsonify({'customers': []})
+    
+    search_term = f"%{q}%"
+    customers = Customer.query.filter(
+        and_(
+            Customer.is_active == True,
+            or_(
+                Customer.first_name.ilike(search_term),
+                Customer.last_name.ilike(search_term),
+                Customer.email.ilike(search_term),
+                Customer.phone.ilike(search_term),
+                Customer.company.ilike(search_term)
+            )
+        )
+    ).limit(20).all()
+    
+    return jsonify({'customers': [c.to_dict() for c in customers]})
+
+# ===================== VEHICLE ROUTES =====================
+
+@app.route('/api/auth/vehicles', methods=['GET'])
+def get_vehicles():
+    """Get all vehicles"""
+    query = Vehicle.query.filter_by(is_active=True)
+    
+    customer_id = request.args.get('customer_id')
+    if customer_id:
+        query = query.filter_by(customer_id=customer_id)
+    
+    return jsonify(paginate_query(query))
+
+@app.route('/api/auth/vehicles', methods=['POST'])
+@validate_json(['customer_id'])
+def create_vehicle():
+    """Create new vehicle"""
+    data = request.get_json()
+    
+    # Check if VIN already exists
+    if data.get('vin'):
+        existing = Vehicle.query.filter_by(vin=data['vin']).first()
+        if existing:
+            return jsonify({'error': 'VIN already exists'}), 409
+    
+    vehicle = Vehicle(**{k: v for k, v in data.items() if hasattr(Vehicle, k)})
+    
+    db.session.add(vehicle)
+    db.session.commit()
+    
+    return jsonify({
+        'message': 'Vehicle created successfully',
+        'vehicle': vehicle.to_dict()
+    }), 201
+
+@app.route('/api/auth/vehicles/<int:vehicle_id>', methods=['GET'])
+def get_vehicle(vehicle_id):
+    """Get specific vehicle"""
+    vehicle = Vehicle.query.get_or_404(vehicle_id)
+    return jsonify({'vehicle': vehicle.to_dict(include_relationships=True)})
+
+@app.route('/api/auth/vehicles/vin-lookup/<vin>', methods=['GET'])
+def vin_lookup(vin):
+    """VIN lookup (mock implementation - integrate with real VIN API)"""
+    # This would typically call an external VIN decoder API
+    return jsonify({
+        'vin': vin,
+        'year': 2020,
+        'make': 'Toyota',
+        'model': 'Camry',
+        'trim': 'LE',
+        'engine': '2.5L 4-Cylinder',
+        'transmission': 'Automatic',
+        'fuel_type': 'Gasoline',
+        'body_style': 'Sedan'
+    })
+
+# ===================== JOB ROUTES =====================
+
+@app.route('/api/auth/jobs', methods=['GET'])
+def get_jobs():
+    """Get all jobs with filtering"""
+    query = Job.query
+    
+    # Filters
+    status = request.args.get('status')
+    if status:
+        query = query.filter_by(status=status)
+    
+    customer_id = request.args.get('customer_id')
+    if customer_id:
+        query = query.filter_by(customer_id=customer_id)
+    
+    technician_id = request.args.get('technician_id')
+    if technician_id:
+        query = query.filter_by(technician_id=technician_id)
+    
+    # Default sort by created date
+    query = query.order_by(desc(Job.created_at))
+    
+    return jsonify(paginate_query(query))
+
+@app.route('/api/auth/jobs', methods=['POST'])
+@validate_json(['customer_id', 'vehicle_id', 'title'])
+def create_job():
+    """Create new job"""
+    data = request.get_json()
+    
+    job = Job(**{k: v for k, v in data.items() if hasattr(Job, k)})
+    
+    db.session.add(job)
+    db.session.commit()
+    
+    return jsonify({
+        'message': 'Job created successfully',
+        'job': job.to_dict()
+    }), 201
+
+@app.route('/api/auth/jobs/<int:job_id>', methods=['GET'])
+def get_job(job_id):
+    """Get specific job"""
+    job = Job.query.get_or_404(job_id)
+    return jsonify({'job': job.to_dict(include_relationships=True)})
+
+@app.route('/api/auth/jobs/<int:job_id>/status', methods=['PATCH'])
+@validate_json(['status'])
+def update_job_status(job_id):
+    """Update job status"""
+    job = Job.query.get_or_404(job_id)
+    data = request.get_json()
+    
+    old_status = job.status
+    job.status = data['status']
+    
+    if data['status'] == 'in_progress' and old_status != 'in_progress':
+        job.started_at = datetime.utcnow()
+    elif data['status'] == 'completed' and old_status != 'completed':
+        job.completed_at = datetime.utcnow()
+        job.calculate_totals()
+    
+    job.updated_at = datetime.utcnow()
+    db.session.commit()
+    
+    return jsonify({
+        'message': 'Job status updated successfully',
+        'job': job.to_dict()
+    })
+
+@app.route('/api/auth/jobs/<int:job_id>/parts', methods=['POST'])
+@validate_json(['part_id', 'quantity', 'unit_price'])
+def add_job_part(job_id):
+    """Add part to job"""
+    job = Job.query.get_or_404(job_id)
+    data = request.get_json()
+    
+    job_part = JobPart(
+        job_id=job_id,
+        part_id=data['part_id'],
+        quantity=data['quantity'],
+        unit_price=data['unit_price']
+    )
+    
+    db.session.add(job_part)
+    job.calculate_totals()
+    db.session.commit()
+    
+    return jsonify({
+        'message': 'Part added to job successfully',
+        'job_part': job_part.to_dict()
+    }), 201
+
+@app.route('/api/auth/jobs/<int:job_id>/labor', methods=['POST'])
+@validate_json(['labor_code_id', 'hours', 'hourly_rate'])
+def add_job_labor(job_id):
+    """Add labor to job"""
+    job = Job.query.get_or_404(job_id)
+    data = request.get_json()
+    
+    job_labor = JobLabor(
+        job_id=job_id,
+        labor_code_id=data['labor_code_id'],
+        technician_id=data.get('technician_id'),
+        hours=data['hours'],
+        hourly_rate=data['hourly_rate'],
+        description=data.get('description')
+    )
+    
+    db.session.add(job_labor)
+    job.calculate_totals()
+    db.session.commit()
+    
+    return jsonify({
+        'message': 'Labor added to job successfully',
+        'job_labor': job_labor.to_dict()
+    }), 201
+
+# ===================== TIME CLOCK ROUTES =====================
+
+@app.route('/api/auth/timeclock/clock-in', methods=['POST'])
+def clock_in():
+    """Clock in user"""
+    user = get_current_user()
+    if not user:
+        return jsonify({'error': 'User not found'}), 404
+    
+    # Check if already clocked in
+    active_entry = TimeEntry.query.filter_by(
+        user_id=user.id,
+        clock_out=None
+    ).first()
+    
+    if active_entry:
+        return jsonify({'error': 'Already clocked in'}), 400
+    
+    data = request.get_json() or {}
+    
+    time_entry = TimeEntry(
+        user_id=user.id,
+        job_id=data.get('job_id'),
+        clock_in=datetime.utcnow(),
+        hourly_rate=user.hourly_rate,
+        notes=data.get('notes')
+    )
+    
+    db.session.add(time_entry)
+    db.session.commit()
+    
+    return jsonify({
+        'message': 'Clocked in successfully',
+        'time_entry': time_entry.to_dict()
+    })
+
+@app.route('/api/auth/timeclock/clock-out', methods=['POST'])
+def clock_out():
+    """Clock out user"""
+    user = get_current_user()
+    if not user:
+        return jsonify({'error': 'User not found'}), 404
+    
+    time_entry = TimeEntry.query.filter_by(
+        user_id=user.id,
+        clock_out=None
+    ).first()
+    
+    if not time_entry:
+        return jsonify({'error': 'Not currently clocked in'}), 400
+    
+    data = request.get_json() or {}
+    
+    time_entry.clock_out = datetime.utcnow()
+    time_entry.break_minutes = data.get('break_minutes', 0)
+    time_entry.notes = data.get('notes') or time_entry.notes
+    time_entry.calculate_totals()
+    
+    db.session.commit()
+    
+    return jsonify({
+        'message': 'Clocked out successfully',
+        'time_entry': time_entry.to_dict()
+    })
+
+@app.route('/api/auth/timeclock/status', methods=['GET'])
+def get_timeclock_status():
+    """Get current time clock status"""
+    user = get_current_user()
+    if not user:
+        return jsonify({'error': 'User not found'}), 404
+    
+    active_entry = TimeEntry.query.filter_by(
+        user_id=user.id,
+        clock_out=None
+    ).first()
+    
+    status = {
+        'is_clocked_in': bool(active_entry),
+        'current_entry': active_entry.to_dict() if active_entry else None,
+        'today_total_minutes': 0,
+        'today_total_pay': 0
+    }
+    
+    # Calculate today's totals
+    today_entries = TimeEntry.query.filter(
+        and_(
+            TimeEntry.user_id == user.id,
+            func.date(TimeEntry.clock_in) == datetime.now().date()
+        )
+    ).all()
+    
+    for entry in today_entries:
+        if entry.total_minutes:
+            status['today_total_minutes'] += entry.total_minutes
+        if entry.total_pay:
+            status['today_total_pay'] += float(entry.total_pay)
+    
+    return jsonify(status)
+
+@app.route('/api/auth/timeclock/history', methods=['GET'])
+def get_timeclock_history():
+    """Get time clock history"""
+    user = get_current_user()
+    if not user:
+        return jsonify({'error': 'User not found'}), 404
+    
+    start_date = request.args.get('start')
+    end_date = request.args.get('end')
+    
+    query = TimeEntry.query.filter_by(user_id=user.id)
+    
+    if start_date:
+        query = query.filter(TimeEntry.clock_in >= start_date)
+    if end_date:
+        query = query.filter(TimeEntry.clock_in <= end_date)
+    
+    query = query.order_by(desc(TimeEntry.clock_in))
+    
+    return jsonify(paginate_query(query))
+
+# ===================== PARTS & INVENTORY ROUTES =====================
+
+@app.route('/api/auth/parts', methods=['GET'])
+def get_parts():
+    """Get all parts with search and filtering"""
+    query = Part.query.filter_by(is_active=True)
+    
+    # Search
+    search = request.args.get('search')
+    if search:
+        search_term = f"%{search}%"
+        query = query.filter(
+            or_(
+                Part.part_number.ilike(search_term),
+                Part.name.ilike(search_term),
+                Part.description.ilike(search_term),
+                Part.brand.ilike(search_term)
+            )
+        )
+    
+    # Category filter
+    category = request.args.get('category')
+    if category:
+        query = query.filter_by(category=category)
+    
+    # Low stock filter
+    low_stock = request.args.get('low_stock')
+    if low_stock == 'true':
+        query = query.filter(Part.quantity_on_hand <= Part.minimum_quantity)
+    
+    query = query.order_by(Part.name)
+    return jsonify(paginate_query(query))
+
+@app.route('/api/auth/parts', methods=['POST'])
+@validate_json(['part_number', 'name'])
+def create_part():
+    """Create new part"""
+    data = request.get_json()
+    
+    # Check if part number exists
+    if Part.query.filter_by(part_number=data['part_number']).first():
+        return jsonify({'error': 'Part number already exists'}), 409
+    
+    part = Part(**{k: v for k, v in data.items() if hasattr(Part, k)})
+    
+    db.session.add(part)
+    db.session.commit()
+    
+    return jsonify({
+        'message': 'Part created successfully',
+        'part': part.to_dict()
+    }), 201
+
+@app.route('/api/auth/inventory/low-stock', methods=['GET'])
+def get_low_stock_parts():
+    """Get parts that need reordering"""
+    parts = Part.query.filter(
+        and_(
+            Part.is_active == True,
+            Part.quantity_on_hand <= Part.minimum_quantity
+        )
+    ).all()
+    
+    return jsonify({'parts': [p.to_dict() for p in parts]})
+
+# ===================== ESTIMATE ROUTES =====================
+
+@app.route('/api/auth/estimates', methods=['GET'])
+def get_estimates():
+    """Get all estimates"""
+    query = Estimate.query
+    
+    status = request.args.get('status')
+    if status:
+        query = query.filter_by(status=status)
+    
+    customer_id = request.args.get('customer_id')
+    if customer_id:
+        query = query.filter_by(customer_id=customer_id)
+    
+    query = query.order_by(desc(Estimate.created_at))
+    return jsonify(paginate_query(query))
+
+@app.route('/api/auth/estimates', methods=['POST'])
+@validate_json(['customer_id', 'title'])
+def create_estimate():
+    """Create new estimate"""
+    data = request.get_json()
+    
+    estimate = Estimate(**{k: v for k, v in data.items() if hasattr(Estimate, k)})
+    
+    db.session.add(estimate)
+    db.session.commit()
+    
+    return jsonify({
+        'message': 'Estimate created successfully',
+        'estimate': estimate.to_dict()
+    }), 201
+
+@app.route('/api/auth/estimates/<int:estimate_id>/convert-to-job', methods=['POST'])
+def convert_estimate_to_job(estimate_id):
+    """Convert estimate to job"""
+    estimate = Estimate.query.get_or_404(estimate_id)
+    
+    if estimate.status != 'approved':
+        return jsonify({'error': 'Only approved estimates can be converted to jobs'}), 400
+    
+    job = Job(
+        customer_id=estimate.customer_id,
+        vehicle_id=estimate.vehicle_id,
+        title=estimate.title,
+        description=estimate.description,
+        total_amount=estimate.total_amount
+    )
+    
+    db.session.add(job)
+    
+    # Copy estimate items to job
+    for item in estimate.estimate_items:
+        if item.item_type == 'part':
+            job_part = JobPart(
+                job=job,
+                part_id=None,  # Would need part lookup
+                quantity=item.quantity,
+                unit_price=item.unit_price
+            )
+            db.session.add(job_part)
+        elif item.item_type == 'labor':
+            job_labor = JobLabor(
+                job=job,
+                labor_code_id=None,  # Would need labor code lookup
+                hours=item.quantity,
+                hourly_rate=item.unit_price
+            )
+            db.session.add(job_labor)
+    
+    estimate.status = 'converted'
+    db.session.commit()
+    
+    return jsonify({
+        'message': 'Estimate converted to job successfully',
+        'job': job.to_dict()
+    }), 201
+
+# ===================== INVOICE ROUTES =====================
+
+@app.route('/api/auth/invoices', methods=['GET'])
+def get_invoices():
+    """Get all invoices"""
+    query = Invoice.query
+    
+    status = request.args.get('status')
+    if status:
+        query = query.filter_by(status=status)
+    
+    customer_id = request.args.get('customer_id')
+    if customer_id:
+        query = query.filter_by(customer_id=customer_id)
+    
+    # Show overdue invoices
+    overdue = request.args.get('overdue')
+    if overdue == 'true':
+        query = query.filter(
+            and_(
+                Invoice.due_date < datetime.now().date(),
+                Invoice.balance_due > 0
+            )
+        )
+    
+    query = query.order_by(desc(Invoice.created_at))
+    return jsonify(paginate_query(query))
+
+@app.route('/api/auth/invoices', methods=['POST'])
+@validate_json(['customer_id'])
+def create_invoice():
+    """Create new invoice"""
+    data = request.get_json()
+    
+    invoice = Invoice(**{k: v for k, v in data.items() if hasattr(Invoice, k)})
+    
+    db.session.add(invoice)
+    db.session.commit()
+    
+    return jsonify({
+        'message': 'Invoice created successfully',
+        'invoice': invoice.to_dict()
+    }), 201
+
+@app.route('/api/auth/invoices/<int:invoice_id>/mark-paid', methods=['POST'])
+@validate_json(['amount', 'payment_method'])
+def mark_invoice_paid(invoice_id):
+    """Mark invoice as paid"""
+    invoice = Invoice.query.get_or_404(invoice_id)
+    data = request.get_json()
+    
+    payment = Payment(
+        invoice_id=invoice_id,
+        amount=data['amount'],
+        payment_method=data['payment_method'],
+        reference_number=data.get('reference_number'),
+        notes=data.get('notes'),
+        processed_by=get_jwt_identity()
+    )
+    
+    db.session.add(payment)
+    invoice.calculate_balance()
+    db.session.commit()
+    
+    return jsonify({
+        'message': 'Payment recorded successfully',
+        'payment': payment.to_dict(),
+        'invoice': invoice.to_dict()
+    })
+
+# ===================== DASHBOARD & REPORTS ROUTES =====================
+
+@app.route('/api/auth/dashboard/stats', methods=['GET'])
+def get_dashboard_stats():
+    """Get dashboard statistics"""
+    today = datetime.now().date()
+    this_month_start = today.replace(day=1)
+    last_month_start = (this_month_start - timedelta(days=1)).replace(day=1)
+    
+    stats = {
+        'customers': {
+            'total': Customer.query.filter_by(is_active=True).count(),
+            'new_this_month': Customer.query.filter(Customer.created_at >= this_month_start).count()
+        },
+        'vehicles': {
+            'total': Vehicle.query.filter_by(is_active=True).count()
+        },
+        'jobs': {
+            'total': Job.query.count(),
+            'pending': Job.query.filter_by(status='pending').count(),
+            'in_progress': Job.query.filter_by(status='in_progress').count(),
+            'completed_today': Job.query.filter(
+                and_(
+                    Job.status == 'completed',
+                    func.date(Job.completed_at) == today
+                )
+            ).count()
+        },
+        'invoices': {
+            'total': Invoice.query.count(),
+            'pending': Invoice.query.filter_by(status='pending').count(),
+            'overdue': Invoice.query.filter(
+                and_(
+                    Invoice.due_date < today,
+                    Invoice.balance_due > 0
+                )
+            ).count()
+        },
+        'revenue': {
+            'this_month': db.session.query(func.sum(Invoice.total_amount)).filter(
+                and_(
+                    Invoice.status == 'paid',
+                    Invoice.paid_at >= this_month_start
+                )
+            ).scalar() or 0,
+            'last_month': db.session.query(func.sum(Invoice.total_amount)).filter(
+                and_(
+                    Invoice.status == 'paid',
+                    Invoice.paid_at >= last_month_start,
+                    Invoice.paid_at < this_month_start
+                )
+            ).scalar() or 0
+        }
+    }
+    
+    # Convert Decimal to float for JSON serialization
+    stats['revenue']['this_month'] = float(stats['revenue']['this_month'])
+    stats['revenue']['last_month'] = float(stats['revenue']['last_month'])
+    
+    return jsonify(stats)
+
+@app.route('/api/auth/dashboard/recent-activity', methods=['GET'])
+def get_recent_activity():
+    """Get recent activity feed"""
+    limit = int(request.args.get('limit', 10))
+    
+    # Get recent jobs
+    recent_jobs = Job.query.order_by(desc(Job.updated_at)).limit(limit).all()
+    
+    activities = []
+    for job in recent_jobs:
+        activities.append({
+            'type': 'job',
+            'action': f"Job {job.job_number} {job.status}",
+            'description': job.title,
+            'timestamp': job.updated_at.isoformat(),
+            'link': f"/jobs/{job.id}"
+        })
+    
+    return jsonify({'activities': activities})
+
+@app.route('/api/auth/reports/sales', methods=['GET'])
+def get_sales_report():
+    """Generate sales report"""
+    start_date = request.args.get('start', (datetime.now() - timedelta(days=30)).date().isoformat())
+    end_date = request.args.get('end', datetime.now().date().isoformat())
+    
+    invoices = Invoice.query.filter(
+        and_(
+            Invoice.status == 'paid',
+            Invoice.paid_at >= start_date,
+            Invoice.paid_at <= end_date
+        )
+    ).all()
+    
+    total_sales = sum([float(inv.total_amount) for inv in invoices])
+    
+    return jsonify({
+        'period': {'start': start_date, 'end': end_date},
+        'total_sales': total_sales,
+        'invoice_count': len(invoices),
+        'average_invoice': total_sales / len(invoices) if invoices else 0,
+        'invoices': [inv.to_dict() for inv in invoices]
+    })
+
+# ===================== SETTINGS ROUTES =====================
+
+@app.route('/api/auth/settings/shop', methods=['GET'])
+@jwt_required()
+def get_shop_settings():
+    """Get shop settings"""
+    settings = ShopSettings.query.first()
+    if not settings:
+        # Create default settings
+        settings = ShopSettings(
+            shop_name="Eddie's Askan Automotive",
+            address_line1="123 Main Street",
+            city="Anytown",
+            state="NY",
+            zip_code="12345",
+            phone="(555) 123-4567",
+            email="info@eddiesauto.com"
+        )
+        db.session.add(settings)
+        db.session.commit()
+    
+    return jsonify({'settings': settings.to_dict()})
+
+@app.route('/api/auth/settings/shop', methods=['PUT'])
+@admin_required
+def update_shop_settings():
+    """Update shop settings"""
+    settings = ShopSettings.query.first()
+    if not settings:
+        settings = ShopSettings()
+        db.session.add(settings)
+    
+    data = request.get_json()
+    
+    for field in ['shop_name', 'address_line1', 'address_line2', 'city', 'state',
+                  'zip_code', 'phone', 'email', 'website', 'license_number',
+                  'tax_id', 'default_tax_rate', 'default_labor_rate', 'currency',
+                  'timezone', 'business_hours']:
+        if field in data:
+            setattr(settings, field, data[field])
+    
+    settings.updated_at = datetime.utcnow()
+    db.session.commit()
+    
+    return jsonify({
+        'message': 'Shop settings updated successfully',
+        'settings': settings.to_dict()
+    })
+
+# ===================== HEALTH CHECK ROUTES =====================
+
+# ===================== ERROR HANDLERS =====================
+
+@app.errorhandler(404)
+def not_found(error):
+    return jsonify({'error': 'Resource not found'}), 404
+
+@app.errorhandler(400)
+def bad_request(error):
+    return jsonify({'error': 'Bad request'}), 400
+
+@app.errorhandler(500)
+def internal_error(error):
+    db.session.rollback()
+    logger.error(f"Internal server error: {error}")
+    return jsonify({'error': 'Internal server error'}), 500
+
+@app.errorhandler(422)
+def unprocessable_entity(error):
+    return jsonify({'error': 'Unprocessable entity'}), 422
+
+# ===================== APPLICATION INITIALIZATION =====================
+
+def create_default_data():
+    """Create default data for new installations"""
+    # Create admin user if none exists
+    if not User.query.filter_by(role='admin').first():
+        admin = User(
+            email='admin@eddiesauto.com',
+            first_name='Eddie',
+            last_name='Admin',
+            role='admin',
+            phone='(555) 123-4567',
+            hourly_rate=50.00
+        )
+        admin.set_password('admin123')
+        db.session.add(admin)
+    
+    # Create sample labor codes
+    labor_codes = [
+        {'code': 'DIAG', 'name': 'Diagnostic', 'hourly_rate': 125.00, 'category': 'diagnostic'},
+        {'code': 'OILCH', 'name': 'Oil Change', 'flat_rate': 35.00, 'standard_hours': 0.5, 'category': 'maintenance'},
+        {'code': 'BRKPAD', 'name': 'Brake Pad Replacement', 'hourly_rate': 125.00, 'standard_hours': 2.0, 'category': 'brakes'},
+        {'code': 'TUNE', 'name': 'Tune Up', 'hourly_rate': 125.00, 'standard_hours': 3.0, 'category': 'engine'},
+        {'code': 'TRANS', 'name': 'Transmission Service', 'hourly_rate': 135.00, 'standard_hours': 2.5, 'category': 'transmission'}
+    ]
+    
+    for lc_data in labor_codes:
+        if not LaborCode.query.filter_by(code=lc_data['code']).first():
+            labor_code = LaborCode(**lc_data)
+            db.session.add(labor_code)
+    
+    # Create sample parts
+    sample_parts = [
+        {
+            'part_number': 'OIL001',
+            'name': '5W-30 Motor Oil',
+            'category': 'fluids',
+            'brand': 'Mobil 1',
+            'cost_price': 8.50,
+            'sell_price': 12.99,
+            'quantity_on_hand': 50,
+            'minimum_quantity': 10
+        },
+        {
+            'part_number': 'FILT001',
+            'name': 'Oil Filter',
+            'category': 'filters',
+            'brand': 'WIX',
+            'cost_price': 6.25,
+            'sell_price': 9.99,
+            'quantity_on_hand': 25,
+            'minimum_quantity': 5
+        },
+        {
+            'part_number': 'BRAKE001',
+            'name': 'Brake Pads - Front',
+            'category': 'brakes',
+            'brand': 'Wagner',
+            'cost_price': 35.00,
+            'sell_price': 55.99,
+            'quantity_on_hand': 15,
+            'minimum_quantity': 3
+        }
+    ]
+    
+    for part_data in sample_parts:
+        if not Part.query.filter_by(part_number=part_data['part_number']).first():
+            part = Part(**part_data)
+            db.session.add(part)
+    
+    db.session.commit()
+    logger.info("Default data created successfully")
+
+def initialize_database():
+    """Initialize database on first request"""
+    try:
+        db.create_all()
+        create_default_data()
+        logger.info("Database initialized successfully")
+    except Exception as e:
+        logger.error(f"Database initialization failed: {e}")
+
+# ===================== MAIN APPLICATION =====================
+
+
+@app.route('/api/auth/logout', methods=['POST'])
+@jwt_required()
+def logout():
+    try:
+        return jsonify({
+            'success': True,
+            'message': 'Successfully logged out'
+        })
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
+@app.route('/api/auth/refresh', methods=['POST'])
+@jwt_required()
+def refresh_token():
+    try:
+        current_user = get_jwt_identity()
+        new_token = create_access_token(identity=current_user, expires_delta=timedelta(hours=24))
+        return jsonify({
+            'success': True,
+            'access_token': new_token,
+            'message': 'Token refreshed successfully'
+        })
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
+
+# Health check endpoint
+@app.route('/api/health', methods=['GET'])
+def api_health():
+    return jsonify({'status': 'healthy', 'service': 'eddies-automotive'})
+
+if __name__ == '__main__':
+    with app.app_context():
+        db.create_all()
+        create_default_data()
+        
+    # Development server
+    port = int(os.getenv('PORT', 5000))
+    debug = os.getenv('FLASK_ENV') == 'development'
+    
+    logger.info("🚀 Eddie's Askan Automotive API Server Starting...")
+    logger.info(f"📍 Server will run on http://localhost:{port}")
+    logger.info(f"🔧 Debug mode: {debug}")
+    
+    app.run(
+        host='0.0.0.0',
+        port=port,
+        debug=debug,
+        threaded=True
+    )
+
+@app.route('/api/auth/settings', methods=['GET'])
+@jwt_required()
+def get_settings():
+    """Get general application settings"""
+    return jsonify({
+        'theme': 'light',
+        'company_name': "Eddie's Automotive",
+        'currency': 'USD', 
+        'timezone': 'America/Los_Angeles',
+        'business_hours': '8:00 AM - 6:00 PM',
+        'phone': '(555) 123-4567',
+        'email': 'admin@eddiesautomotive.com',
+        'tax_rate': 0.08,
+        'labor_rate': 120.00,
+        'notifications_enabled': True,
+        'auto_backup': True
+    })
+
+# Health check endpoints

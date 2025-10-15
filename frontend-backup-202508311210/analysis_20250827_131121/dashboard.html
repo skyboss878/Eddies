@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Frontend Analysis Dashboard</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 40px; background: #f5f5f5; }
+        .container { background: white; padding: 30px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .header { color: #2c3e50; border-bottom: 2px solid #3498db; padding-bottom: 10px; margin-bottom: 20px; }
+        .metric { display: inline-block; margin: 10px 20px; padding: 15px; background: #ecf0f1; border-radius: 5px; min-width: 120px; text-align: center; }
+        .metric-value { font-size: 24px; font-weight: bold; color: #2980b9; }
+        .metric-label { font-size: 12px; color: #7f8c8d; }
+        .section { margin: 20px 0; padding: 15px; border-left: 4px solid #3498db; background: #f8f9fa; }
+        .success { color: #27ae60; }
+        .warning { color: #f39c12; }
+        .error { color: #e74c3c; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="header">Eddie's Asian Automotive - Frontend Analysis Dashboard</h1>
+        
+        <div class="metrics">
+            <div class="metric">
+                <div class="metric-value">108</div>
+                <div class="metric-label">Components</div>
+            </div>
+            <div class="metric">
+                <div class="metric-value">140</div>
+                <div class="metric-label">JS/JSX Files</div>
+            </div>
+            <div class="metric">
+                <div class="metric-value">77</div>
+                <div class="metric-label">Exports</div>
+            </div>
+        </div>
+        
+        <div class="section">
+            <h3>Quick Summary</h3>
+            <p>Analysis completed at Wed Aug 27 13:11:35 PDT 2025</p>
+            <p>Full report available in: <code>analysis_20250827_131121/complete_analysis_report.md</code></p>
+            <p>Log files available in: <code>analysis_20250827_131121/logs/</code></p>
+            <p>Fix scripts available in: <code>analysis_20250827_131121/fixes/</code></p>
+        </div>
+    </div>
+</body>
+</html>

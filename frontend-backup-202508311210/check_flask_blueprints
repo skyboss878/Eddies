@@ -1,0 +1,47 @@
+#!/bin/bash
+
+echo "=== CORRECT API ENDPOINT FIX ==="
+echo
+
+echo "1. Backend Analysis:"
+echo "=================="
+echo "✓ Flask backend found"
+echo "✓ Routes use blueprints with url_prefix='/api/...' patterns"
+echo "✓ AI route: /api/ai/generate-full-estimate"
+echo "✓ No base /api prefix needed in API_BASE_URL"
+
+echo
+echo "2. Key findings from your backend:"
+echo "================================"
+echo "- ai_bp has url_prefix='/api/ai'"
+echo "- So /generate-full-estimate becomes /api/ai/generate-full-estimate"
+echo "- Your frontend expects /estimates/from-ai"
+echo "- This is a ROUTE MISMATCH, not a base URL issue"
+
+echo
+echo "3. The REAL issues to fix:"
+echo "========================="
+cat << 'EOF'
+FRONTEND EXPECTS          →  BACKEND ACTUALLY HAS
+/estimates/from-ai        →  /api/ai/generate-full-estimate
+/labor                    →  /api/labor (probably)
+/initial-data             →  /api/initial-data (probably)
+EOF
+
+echo
+echo "4. Checking your actual Flask blueprints:"
+echo "========================================"
+
+# Navigate to backend to check blueprints
+cd ../backend
+
+echo "Blueprint URL prefixes in your routes:"
+grep -r "url_prefix=" routes/ | head -10
+
+echo
+echo "5. The correct fix:"
+echo "=================="
+echo "Option A: Update your frontend API calls to match backend routes"
+echo "Option B: Update your Flask blueprint prefixes to match frontend expectations"
+echo
+echo "Let's check what URL prefixes your blueprints actually use..."

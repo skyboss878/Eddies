@@ -1,0 +1,266 @@
+import { useState, useCallback } from 'react';
+import { 
+  customerService, 
+  vehicleService, 
+  jobService, 
+  estimateService, 
+  invoiceService,
+  appointmentService,
+  timeclockService,
+  reportService,
+  diagnosticsService
+} from "../utils/services";
+import { showError, showSuccess } from "../utils/toast";
+
+export const useDataOperations = () => {
+  const [loading, setLoading] = useState({
+    customers: false,
+    vehicles: false,
+    jobs: false,
+    estimates: false,
+    invoices: false,
+    appointments: false,
+    timeclock: false,
+    reports: false,
+    diagnostics: false
+  });
+
+  const setSpecificLoading = (key, value) => {
+    setLoading(prev => ({ ...prev, [key]: value }));
+  };
+
+  // ----- Existing customer, vehicle, job, estimate, invoice, appointment, timeclock operations -----
+  // (keep all existing operations as they are)
+
+  // --- Report operations ---
+  const fetchReports = useCallback(async (params = {}) => {
+    setSpecificLoading('reports', true);
+    try {
+      const response = await reportService.getAll(params);
+      return response.data || response;
+    } catch (error) {
+      console.error('Failed to fetch reports:', error);
+      showError('Failed to fetch reports');
+      throw error;
+    } finally {
+      setSpecificLoading('reports', false);
+    }
+  }, []);
+
+  // --- Diagnostics operations ---
+  const fetchDiagnosticsStatus = useCallback(async () => {
+    setSpecificLoading('diagnostics', true);
+    try {
+      const response = await diagnosticsService.getSystemStatus();
+      return response;
+    } catch (error) {
+      console.error('Failed to fetch diagnostics status:', error);
+      showError('Failed to fetch diagnostics status');
+      throw error;
+    } finally {
+      setSpecificLoading('diagnostics', false);
+    }
+  }, []);
+
+  const runDiagnosticTest = useCallback(async (testType) => {
+    setSpecificLoading('diagnostics', true);
+    try {
+      const response = await diagnosticsService.runTest(testType);
+      showSuccess(`Diagnostic test "${testType}" completed`);
+      return response;
+    } catch (error) {
+      console.error('Failed to run diagnostic test:', error);
+      showError(`Failed to run diagnostic test: ${testType}`);
+      throw error;
+    } finally {
+      setSpecificLoading('diagnostics', false);
+    }
+  }, []);
+
+  // --- Refresh all data ---
+  const refreshAllData = useCallback(async () => {
+
+    // Migration operations
+    migrationOps: {
+      analyze: async (formData) => {
+        setSpecificLoading('analyzeMigration', true);
+        try {
+          const response = await fetch('/api/migration/analyze', {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${localStorage.getItem('token')}`
+            },
+            body: formData
+          });
+          const result = await response.json();
+          if (!response.ok) {
+            showError(result.error || 'Analysis failed');
+            return { success: false, error: result.error };
+          }
+          return { success: true, data: result.data };
+        } catch (error) {
+          showError('Failed to analyze file');
+          return { success: false, error: error.message };
+        } finally {
+          setSpecificLoading('analyzeMigration', false);
+        }
+      },
+      importData: async (data) => {
+        setSpecificLoading('importMigration', true);
+        try {
+          const response = await fetch('/api/migration/import', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${localStorage.getItem('token')}`
+            },
+            body: JSON.stringify(data)
+          });
+          const result = await response.json();
+          if (!response.ok) {
+            showError(result.error || 'Import failed');
+            return { success: false, error: result.error };
+          }
+          showSuccess('Data imported successfully!');
+          return { success: true, data: result.data };
+        } catch (error) {
+          showError('Failed to import data');
+          return { success: false, error: error.message };
+        } finally {
+          setSpecificLoading('importMigration', false);
+        }
+      }
+    },
+
+    utils: {
+      isLoading: (key) => loading[key],
+      showMessage: showSuccess
+    }
+    try {
+      await Promise.allSettled([
+        fetchCustomers(),
+        fetchVehicles(),
+        fetchJobs(),
+        fetchEstimates(),
+        fetchInvoices(),
+        fetchAppointments(),
+        fetchReports(),
+        fetchDiagnosticsStatus()
+      ]);
+    } catch (error) {
+      console.error('Failed to refresh data:', error);
+    }
+  }, [
+    fetchCustomers,
+    fetchVehicles,
+    fetchJobs,
+    fetchEstimates,
+    fetchInvoices,
+    fetchAppointments,
+    fetchReports,
+    fetchDiagnosticsStatus
+  ]);
+
+  return {
+    loading,
+
+    // Customer operations
+    fetchCustomers,
+    createCustomer,
+    updateCustomer,
+    deleteCustomer,
+
+    // Vehicle operations
+    fetchVehicles,
+    createVehicle,
+    updateVehicle,
+
+    // Job operations
+    fetchJobs,
+    createJob,
+    updateJobStatus,
+
+    // Estimate operations
+    fetchEstimates,
+    createEstimate,
+
+    // Invoice operations
+    fetchInvoices,
+    createInvoice,
+
+    // Appointment operations
+    fetchAppointments,
+
+    // Time clock operations
+    getTimeClockStatus,
+    clockIn,
+    clockOut,
+
+    // Report operations
+    fetchReports,
+
+    // Diagnostics operations
+    fetchDiagnosticsStatus,
+    runDiagnosticTest,
+
+    // Utility
+    refreshAllData
+
+    // Migration operations
+    migrationOps: {
+      analyze: async (formData) => {
+        setSpecificLoading('analyzeMigration', true);
+        try {
+          const response = await fetch('/api/migration/analyze', {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${localStorage.getItem('token')}`
+            },
+            body: formData
+          });
+          const result = await response.json();
+          if (!response.ok) {
+            showError(result.error || 'Analysis failed');
+            return { success: false, error: result.error };
+          }
+          return { success: true, data: result.data };
+        } catch (error) {
+          showError('Failed to analyze file');
+          return { success: false, error: error.message };
+        } finally {
+          setSpecificLoading('analyzeMigration', false);
+        }
+      },
+      importData: async (data) => {
+        setSpecificLoading('importMigration', true);
+        try {
+          const response = await fetch('/api/migration/import', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${localStorage.getItem('token')}`
+            },
+            body: JSON.stringify(data)
+          });
+          const result = await response.json();
+          if (!response.ok) {
+            showError(result.error || 'Import failed');
+            return { success: false, error: result.error };
+          }
+          showSuccess('Data imported successfully!');
+          return { success: true, data: result.data };
+        } catch (error) {
+          showError('Failed to import data');
+          return { success: false, error: error.message };
+        } finally {
+          setSpecificLoading('importMigration', false);
+        }
+      }
+    },
+
+    utils: {
+      isLoading: (key) => loading[key],
+      showMessage: showSuccess
+    }
+  };
+};

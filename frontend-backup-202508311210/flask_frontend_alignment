@@ -1,0 +1,49 @@
+#!/bin/bash
+
+echo "=== ALIGNING FRONTEND WITH FLASK BACKEND ==="
+echo
+
+cd ../frontend/src/utils
+
+echo "1. Current API.js endpoints that need fixing:"
+echo "==========================================="
+echo "Frontend calls → Backend expects:"
+echo "/estimates/from-ai → /api/ai/generate-full-estimate"
+echo "/labor → /api/labor (if labor_bp has url_prefix='/api')"  
+echo "/initial-data → /api/initial-data (if initial_data_bp has url_prefix='/api')"
+
+echo
+echo "2. Making the corrections:"
+echo "========================"
+
+# Fix the AI estimate endpoint - this is the big one
+echo "Fixing AI estimate endpoint..."
+sed -i "s|/estimates/from-ai|/api/ai/generate-full-estimate|g" api.js
+echo "✓ Updated /estimates/from-ai → /api/ai/generate-full-estimate"
+
+# We need to check what other blueprint prefixes exist, but likely fixes:
+echo
+echo "3. Checking current api.js after AI fix:"
+grep -n "ai.*generate" api.js || echo "AI endpoint fix not found - check manually"
+
+echo
+echo "4. Next steps - verify these other endpoints:"
+echo "==========================================="
+cat << 'EOF'
+Need to verify if these frontend endpoints match your Flask blueprints:
+
+FRONTEND EXPECTS    FLASK BLUEPRINT LIKELY USES
+/auth/login      →  /api/auth/login (if auth_bp uses /api prefix)
+/customers       →  /api/customers (if customer_bp uses /api prefix)  
+/vehicles        →  /api/vehicles (if vehicle_bp uses /api prefix)
+/labor           →  /api/labor (if labor_bp uses /api prefix)
+/initial-data    →  /api/initial-data (if initial_data_bp uses /api prefix)
+
+Run the blueprint checker first to see actual prefixes!
+EOF
+
+echo
+echo "5. Quick test command:"
+echo "===================="
+echo "After fixing, test with:"
+echo "curl -X POST http://127.0.0.1:5000/api/ai/generate-full-estimate"

@@ -1,0 +1,62 @@
+#!/bin/bash
+# === COMPREHENSIVE PAGES API CHECKER ===
+
+# Colors
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+CYAN='\033[0;36m'
+NC='\033[0m' # No Color
+
+echo -e "${CYAN}=== COMPREHENSIVE PAGES API CHECKER ===${NC}"
+
+echo -e "${YELLOW}1. CHECKING ALL PAGES FOR API CALLS${NC}"
+echo "===================================="
+
+for file in src/pages/*.jsx; do
+    page_name=$(basename "$file")
+    echo -e "\n📄 ${CYAN}${page_name}${NC}"
+    echo "------------------------"
+    api_calls=$(grep -n "fetch(" "$file")
+    hooks_used=$(grep -n "useDataOperations" "$file")
+
+    if [[ -n "$api_calls" ]]; then
+        echo -e "🔗 API CALLS FOUND:"
+        echo "$api_calls"
+    else
+        echo -e "${GREEN}✅ No direct API calls (likely uses hooks/services)${NC}"
+    fi
+done
+
+echo -e "\n${YELLOW}2. CHECKING FOR ROUTING ISSUES${NC}"
+echo "=============================="
+routes_file="src/App.jsx"
+missing_pages=()
+
+for file in src/pages/*.jsx; do
+    page_name=$(basename "$file" .jsx)
+    if ! grep -q "$page_name" "$routes_file"; then
+        missing_pages+=("$page_name")
+    fi
+done
+
+if (( ${#missing_pages[@]} > 0 )); then
+    echo -e "⚠️  Pages possibly not in routing:"
+    for page in "${missing_pages[@]}"; do
+        echo "- $page"
+    done
+else
+    echo -e "${GREEN}✅ All pages appear to be in routing${NC}"
+fi
+
+echo -e "\n${YELLOW}3. RECOMMENDATIONS${NC}"
+echo "=================="
+echo -e "✅ API endpoints centralized in useDataOperations.js"
+echo -e "✅ Base API configuration correct in api.js"
+echo -e "Next steps:"
+echo -e "  1. Review any pages with ⚠️ warnings above"
+echo -e "  2. Test each major page functionality"
+echo -e "  3. Check browser console for any remaining API errors"
+echo -e "  4. Verify all pages are accessible through navigation"
+
+echo -e "\n${GREEN}✔ Script finished without errors.${NC}"

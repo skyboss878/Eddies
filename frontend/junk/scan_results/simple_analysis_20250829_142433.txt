@@ -1,0 +1,106 @@
+React Project Analysis - Fixed Version
+Generated: Fri Aug 29 14:24:33 PDT 2025
+Project: /data/data/com.termux/files/home/eddies-asian-automotive/frontend
+=====================================
+
+📊 PROJECT OVERVIEW
+===================
+
+📁 DIRECTORY STRUCTURE:
+----------------------
+components  :  43 files
+pages       :  42 files
+utils       :  29 files
+services    :   3 files
+hooks       :   8 files
+contexts    :   6 files
+assets      :   0 files
+
+📄 FILE TYPES:
+--------------
+JavaScript:   44 files
+JSX:          93 files
+TypeScript:    2 files
+TSX:           5 files
+TOTAL:       144 files
+
+🔗 IMPORT ANALYSIS
+==================
+Files importing from utils:       26
+Files importing from services:     3
+Files importing from components:  21
+Files importing from pages:        2
+
+🏆 TOP UTILITIES
+================
+Most referenced utility files:
+  toast: 21 references
+  api: 53 references
+  vehicleHelpers: 3 references
+  aiDiagnosticsService: 2 references
+  tokenManager: 3 references
+  apiEndpoints: 15 references
+  testApi: 3 references
+  billing: 2 references
+  aiUtils: 1 references
+  index: 20 references
+  customerService: 8 references
+  vehicleService: 8 references
+  jobService: 8 references
+  estimateService: 7 references
+  invoiceService: 5 references
+  appointmentService: 5 references
+  timeclockService: 6 references
+  reportService: 3 references
+  diagnosticsService: 4 references
+  index: 20 references
+  migrationServices: 0 references
+  utilityService: 2 references
+  employeeService: 2 references
+  messageUtils: 2 references
+  socketUtils: 2 references
+  calculations: 3 references
+  dateUtils: 1 references
+  statusUtils: 1 references
+  errorUtils: 2 references
+
+⚠️  LARGE FILES (>500 lines)
+============================
+  pages/CustomerList.jsx                  :  892 lines
+  pages/AddVehicle.jsx                    :  506 lines
+  pages/CreateJob.jsx                     : 1127 lines
+  pages/Dashboard.jsx                     :  626 lines
+  pages/Reports.jsx                       :  525 lines
+  pages/VehicleForm.jsx                   :  556 lines
+  pages/AppointmentCalendar.jsx           :  695 lines
+  pages/CreateInvoice.jsx                 :  736 lines
+  pages/Settings.jsx                      :  986 lines
+  pages/Customers.jsx                     :  892 lines
+
+📦 FILES WITH MANY IMPORTS (>15)
+=================================
+
+🏗️  ARCHITECTURE PATTERNS
+=========================
+Detected patterns:
+  ✅ React Hooks pattern detected
+  ✅ Context API pattern detected
+  ✅ HTTP client pattern detected
+  ✅ Custom hooks pattern detected
+  ✅ Service layer pattern detected
+
+📈 IMPORT FREQUENCY
+===================
+Files mentioned most in import statements:
+  api                 :  22 imports
+  utils               :  19 imports
+  toast               :  15 imports
+  LoadingSpinner      :   9 imports
+  outline             :   7 imports
+  ConfirmModal        :   7 imports
+  TimeClockNavbar     :   5 imports
+  RealTimeNotifications:   5 imports
+  apiEndpoints        :   4 imports
+  SmartBreadcrumb     :   4 imports
+
+Analysis completed at: Fri Aug 29 14:24:44 PDT 2025

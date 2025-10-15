@@ -1,0 +1,81 @@
+Missing Connections Report
+Generated: Fri Aug 29 14:35:23 PDT 2025
+=====================================
+
+POTENTIAL ISSUES DETECTED
+=========================
+
+Components without API connections:
+  ⚠️  Navbar.jsx - has forms but no API calls
+  ⚠️  ConfirmModal.jsx - has forms but no API calls
+  ⚠️  PromptModal.jsx - has forms but no API calls
+  ⚠️  UserDropdown.jsx - has forms but no API calls
+  ⚠️  UserDropdown.jsx - displays data but no API calls
+  ⚠️  ShareableActions.jsx - has forms but no API calls
+  ⚠️  Navigation.jsx - has forms but no API calls
+  ⚠️  Navigation.jsx - displays data but no API calls
+  ⚠️  QuickActionButton.jsx - has forms but no API calls
+  ⚠️  TechnicianTimeClockCard.jsx - has forms but no API calls
+  ⚠️  TimeClockWidget.jsx - has forms but no API calls
+  ⚠️  LogoSplash.jsx - has forms but no API calls
+  ⚠️  LogoSplash.jsx - displays data but no API calls
+  ⚠️  EnhancedJobCreation.jsx - has forms but no API calls
+  ⚠️  EnhancedJobCreation.jsx - displays data but no API calls
+  ⚠️  PrintableLayout.jsx - has forms but no API calls
+  ⚠️  PrintableLayout.jsx - displays data but no API calls
+  ⚠️  RealTimeNotifications.jsx - displays data but no API calls
+  ⚠️  AIDiagnosticHelper.jsx - has forms but no API calls
+  ⚠️  AIEstimateModal.jsx - has forms but no API calls
+  ⚠️  OBD2Lookup.jsx - has forms but no API calls
+  ⚠️  MobileNavigation.jsx - has forms but no API calls
+  ⚠️  ComplianceNoticeCA.jsx - has forms but no API calls
+  ⚠️  CustomerAuthorization.jsx - has forms but no API calls
+  ⚠️  CustomerAuthorization.jsx - displays data but no API calls
+  ⚠️  DocumentTemplplateRenderer.jsx - has forms but no API calls
+  ⚠️  DocumentTemplplateRenderer.jsx - displays data but no API calls
+  ⚠️  SmartBreadcrumb.jsx - displays data but no API calls
+  ⚠️  LandingPage.jsx - has forms but no API calls
+  ⚠️  LandingPage.jsx - displays data but no API calls
+  ⚠️  AIEstimateCard.jsx - has forms but no API calls
+  ⚠️  AIEstimateCard.jsx - displays data but no API calls
+  ⚠️  ViewJobs.jsx - has forms but no API calls
+  ⚠️  ViewJobs.jsx - displays data but no API calls
+  ⚠️  Login.jsx - has forms but no API calls
+  ⚠️  Login.jsx - displays data but no API calls
+  ⚠️  VehicleList.jsx - has forms but no API calls
+  ⚠️  VehicleList.jsx - displays data but no API calls
+  ⚠️  Mobile.jsx - has forms but no API calls
+  ⚠️  Register.jsx - has forms but no API calls
+  ⚠️  Register.jsx - displays data but no API calls
+  ⚠️  Reports.jsx - has forms but no API calls
+  ⚠️  Reports.jsx - displays data but no API calls
+  ⚠️  Diagnosis.jsx - has forms but no API calls
+  ⚠️  Diagnosis.jsx - displays data but no API calls
+  ⚠️  AddAndEditCustomer.jsx - has forms but no API calls
+  ⚠️  AddAndEditCustomer.jsx - displays data but no API calls
+  ⚠️  DataMigration.jsx - has forms but no API calls
+  ⚠️  DataMigration.jsx - displays data but no API calls
+  ⚠️  NotFound.jsx - has forms but no API calls
+  ⚠️  Inventory.jsx - displays data but no API calls
+  ⚠️  CustomerDetail.jsx - has forms but no API calls
+  ⚠️  CustomerDetail.jsx - displays data but no API calls
+  ⚠️  VehicleDetail.jsx - has forms but no API calls
+  ⚠️  VehicleDetail.jsx - displays data but no API calls
+  ⚠️  Vehicles.jsx - has forms but no API calls
+  ⚠️  Vehicles.jsx - displays data but no API calls
+  ⚠️  Jobs.jsx - has forms but no API calls
+  ⚠️  Jobs.jsx - displays data but no API calls
+  ⚠️  helpers.js - has forms but no API calls
+  ⚠️  AddAppointmentModal.jsx - has forms but no API calls
+  ⚠️  index.jsx - has forms but no API calls
+  ⚠️  index.jsx - displays data but no API calls
+  ⚠️  InvoiceDetail.jsx - has forms but no API calls
+  ⚠️  InvoiceDetail.jsx - displays data but no API calls
+
+Potentially unused services:
+
+Files with API calls but no error handling:
+  ⚠️  App.jsx - API calls without error handling
+  ⚠️  TimeClockNavbar.jsx - API calls without error handling
+  ⚠️  CustomerPortal.jsx - API calls without error handling
+  ⚠️  Dashboard.tsx - API calls without error handling

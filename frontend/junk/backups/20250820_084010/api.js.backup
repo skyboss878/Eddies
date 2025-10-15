@@ -1,0 +1,813 @@
+// frontend/src/utils/api.js - Clean Minimal Production API Service
+
+import axios from 'axios';
+
+// =============================================================================
+// CONFIGURATION & CONSTANTS
+// =============================================================================
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000';
+const API_TIMEOUT = parseInt(import.meta.env.VITE_API_TIMEOUT) || 30000;
+const RETRY_DELAY = 1000;
+const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
+
+// Development vs Production logging
+const isDevelopment = import.meta.env.DEV;
+const log = {
+  info: isDevelopment ? console.log : () => {},
+  warn: isDevelopment ? console.warn : () => {},
+  error: console.error,
+  debug: isDevelopment ? console.debug : () => {}
+};
+
+// =============================================================================
+// AUTH TOKEN UTILITIES
+// =============================================================================
+const getAuthToken = () => {
+  try {
+    return localStorage.getItem('token');
+  } catch (error) {
+    log.error('Error getting auth token:', error);
+    return null;
+  }
+};
+
+const clearAuthToken = () => {
+  try {
+    localStorage.removeItem('token');
+    if (typeof cacheService !== 'undefined') {
+      cacheService.clear();
+    }
+  } catch (error) {
+    log.error('Error clearing auth token:', error);
+  }
+};
+
+const isTokenValid = () => {
+  const token = getAuthToken();
+  if (!token) return false;
+
+  try {
+    const payload = JSON.parse(atob(token.split('.')[1]));
+    return payload.exp * 1000 > Date.now();
+  } catch (error) {
+    log.error('Error validating token:', error);
+    return false;
+  }
+};
+
+// =============================================================================
+// CACHE SERVICE
+// =============================================================================
+class CacheService {
+  constructor() {
+    this.cache = new Map();
+    this.defaultTtl = CACHE_TTL;
+  }
+
+  set(key, data, customTtl = null) {
+    const expiry = Date.now() + (customTtl || this.defaultTtl);
+    this.cache.set(key, { data, expiry });
+    log.debug(`[Cache] Set: ${key}`);
+  }
+
+  get(key) {
+    const item = this.cache.get(key);
+    if (!item) return null;
+
+    if (Date.now() > item.expiry) {
+      this.cache.delete(key);
+      log.debug(`[Cache] Expired: ${key}`);
+      return null;
+    }
+
+    log.debug(`[Cache] Hit: ${key}`);
+    return item.data;
+  }
+
+  clear() {
+    this.cache.clear();
+    log.debug('[Cache] Cleared all');
+  }
+
+  delete(key) {
+    this.cache.delete(key);
+    log.debug(`[Cache] Deleted: ${key}`);
+  }
+
+  has(key) {
+    const item = this.cache.get(key);
+    if (!item) return false;
+
+    if (Date.now() > item.expiry) {
+      this.cache.delete(key);
+      return false;
+    }
+
+    return true;
+  }
+
+  cleanup() {
+    const now = Date.now();
+    for (const [key, item] of this.cache.entries()) {
+      if (now > item.expiry) {
+        this.cache.delete(key);
+      }
+    }
+  }
+}
+
+const cacheService = new CacheService();
+
+// Clean cache every 5 minutes
+if (typeof window !== 'undefined') {
+  setInterval(() => cacheService.cleanup(), 5 * 60 * 1000);
+}
+
+// =============================================================================
+// ERROR HANDLERS
+// =============================================================================
+const handleUnauthorized = () => {
+  clearAuthToken();
+  if (typeof window !== 'undefined' && window.location.pathname !== '/login') {
+    window.location.href = '/login';
+  }
+};
+
+const handleForbidden = (error) => {
+  log.error('Access forbidden:', error.response?.data?.message);
+};
+
+const handleServerError = (error) => {
+  log.error('Server error occurred:', {
+    status: error.response?.status,
+    message: error.response?.data?.message
+  });
+};
+
+const handleNetworkError = (error) => {
+  log.error('Network error:', error.message);
+};
+
+const shouldRetry = (error) => {
+  return (
+    !error.response ||
+    error.response.status >= 500 ||
+    error.response.status === 429
+  );
+};
+
+// =============================================================================
+// API CLIENT SETUP
+// =============================================================================
+const apiClient = axios.create({
+  baseURL: API_BASE_URL,
+  timeout: API_TIMEOUT,
+  headers: {
+    'Content-Type': 'application/json',
+    'Accept': 'application/json',
+    'X-Requested-With': 'XMLHttpRequest'
+  },
+  withCredentials: false
+});
+
+// =============================================================================
+// REQUEST INTERCEPTOR
+// =============================================================================
+apiClient.interceptors.request.use(
+  (config) => {
+    const token = getAuthToken();
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+
+    config.metadata = { startTime: Date.now() };
+    
+    log.debug(`[API] ${config.method?.toUpperCase()} ${config.url}`, {
+      data: config.data,
+      params: config.params
+    });
+
+    return config;
+  },
+  (error) => {
+    log.error('Request interceptor error:', error);
+    return Promise.reject(error);
+  }
+);
+
+// =============================================================================
+// RESPONSE INTERCEPTOR
+// =============================================================================
+apiClient.interceptors.response.use(
+  (response) => {
+    const duration = Date.now() - response.config.metadata.startTime;
+    log.debug(`[API] ${response.config.method?.toUpperCase()} ${response.config.url} - ${duration}ms`);
+    
+    return response;
+  },
+  async (error) => {
+    const originalRequest = error.config;
+    
+    log.error('API Response Error:', {
+      status: error.response?.status,
+      message: error.response?.data?.message || error.message,
+      url: error.config?.url,
+      method: error.config?.method?.toUpperCase()
+    });
+
+    if (error.response?.status === 401) {
+      handleUnauthorized();
+    } else if (error.response?.status === 403) {
+      handleForbidden(error);
+    } else if (error.response?.status >= 500) {
+      handleServerError(error);
+    } else if (!error.response) {
+      handleNetworkError(error);
+    }
+
+    if (shouldRetry(error) && !originalRequest._retry) {
+      originalRequest._retry = true;
+      await new Promise(resolve => setTimeout(resolve, RETRY_DELAY));
+      return apiClient(originalRequest);
+    }
+
+    return Promise.reject(error);
+  }
+);
+
+// =============================================================================
+// ERROR HANDLING UTILITIES
+// =============================================================================
+const handleApiError = (error, defaultMessage = 'An error occurred') => {
+  if (error.response) {
+    const message = error.response.data?.error || 
+                   error.response.data?.message || 
+                   defaultMessage;
+    return {
+      message,
+      status: error.response.status,
+      data: error.response.data,
+      type: 'server_error'
+    };
+  } else if (error.request) {
+    return {
+      message: 'Network error. Please check your connection.',
+      status: 0,
+      data: null,
+      type: 'network_error'
+    };
+  } else {
+    return {
+      message: error.message || defaultMessage,
+      status: 0,
+      data: null,
+      type: 'client_error'
+    };
+  }
+};
+
+// =============================================================================
+// API HELPERS
+// =============================================================================
+const apiHelpers = {
+  formatError: (error) => {
+    const errorInfo = handleApiError(error);
+    return errorInfo.message;
+  },
+
+  isTokenValid,
+
+  validateRequired: (data, requiredFields) => {
+    const missing = requiredFields.filter(field => !data[field]);
+    if (missing.length > 0) {
+      throw new Error(`Missing required fields: ${missing.join(', ')}`);
+    }
+  }
+};
+
+// =============================================================================
+// AUTHENTICATION SERVICES
+// =============================================================================
+const authService = {
+  login: async (email, password) => {
+    apiHelpers.validateRequired({ email, password }, ['email', 'password']);
+    const response = await apiClient.post('/api/auth/login', { email, password });
+    if (response.data.token) {
+      localStorage.setItem('token', response.data.token);
+    }
+    return response;
+  },
+  
+  logout: async () => {
+    try {
+      await apiClient.post('/api/auth/logout');
+    } finally {
+      clearAuthToken();
+    }
+  },
+  
+  getCurrentUser: () => apiClient.get('/api/auth/me'),
+  
+  register: (userData) => {
+    apiHelpers.validateRequired(userData, ['email', 'password', 'name']);
+    return apiClient.post('/api/auth/register', userData);
+  }
+};
+
+
+const dashboardService = {
+  getStats: (dateRange = {}) => apiClient.get('/api/dashboard/stats', { params: dateRange }),
+  getRecentActivity: (limit = 10) => apiClient.get('/api/dashboard/activity', { params: { limit } }),
+  getSummary: () => apiClient.get('/api/dashboard/summary'),
+  getOverview: () => apiClient.get('/api/dashboard/overview')
+};
+// =============================================================================
+// CUSTOMER SERVICES
+// =============================================================================
+const customerService = {
+  getAll: (params = {}) => apiClient.get('/api/customers', { params }),
+  getById: (id) => {
+    if (!id) throw new Error('Customer ID is required');
+    return apiClient.get(`/api/customers/${id}`);
+  },
+  create: (customerData) => {
+    apiHelpers.validateRequired(customerData, ['name', 'email']);
+    return apiClient.post('/api/customers', customerData);
+  },
+  update: (id, customerData) => {
+    if (!id) throw new Error('Customer ID is required');
+    return apiClient.put(`/api/customers/${id}`, customerData);
+  },
+  delete: (id) => {
+    if (!id) throw new Error('Customer ID is required');
+    return apiClient.delete(`/api/customers/${id}`);
+  }
+};
+
+// =============================================================================
+// VEHICLE SERVICES
+// =============================================================================
+const vehicleService = {
+  getAll: (params = {}) => apiClient.get('/api/vehicles', { params }),
+  getById: (id) => {
+    if (!id) throw new Error('Vehicle ID is required');
+    return apiClient.get(`/api/vehicles/${id}`);
+  },
+  create: (vehicleData) => {
+    apiHelpers.validateRequired(vehicleData, ['make', 'model', 'year', 'customerId']);
+    return apiClient.post('/api/vehicles', vehicleData);
+  },
+  update: (id, vehicleData) => {
+    if (!id) throw new Error('Vehicle ID is required');
+    return apiClient.put(`/api/vehicles/${id}`, vehicleData);
+  },
+  delete: (id) => {
+    if (!id) throw new Error('Vehicle ID is required');
+    return apiClient.delete(`/api/vehicles/${id}`);
+  }
+};
+
+// =============================================================================
+// JOB SERVICES
+// =============================================================================
+const jobService = {
+  getAll: (params = {}) => apiClient.get('/api/jobs', { params }),
+  getById: (id) => {
+    if (!id) throw new Error('Job ID is required');
+    return apiClient.get(`/api/jobs/${id}`);
+  },
+  create: (jobData) => {
+    apiHelpers.validateRequired(jobData, ['customerId', 'vehicleId', 'description']);
+    return apiClient.post('/api/jobs', jobData);
+  },
+  update: (id, jobData) => {
+    if (!id) throw new Error('Job ID is required');
+    return apiClient.put(`/api/jobs/${id}`, jobData);
+  },
+  delete: (id) => {
+    if (!id) throw new Error('Job ID is required');
+    return apiClient.delete(`/api/jobs/${id}`);
+  }
+};
+
+// =============================================================================
+// ESTIMATE SERVICES
+// =============================================================================
+const estimateService = {
+  getAll: (params = {}) => apiClient.get('/api/estimates', { params }),
+  getById: (id) => {
+    if (!id) throw new Error('Estimate ID is required');
+    return apiClient.get(`/api/estimates/${id}`);
+  },
+  create: (estimateData) => {
+    apiHelpers.validateRequired(estimateData, ['customerId', 'vehicleId']);
+    return apiClient.post('/api/estimates', estimateData);
+  },
+  update: (id, estimateData) => {
+    if (!id) throw new Error('Estimate ID is required');
+    return apiClient.put(`/api/estimates/${id}`, estimateData);
+  },
+  delete: (id) => {
+    if (!id) throw new Error('Estimate ID is required');
+    return apiClient.delete(`/api/estimates/${id}`);
+  }
+};
+
+// =============================================================================
+// PARTS SERVICES
+// =============================================================================
+const partService = {
+  getAll: (params = {}) => apiClient.get('/api/parts', { params }),
+  getById: (id) => {
+    if (!id) throw new Error('Part ID is required');
+    return apiClient.get(`/api/parts/${id}`);
+  },
+  create: (partData) => {
+    apiHelpers.validateRequired(partData, ['name', 'partNumber', 'price']);
+    return apiClient.post('/api/parts', partData);
+  },
+  update: (id, partData) => {
+    if (!id) throw new Error('Part ID is required');
+    return apiClient.put(`/api/parts/${id}`, partData);
+  },
+  delete: (id) => {
+    if (!id) throw new Error('Part ID is required');
+    return apiClient.delete(`/api/parts/${id}`);
+  }
+};
+
+// =============================================================================
+// LABOR SERVICES
+// =============================================================================
+const laborService = {
+  getAll: (params = {}) => apiClient.get('/api/labor', { params }),
+  getById: (id) => {
+    if (!id) throw new Error('Labor ID is required');
+    return apiClient.get(`/api/labor/${id}`);
+  },
+  create: (laborData) => {
+    apiHelpers.validateRequired(laborData, ['description', 'rate']);
+    return apiClient.post('/api/labor', laborData);
+  },
+  update: (id, laborData) => {
+    if (!id) throw new Error('Labor ID is required');
+    return apiClient.put(`/api/labor/${id}`, laborData);
+  },
+  delete: (id) => {
+    if (!id) throw new Error('Labor ID is required');
+    return apiClient.delete(`/api/labor/${id}`);
+  }
+};
+
+// =============================================================================
+// AI SERVICES
+// =============================================================================
+const aiService = {
+  getDiagnostics: (diagnosticData) => {
+    apiHelpers.validateRequired(diagnosticData, ['symptoms']);
+    return apiClient.post('/api/ai/diagnostics', diagnosticData);
+  },
+  generateEstimate: (estimateData) => {
+    apiHelpers.validateRequired(estimateData, ['vehicleInfo', 'issues']);
+    return apiClient.post('/api/ai/estimate', estimateData);
+  },
+  generateServiceReport: (reportData) => {
+    apiHelpers.validateRequired(reportData, ['jobId']);
+    return apiClient.post('/api/ai/generate-service-report', reportData);
+  }
+};
+
+// =============================================================================
+// OBD2 & DIAGNOSTIC SERVICES
+// =============================================================================
+const diagnosticService = {
+  lookupCode: (code) => {
+    if (!code) throw new Error('Diagnostic code is required');
+    return apiClient.get(`/api/obd2/lookup/${encodeURIComponent(code)}`);
+  },
+  addDiagnosticCode: (codeData) => {
+    apiHelpers.validateRequired(codeData, ['code', 'description']);
+    return apiClient.post('/api/diagnostic-codes', codeData);
+  },
+  getVehicleCodes: (vehicleId) => {
+    if (!vehicleId) throw new Error('Vehicle ID is required');
+    return apiClient.get(`/api/vehicles/${vehicleId}/diagnostic-codes`);
+  }
+};
+
+// =============================================================================
+// TIME CLOCK SERVICES
+// =============================================================================
+const timeClockService = {
+  clockIn: (employeeData) => {
+    apiHelpers.validateRequired(employeeData, ['employeeId']);
+    return apiClient.post('/api/timeclock/clockin', employeeData);
+  },
+  clockOut: (employeeData) => {
+    apiHelpers.validateRequired(employeeData, ['employeeId']);
+    return apiClient.post('/api/timeclock/clockout', employeeData);
+  },
+  getEntries: (params = {}) => apiClient.get('/api/timeclock/entries', { params }),
+  getStatus: () => apiClient.get('/api/timeclock/status')
+};
+
+// =============================================================================
+// USER SERVICES
+// =============================================================================
+const userService = {
+  getAll: (params = {}) => apiClient.get('/api/users', { params }),
+  getById: (id) => {
+    if (!id) throw new Error('User ID is required');
+    return apiClient.get(`/api/users/${id}`);
+  },
+  create: (userData) => {
+    apiHelpers.validateRequired(userData, ['name', 'email', 'role']);
+    return apiClient.post('/api/users', userData);
+  },
+  update: (id, userData) => {
+    if (!id) throw new Error('User ID is required');
+    return apiClient.put(`/api/users/${id}`, userData);
+  },
+  delete: (id) => {
+    if (!id) throw new Error('User ID is required');
+    return apiClient.delete(`/api/users/${id}`);
+  }
+};
+
+// =============================================================================
+// SETTINGS SERVICES
+// =============================================================================
+const settingsService = {
+  getAll: () => apiClient.get('/api/settings'),
+  updateMultiple: (settingsData) => {
+    if (!settingsData || typeof settingsData !== 'object') {
+      throw new Error('Settings data object is required');
+    }
+    return apiClient.put('/api/settings', settingsData);
+  },
+  update: (key, value) => {
+    if (!key) throw new Error('Setting key is required');
+    return apiClient.put('/api/settings', { [key]: value });
+  }
+};
+
+// =============================================================================
+// INVOICE SERVICES
+// =============================================================================
+const invoiceService = {
+  getAll: (params = {}) => apiClient.get('/api/invoices', { params }),
+  getById: (id) => {
+    if (!id) throw new Error('Invoice ID is required');
+    return apiClient.get(`/api/invoices/${id}`);
+  },
+  create: (invoiceData) => {
+    apiHelpers.validateRequired(invoiceData, ['customerId', 'items']);
+    return apiClient.post('/api/invoices', invoiceData);
+  },
+  update: (id, invoiceData) => {
+    if (!id) throw new Error('Invoice ID is required');
+    return apiClient.put(`/api/invoices/${id}`, invoiceData);
+  },
+  delete: (id) => {
+    if (!id) throw new Error('Invoice ID is required');
+    return apiClient.delete(`/api/invoices/${id}`);
+  },
+  markAsPaid: (id) => {
+    if (!id) throw new Error('Invoice ID is required');
+    return apiClient.post(`/api/invoices/${id}/mark-paid`);
+  },
+  sendEmail: (id, email) => {
+    if (!id || !email) throw new Error('Invoice ID and email are required');
+    return apiClient.post(`/api/invoices/${id}/send-email`, { email });
+  }
+};
+
+const employeeService = {
+  // Add your employee-related API methods here
+  getAll: () => api.get('/employees'),
+  getById: (id) => api.get(`/employees/${id}`),
+  create: (data) => api.post('/employees', data),
+  update: (id, data) => api.put(`/employees/${id}`, data),
+  delete: (id) => api.delete(`/employees/${id}`),
+};
+
+// =============================================================================
+// REPORT SERVICES
+// =============================================================================
+const reportService = {
+  getDashboardStats: (dateRange = {}) => apiClient.get('/api/reports/dashboard', { params: dateRange }),
+  getCustomerReport: (params = {}) => apiClient.get('/api/reports/customers', { params }),
+  getRevenueReport: (params = {}) => apiClient.get('/api/reports/revenue', { params }),
+  getJobReport: (params = {}) => apiClient.get('/api/reports/jobs', { params })
+};
+
+// =============================================================================
+// SEARCH SERVICES
+// =============================================================================
+const searchService = {
+  global: (query, filters = {}) => {
+    if (!query || query.trim().length === 0) {
+      throw new Error('Search query is required');
+    }
+    return apiClient.get('/api/search', { params: { q: query.trim(), ...filters } });
+  },
+  customers: (query) => apiClient.get('/api/customers', { params: { search: query } }),
+  vehicles: (query) => apiClient.get('/api/vehicles', { params: { search: query } }),
+  jobs: (query) => apiClient.get('/api/jobs', { params: { search: query } })
+};
+
+// =============================================================================
+// HEALTH & UTILITY SERVICES
+// =============================================================================
+const utilityService = {
+  healthCheck: () => axios.get(`${API_BASE_URL.replace('/api', '')}/health`),
+  ping: () => apiClient.get('/api/ping')
+};
+
+// =============================================================================
+// WEBSOCKET SERVICE
+// =============================================================================
+class WebSocketService {
+  constructor() {
+    this.ws = null;
+    this.listeners = {};
+    this.reconnectAttempts = 0;
+    this.maxReconnectAttempts = 5;
+    this.reconnectDelay = 1000;
+  }
+
+  connect() {
+    try {
+      const wsUrl = API_BASE_URL.replace('http', 'ws').replace('/api', '/ws');
+      this.ws = new WebSocket(wsUrl);
+
+      this.ws.onopen = () => {
+        log.info('WebSocket connected');
+        this.reconnectAttempts = 0;
+        this.emit('connected');
+      };
+
+      this.ws.onmessage = (event) => {
+        try {
+          const data = JSON.parse(event.data);
+          this.emit(data.type, data.payload);
+        } catch (error) {
+          log.error('WebSocket message parse error:', error);
+        }
+      };
+
+      this.ws.onclose = () => {
+        log.info('WebSocket disconnected');
+        this.emit('disconnected');
+        this.attemptReconnect();
+      };
+
+      this.ws.onerror = (error) => {
+        log.error('WebSocket error:', error);
+        this.emit('error', error);
+      };
+
+    } catch (error) {
+      log.error('WebSocket connection error:', error);
+    }
+  }
+
+  disconnect() {
+    if (this.ws) {
+      this.ws.close();
+      this.ws = null;
+    }
+  }
+
+  send(type, payload) {
+    if (this.ws && this.ws.readyState === WebSocket.OPEN) {
+      this.ws.send(JSON.stringify({ type, payload }));
+    }
+  }
+
+  on(event, callback) {
+    if (!this.listeners[event]) {
+      this.listeners[event] = [];
+    }
+    this.listeners[event].push(callback);
+  }
+
+  off(event, callback) {
+    if (this.listeners[event]) {
+      this.listeners[event] = this.listeners[event].filter(cb => cb !== callback);
+    }
+  }
+
+  emit(event, data) {
+    if (this.listeners[event]) {
+      this.listeners[event].forEach(callback => {
+        try {
+          callback(data);
+        } catch (error) {
+          log.error('WebSocket callback error:', error);
+        }
+      });
+    }
+  }
+
+  attemptReconnect() {
+    if (this.reconnectAttempts < this.maxReconnectAttempts) {
+      this.reconnectAttempts++;
+      setTimeout(() => {
+        log.info(`WebSocket reconnect attempt ${this.reconnectAttempts}`);
+        this.connect();
+      }, this.reconnectDelay * this.reconnectAttempts);
+    }
+  }
+}
+
+const wsService = new WebSocketService();
+
+// =============================================================================
+// CACHED API CALLS
+// =============================================================================
+const cachedApiService = {
+  customers: {
+    getAll: async (useCache = true, params = {}) => {
+      const cacheKey = `customers:all:${JSON.stringify(params)}`;
+      if (useCache && cacheService.has(cacheKey)) {
+        return { data: cacheService.get(cacheKey) };
+      }
+
+      const response = await customerService.getAll(params);
+      cacheService.set(cacheKey, response.data);
+      return response;
+    }
+  },
+
+  vehicles: {
+    getAll: async (useCache = true, params = {}) => {
+      const cacheKey = `vehicles:all:${JSON.stringify(params)}`;
+      if (useCache && cacheService.has(cacheKey)) {
+        return { data: cacheService.get(cacheKey) };
+      }
+
+      const response = await vehicleService.getAll(params);
+      cacheService.set(cacheKey, response.data);
+      return response;
+    }
+  },
+
+  settings: {
+    getAll: async (useCache = true) => {
+      const cacheKey = 'settings:all';
+      if (useCache && cacheService.has(cacheKey)) {
+        return { data: cacheService.get(cacheKey) };
+      }
+
+      const response = await settingsService.getAll();
+      cacheService.set(cacheKey, response.data);
+      return response;
+    }
+  }
+};
+
+// =============================================================================
+// EXPORTS - CLEAN AND NO DUPLICATES
+// =============================================================================
+export default apiClient;
+
+export {
+  // Core
+  apiClient,
+  API_BASE_URL,
+  API_TIMEOUT,
+
+  // Services
+  authService,
+  customerService,
+  employeeService,
+  vehicleService,
+  jobService,
+  estimateService,
+  partService,
+  laborService,
+  aiService,
+  diagnosticService,
+  invoiceService,
+  reportService,
+  timeClockService,
+  userService,
+  settingsService,
+  reportService,
+  searchService,
+  utilityService,
+  dashboardService,
+
+  // Utilities
+  handleApiError,
+  apiHelpers,
+  wsService,
+  cacheService,
+  cachedApiService,
+
+  // Development
+  isDevelopment,
+  log
+};
+

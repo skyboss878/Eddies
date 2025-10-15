@@ -1,0 +1,331 @@
+import axios from "axios";
+
+/**
+ * Enhanced API service for Eddie's Askan Automotive
+ * Supports all frontend components with automotive bureau compliance
+ */
+const API_BASE =
+  (typeof import.meta !== "undefined" &&
+    import.meta.env &&
+    import.meta.env.VITE_API_URL) ||
+  (typeof process !== "undefined" &&
+    process.env &&
+    process.env.REACT_APP_API_URL) ||
+  "http://127.0.0.1:5000/new-api-prefix";
+
+// Token management
+const getToken = () => (typeof localStorage !== "undefined" ? localStorage.getItem("token") : null);
+
+// Enhanced axios instance with retry logic
+const api = axios.create({
+  baseURL: API_BASE,
+  headers: { "Content-Type": "application/json" },
+  timeout: 30000,
+});
+
+// Request interceptor with enhanced auth
+api.interceptors.request.use(
+  (config) => {
+    const token = getToken();
+    if (token) config.headers.Authorization = `Bearer ${token}`;
+    config.metadata = { startTime: new Date() };
+    return config;
+  },
+  (error) => Promise.reject(error)
+);
+
+// Response interceptor with enhanced error handling
+api.interceptors.response.use(
+  (response) => {
+    if (typeof process !== "undefined" && process.env && process.env.NODE_ENV === "development" && response.config?.metadata) {
+      const dur = new Date() - response.config.metadata.startTime;
+      console.log(`🔌 API ${response.config.method?.toUpperCase()} ${response.config.url} - ${dur}ms`);
+    }
+    return response;
+  },
+  (error) => {
+    if (error?.response) {
+      const { status, data } = error.response;
+      const messages = {
+        400: "Invalid request. Please check your input.",
+        401: "Authentication required. Please log in.",
+        403: "You don't have permission to perform this action.",
+        404: "The requested resource was not found.",
+        409: "This action conflicts with existing data.",
+        422: "The submitted data is invalid.",
+        429: "Too many requests. Please try again later.",
+        500: "Server error. Please try again later.",
+        502: "Service temporarily unavailable.",
+        503: "Service temporarily unavailable.",
+        504: "Request timeout. Please try again.",
+      };
+      error.userMessage = data?.message || messages[status] || "An error occurred. Please try again.";
+      
+      if (status === 401 && typeof window !== "undefined" && !window.location.pathname.includes("/login")) {
+        localStorage.removeItem("token");
+        localStorage.removeItem("user");
+        window.location.href = "/login";
+      }
+    } else if (error?.request) {
+      error.userMessage = "Network error. Please check your connection.";
+    } else {
+      error.userMessage = "An unexpected error occurred.";
+    }
+    return Promise.reject(error);
+  }
+);
+
+// Enhanced helper functions
+export const handleApiError = (err) => {
+  console.error("[API ERROR]", err?.userMessage || err?.message || err);
+  throw err;
+};
+
+const uploadFile = (url, file, extraData = {}) => {
+  const formData = new FormData();
+  formData.append("file", file);
+  Object.keys(extraData).forEach((k) => formData.append(k, extraData[k]));
+  return api.post(url, formData, {
+    headers: { "Content-Type": "multipart/form-data" },
+    onUploadProgress: (e) => {
+      const pct = Math.round((e.loaded * 100) / (e.total || 1));
+      console.log(`📤 Upload Progress: ${pct}%`);
+    },
+  });
+};
+
+const createCrudApi = (resource) => ({
+  list: (params = {}) => api.get(`/${resource}`, { params }),
+  get: (id) => api.get(`/${resource}/${id}`),
+  create: (data) => api.post(`/${resource}`, data),
+  update: (id, data) => api.put(`/${resource}/${id}`, data),
+  patch: (id, data) => api.patch(`/${resource}/${id}`, data),
+  delete: (id) => api.delete(`/${resource}/${id}`),
+  bulkCreate: (items) => api.post(`/${resource}/bulk`, { items }),
+  bulkUpdate: (updates) => api.put(`/${resource}/bulk`, updates),
+  bulkDelete: (ids) => api.delete(`/${resource}/bulk`, { data: { ids } }),
+});
+
+// ================ CORE SERVICES ================
+
+// Authentication & User Management
+export const authService = {
+  login: (email, password) => api.post("/api/auth/login", { email, password }),
+  register: (data) => api.post("/api/auth/register", data),
+  logout: () => api.post("/api/auth/logout"),
+  refresh: () => api.post("/api/auth/refresh"),
+  me: () => api.get("/api/auth/me"),
+  forgotPassword: (email) => api.post("/api/auth/forgot-password", { email }),
+  resetPassword: (token, password) => api.post("/api/auth/reset-password", { token, password }),
+  changePassword: (oldPassword, newPassword) => api.put("/api/auth/change-password", { oldPassword, newPassword }),
+  updateProfile: (data) => api.put("/api/auth/profile", data),
+  uploadAvatar: (file) => uploadFile("/api/auth/avatar", file),
+};
+
+// Core CRUD Services
+export const customerService = createCrudApi("customers");
+export const vehicleService = createCrudApi("vehicles");
+export const jobService = createCrudApi("jobs");
+export const estimateService = createCrudApi("estimates");
+export const partService = createCrudApi("parts");
+export const laborService = createCrudApi("labor");
+export const invoiceService = createCrudApi("invoices");
+export const appointmentService = createCrudApi("appointments");
+
+// ================ ENHANCED CUSTOMER SERVICES ================
+customerService.search = (q) => api.get(`/customers/search?q=${encodeURIComponent(q)}`);
+customerService.getVehicles = (id) => api.get(`/customers/${id}/vehicles`);
+customerService.getJobs = (id) => api.get(`/customers/${id}/jobs`);
+customerService.getInvoices = (id) => api.get(`/customers/${id}/invoices`);
+customerService.getEstimates = (id) => api.get(`/customers/${id}/estimates`);
+customerService.sendMessage = (id, message) => api.post(`/customers/${id}/messages`, message);
+customerService.getMessages = (id) => api.get(`/customers/${id}/messages`);
+customerService.getHistory = (id) => api.get(`/customers/${id}/history`);
+
+// ================ ENHANCED VEHICLE SERVICES ================
+vehicleService.vinLookup = (vin) => api.get(`/vehicles/vin-lookup/${vin}`);
+vehicleService.getHistory = (id) => api.get(`/vehicles/${id}/history`);
+vehicleService.getMaintenance = (id) => api.get(`/vehicles/${id}/maintenance`);
+vehicleService.updateMaintenance = (id, data) => api.put(`/vehicles/${id}/maintenance`, data);
+vehicleService.getRecalls = (id) => api.get(`/vehicles/${id}/recalls`);
+vehicleService.uploadDocument = (id, file) => uploadFile(`/vehicles/${id}/documents`, file);
+
+// ================ ENHANCED JOB SERVICES ================
+jobService.updateStatus = (id, status) => api.patch(`/jobs/${id}/status`, { status });
+jobService.startTimer = (id) => api.post(`/jobs/${id}/timer/start`);
+jobService.stopTimer = (id) => api.post(`/jobs/${id}/timer/stop`);
+jobService.getTimes = (id) => api.get(`/jobs/${id}/times`);
+jobService.addPart = (id, part) => api.post(`/jobs/${id}/parts`, part);
+jobService.addLabor = (id, labor) => api.post(`/jobs/${id}/labor`, labor);
+jobService.addNote = (id, note) => api.post(`/jobs/${id}/notes`, note);
+jobService.uploadPhoto = (id, file) => uploadFile(`/jobs/${id}/photos`, file);
+jobService.getPhotos = (id) => api.get(`/jobs/${id}/photos`);
+jobService.assignTechnician = (id, techId) => api.patch(`/jobs/${id}/assign`, { technician_id: techId });
+jobService.getTemplates = () => api.get("/jobs/templates");
+
+// ================ ENHANCED ESTIMATE SERVICES ================
+estimateService.convertToJob = (id) => api.post(`/estimates/${id}/convert-to-job`);
+estimateService.sendToCustomer = (id, method="email") => api.post(`/estimates/${id}/send`, { method });
+estimateService.generatePdf = (id) => api.get(`/estimates/${id}/pdf`, { responseType: "blob" });
+estimateService.duplicate = (id) => api.post(`/estimates/${id}/duplicate`);
+estimateService.getTemplates = () => api.get("/estimates/templates");
+estimateService.preview = (data) => api.post("/estimates/preview", data);
+
+// ================ ENHANCED INVOICE SERVICES ================
+invoiceService.markPaid = (id, payment) => api.post(`/invoices/${id}/mark-paid`, payment);
+invoiceService.generatePdf = (id) => api.get(`/invoices/${id}/pdf`, { responseType: "blob" });
+invoiceService.send = (id, method="email") => api.post(`/invoices/${id}/send`, { method });
+invoiceService.addPayment = (id, data) => api.post(`/invoices/${id}/payments`, data);
+invoiceService.getPayments = (id) => api.get(`/invoices/${id}/payments`);
+invoiceService.void = (id, reason) => api.post(`/invoices/${id}/void`, { reason });
+invoiceService.reminder = (id) => api.post(`/invoices/${id}/reminder`);
+
+// ================ REPORTS & ANALYTICS ================
+export const reportService = {
+  getDailySummary: (date) => api.get(`/reports/daily/${date}`),
+  getPeriodSummary: (dateRange) => api.get(`/reports/period`, { params: dateRange }),
+  sales: (start, end) => api.get(`/reports/sales`, { params: { start, end } }),
+  inventory: () => api.get("/reports/inventory"),
+  customers: (period="30d") => api.get(`/reports/customers`, { params: { period } }),
+  jobs: (status, period="30d") => api.get(`/reports/jobs`, { params: { status, period } }),
+  technician: (techId, period="30d") => api.get(`/reports/technician/${techId}`, { params: { period } }),
+  exportSales: (format="pdf", start, end) => api.get(`/reports/sales/export`, { 
+    params: { format, start, end }, 
+    responseType: "blob" 
+  }),
+  exportInventory: (format="csv") => api.get(`/reports/inventory/export`, { 
+    params: { format }, 
+    responseType: "blob" 
+  }),
+  exportTimesheet: (start, end, format="csv") => api.get(`/reports/timesheet/export`, {
+    params: { start, end, format },
+    responseType: "blob"
+  }),
+};
+
+// ================ DASHBOARD & ANALYTICS ================
+export const dashboardService = {
+  stats: () => api.get("/dashboard/stats"),
+  recentActivity: (limit=10) => api.get(`/dashboard/recent-activity`, { params: { limit } }),
+  charts: (period="30d") => api.get(`/dashboard/charts`, { params: { period } }),
+  alerts: () => api.get("/dashboard/alerts"),
+  pendingApprovals: () => api.get("/dashboard/pending-approvals"),
+};
+
+// ================ SETTINGS & CONFIGURATION ================
+export const settingsService = {
+  get: () => api.get("/settings"),
+  update: (data) => api.put("/settings", data),
+  getShop: () => api.get("/settings/shop"),
+  updateShop: (data) => api.put("/settings/shop", data),
+  getLaborRates: () => api.get("/settings/labor-rates"),
+  updateLaborRates: (data) => api.put("/settings/labor-rates", data),
+  getTax: () => api.get("/settings/tax"),
+  updateTax: (data) => api.put("/settings/tax", data),
+  getNotifications: () => api.get("/settings/notifications"),
+  updateNotifications: (data) => api.put("/settings/notifications", data),
+  backup: () => api.get("/settings/backup", { responseType: "blob" }),
+  restore: (file) => uploadFile("/settings/restore", file),
+  getBusiness: () => api.get("/settings/business"),
+  updateBusiness: (data) => api.put("/settings/business", data),
+};
+
+// ================ AI & DIAGNOSTICS ================
+export const aiService = {
+  quickDiagnosis: (data) => api.post("/ai/diagnostics/quick-diagnosis", data),
+  obdLookup: (code) => api.get(`/ai/diagnostics/obd/${code}`),
+  symptomAnalysis: (symptoms) => api.post("/ai/diagnostics/symptoms", { symptoms }),
+  generateEstimate: (data) => api.post("/ai/generate-estimate", data),
+  feedback: (id, feedback) => api.post(`/ai/diagnostics/${id}/feedback`, feedback),
+  getHistory: () => api.get("/ai/diagnostics/history"),
+};
+
+// ================ TIME CLOCK & EMPLOYEE MANAGEMENT ================
+export const timeClockService = {
+  clockIn: () => api.post("/timeclock/clock-in"),
+  clockOut: () => api.post("/timeclock/clock-out"),
+  status: () => api.get("/timeclock/status"),
+  history: (start, end) => api.get(`/timeclock/history`, { params: { start, end } }),
+  getCurrentShift: () => api.get("/timeclock/current-shift"),
+  getTimesheet: (start, end) => api.get(`/timeclock/timesheet`, { params: { start, end } }),
+  exportTimesheet: (start, end, format="csv") => api.get(`/timeclock/export`, {
+    params: { start, end, format },
+    responseType: "blob"
+  }),
+};
+
+// ================ INVENTORY MANAGEMENT ================
+export const inventoryService = createCrudApi("inventory");
+inventoryService.search = (q) => api.get(`/inventory/search`, { params: { q } });
+inventoryService.lowStock = () => api.get("/inventory/low-stock");
+inventoryService.adjustStock = (id, quantity, reason) => api.post(`/inventory/${id}/adjust`, { quantity, reason });
+inventoryService.bulkImport = (file) => uploadFile("/inventory/bulk-import", file);
+inventoryService.exportCatalog = (format="csv") => api.get(`/inventory/export`, { 
+  params: { format }, 
+  responseType: "blob" 
+});
+
+// ================ COMMUNICATION ================
+export const communicationService = {
+  sendEmail: (data) => api.post("/communication/email", data),
+  sendSMS: (data) => api.post("/communication/sms", data),
+  getTemplates: (type) => api.get(`/communication/templates/${type}`),
+  createTemplate: (data) => api.post("/communication/templates", data),
+  getHistory: (customerId) => api.get(`/communication/history/${customerId}`),
+};
+
+// ================ DATA MANAGEMENT ================
+export const dataService = {
+  export: (type, format="csv") => api.get(`/data/export/${type}`, { 
+    params: { format }, 
+    responseType: "blob" 
+  }),
+  import: (type, file) => uploadFile(`/data/import/${type}`, file),
+  backup: () => api.get("/data/backup", { responseType: "blob" }),
+  restore: (file) => uploadFile("/data/restore", file),
+  migrate: (data) => api.post("/data/migrate", data),
+};
+
+// ================ UTILITIES & HELPERS ================
+export const timeClockUtils = {
+  formatDuration(ms) {
+    const s = Math.floor(ms / 1000);
+    const h = Math.floor(s / 3600);
+    const m = Math.floor((s % 3600) / 60);
+    const ss = s % 60;
+    return h > 0 ? `${h}h ${m}m ${ss}s` : m > 0 ? `${m}m ${ss}s` : `${ss}s`;
+  },
+  formatCurrency(amount) {
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD'
+    }).format(amount || 0);
+  },
+};
+
+export const healthService = {
+  ping: () => api.get("/health"),
+  status: () => api.get("/health/status"),
+};
+
+export const apiUtils = {
+  handleApiError,
+  downloadBlob: (blob, filename) => {
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.style.display = 'none';
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    window.URL.revokeObjectURL(url);
+    document.body.removeChild(a);
+  },
+};
+
+// Legacy aliases for backward compatibility
+export const reports = reportService;
+export const invoices = invoiceService;
+
+// Default export
+export default api;

@@ -1,0 +1,112 @@
+[
+  {
+    "url": "/api/auth/customers",
+    "method": "GET",
+    "payload": ""
+  },
+  {
+    "url": "/api/auth/customers",
+    "method": "GET",
+    "payload": ""
+  },
+  {
+    "url": "/api/auth/vehicles",
+    "method": "GET",
+    "payload": ""
+  },
+  {
+    "url": "/api/technicians",
+    "method": "GET",
+    "payload": ""
+  },
+  {
+    "url": "/api/ai/openai-diagnosis",
+    "method": "GET",
+    "payload": ""
+  },
+  {
+    "url": "/api/ai/openrouter-diagnosis",
+    "method": "GET",
+    "payload": ""
+  },
+  {
+    "url": "/api/ai/huggingface-diagnosis",
+    "method": "GET",
+    "payload": ""
+  },
+  {
+    "url": "/api/carfax/report",
+    "method": "GET",
+    "payload": ""
+  },
+  {
+    "url": "/api/obd2/lookup",
+    "method": "GET",
+    "payload": ""
+  },
+  {
+    "url": "/api/wiring-diagrams",
+    "method": "GET",
+    "payload": ""
+  },
+  {
+    "url": "/api/auth/jobs",
+    "method": "GET",
+    "payload": ""
+  },
+  {
+    "url": "/api/appointments",
+    "method": "GET",
+    "payload": ""
+  },
+  {
+    "url": "/api/auth/customers",
+    "method": "GET",
+    "payload": ""
+  },
+  {
+    "url": "/api/auth/vehicles",
+    "method": "GET",
+    "payload": ""
+  },
+  {
+    "url": "/api/settings",
+    "method": "GET",
+    "payload": ""
+  },
+  {
+    "url": "/api/settings",
+    "method": "GET",
+    "payload": ""
+  },
+  {
+    "url": "/api/auth/customers",
+    "method": "GET",
+    "payload": ""
+  },
+  {
+    "url": "/api/timeclock/status",
+    "method": "GET",
+    "payload": ""
+  },
+  {
+    "url": "/api/timeclock/history",
+    "method": "GET",
+    "payload": ""
+  },
+  {
+    "url": "/api/timeclock/clock-in",
+    "method": "GET",
+    "payload": ""
+  },
+  {
+    "url": "/api/timeclock/clock-out",
+    "method": "GET",
+    "payload": ""
+  },
+  {
+    "url": "/api/v1/dashboard/stats",
+    "method": "GET",
+    "payload": ""
+  }
+]

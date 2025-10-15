@@ -1,0 +1,44 @@
+// Auto-generated component exports
+// This file centralizes all component exports for easier importing
+
+export { default as Navbar } from './Navbar';
+export { default as ErrorBoundary } from './ErrorBoundary';
+export { default as GlobalToastDisplay } from './GlobalToastDisplay';
+export { default as DashboardCard } from './DashboardCard';
+export { default as UserDropdown } from './UserDropdown';
+export { default as HealthCheck } from './HealthCheck';
+export { default as LoadingSpinner } from './LoadingSpinner';
+export { default as SearchSystem } from './SearchSystem';
+export { default as AIEstimateModal } from './AIEstimateModal';
+export { default as QuickActionButton } from './QuickActionButton';
+export { default as TechnicianTimeClockCard } from './TechnicianTimeClockCard';
+export { default as AppointmentCard } from './AppointmentCard';
+export { default as JobCard } from './JobCard';
+export { default as TechnicianCard } from './TechnicianCard';
+export { default as LogoSplash } from './LogoSplash';
+export { default as EnhancedJobCreation } from './EnhancedJobCreation';
+export { default as TimeClockNavbar } from './TimeClockNavbar';
+export { default as PayrollReportDetail } from './PayrollReportDetail';
+export { default as ProtectedRoute } from './ProtectedRoute';
+export { default as TimeclockHistory } from './TimeclockHistory';
+export { default as RealTimeNotifications } from './RealTimeNotifications';
+export { default as MobileNavigation } from './MobileNavigation';
+export { default as CustomerPortal } from './CustomerPortal';
+export { default as AIDiagnosticHelper } from './AIDiagnosticHelper';
+export { default as Dashboard } from './Dashboard';
+export { default as AppointmentBar } from './AppointmentBar';
+export { default as ApiTest } from './ApiTest';
+export { default as ComplianceNoticeCA } from './ComplianceNoticeCA';
+export { default as CustomerAuthorization } from './CustomerAuthorization';
+export { default as ErrorBoundaryWithAuth } from './ErrorBoundaryWithAuth';
+export { default as DocumentTemplplateRenderer } from './DocumentTemplplateRenderer';
+export { default as TimeClockWidget } from './TimeClockWidget';
+export { default as Layout } from './Layout';
+export { default as SmartBreadcrumb } from './SmartBreadcrumb';
+export { default as LandingPage } from './LandingPage';
+export { default as RouteTest } from './RouteTest';
+export { default as RoutingTestComponent } from './RoutingTestComponent';
+export { default as FullDashboardNavbar } from './FullDashboardNavbar';
+export { default as IntegrationTest } from './testing/IntegrationTest';
+export { default as OBD2Lookup } from './ai/OBD2Lookup';
+export { default as AIChat } from './ai/AIChat';

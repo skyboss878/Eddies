@@ -1,0 +1,75 @@
+📊 PROJECT OVERVIEW
+===================
+Generated: Fri Aug 29 14:16:37 PDT 2025
+
+📁 DIRECTORY STRUCTURE:
+----------------------
+components  :  43 files
+pages       :  42 files
+utils       :  29 files
+services    :   3 files
+hooks       :   8 files
+contexts    :   6 files
+assets      :   0 files
+
+📄 FILE TYPES:
+--------------
+JavaScript:   44 files
+JSX:          93 files
+TypeScript:    2 files
+TSX:           5 files
+TOTAL:       144 files
+
+🔗 IMPORT ANALYSIS
+==================
+Components importing from:
+  - Utils:       26 files import from utils
+  - Services:     3 files import from services
+  - Components:  21 files import from components
+  - Pages:        2 files import from pages
+
+🏆 MOST IMPORTED FILES
+======================
+Most imported utilities:
+  aiDiagnosticsService:   1 imports
+  vehicleService      :   1 imports
+  vehicleHelpers      :   2 imports
+  utilityService      :   1 imports
+  tokenManager        :   2 imports
+  toast               :  20 imports
+  timeclockService    :   1 imports
+  testApi             :   1 imports
+  statusUtils         :   1 imports
+  socketUtils         :   2 imports
+
+Most imported services:
+  socket              :   4 imports
+  diagnosticsService  :   1 imports
+  aiService           :   2 imports
+
+⚠️  POTENTIAL ISSUES
+===================
+Large files (>500 lines):
+  pages/CustomerList.jsx                  :  892 lines
+  pages/AddVehicle.jsx                    :  506 lines
+  pages/CreateJob.jsx                     : 1127 lines
+  pages/Dashboard.jsx                     :  626 lines
+  pages/Reports.jsx                       :  525 lines
+  pages/VehicleForm.jsx                   :  556 lines
+  pages/AppointmentCalendar.jsx           :  695 lines
+  pages/CreateInvoice.jsx                 :  736 lines
+  pages/Settings.jsx                      :  986 lines
+  pages/Customers.jsx                     :  892 lines
+
+Files with many imports (>15):
+
+🏗️  ARCHITECTURE INSIGHTS
+========================
+Framework patterns detected:
+  ✅ React Hooks pattern in use
+  ✅ Context API pattern in use
+  ✅ HTTP client pattern in use
+  ✅ Custom hooks pattern in use
+
+📊 PROJECT HEALTH SCORE: 100/100
+

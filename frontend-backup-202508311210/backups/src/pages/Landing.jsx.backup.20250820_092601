@@ -1,0 +1,43 @@
+import React from 'react';
+
+const Landing = () => {
+  const handleStaffLogin = () => {
+    window.location.href = '/login';
+  };
+
+  const handleCustomerAppointment = () => {
+    alert('Customer appointment booking would go here');
+  };
+
+  return (
+    <div className="min-h-screen bg-gray-900 text-white flex items-center justify-center">
+      <div className="text-center max-w-2xl mx-auto p-8">
+        <h1 className="text-6xl font-bold mb-4 text-red-500">Eddie's Automotive</h1>
+        <p className="text-2xl mb-8">Professional Auto Service</p>
+        
+        <div className="space-y-4">
+          <button 
+            onClick={handleStaffLogin}
+            className="w-full bg-red-600 hover:bg-red-700 px-8 py-4 rounded-lg text-xl font-bold transition-colors"
+          >
+            🛠️ Staff Login
+          </button>
+          
+          <button 
+            onClick={handleCustomerAppointment}
+            className="w-full bg-blue-600 hover:bg-blue-700 px-8 py-4 rounded-lg text-xl font-bold transition-colors"
+          >
+            📅 Schedule Appointment
+          </button>
+        </div>
+        
+        <div className="mt-8 text-gray-300">
+          <p>📞 (661) 327-4242</p>
+          <p>📍 3123 Chester Ave, Bakersfield, CA</p>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default Landing;

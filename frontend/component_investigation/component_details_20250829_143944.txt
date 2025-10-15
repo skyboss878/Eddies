@@ -1,0 +1,504 @@
+Component Connection Investigation
+Generated: Fri Aug 29 14:39:44 PDT 2025
+=====================================
+
+COMPONENT: Navbar.jsx
+Path: src/components/Navbar.jsx
+==================================================
+
+File size: 93 lines
+IMPORTS:
+  import React, { useState } from 'react';
+  import { Link } from 'react-router-dom';
+  import { Clock, Users, Calendar, FileText, Bell, Settings, Cpu } from 'lucide-react';
+  import TimeClockDashboard from './TimeClockNavbar';
+  import UserDropdown from './UserDropdown';
+  import RealTimeNotifications from './RealTimeNotifications';
+  import QuickActionButton from './QuickActionButton';
+
+PROPS/PARAMETERS:
+  10:const Navbar = () => {
+
+STATE MANAGEMENT:
+  2:import React, { useState } from 'react';
+  11:  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+FORM ELEMENTS:
+  61:            <button
+  68:            </button>
+
+EVENT HANDLERS:
+  63:              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+
+COMPONENT TYPE ANALYSIS:
+  - useEffect calls: 0
+  - API calls: 0
+  - Props usage: 0
+  - Context usage: 0
+  -> ASSESSMENT: Pure UI component (no data fetching needed)
+
+USAGE IN OTHER FILES:
+  Used in: src/components/SearchSystem.jsx
+    17:// Search button component for the Navbar/Dashboard
+  Used in: src/components/TimeClockNavbar.jsx
+    1:// src/components/TimeClockNavbar.jsx
+    6:const TimeClockNavbar = ({ settings }) => {
+  Used in: src/components/index.js
+    4:export { default as Navbar } from './Navbar';
+    20:export { default as TimeClockNavbar } from './TimeClockNavbar';
+  Used in: src/layouts/Layout.jsx
+    9:import Navbar from "../components/TimeClockNavbar";
+    24:        {/* Top Navigation / Main Navbar */}
+  Used in: src/layouts/ProtectedDashboardLayout.jsx
+    10:import TimeClockNavbar from "../components/TimeClockNavbar";
+    38:        {/* Top Navigation / Main Navbar */}
+  Used in: src/index.js
+    3:export { default as Navbar } from './components/Navbar';
+    20:export { default as TimeClockNavbar } from './components/TimeClockNavbar';
+
+================================================================================
+
+COMPONENT: ConfirmModal.jsx
+Path: src/components/modals/ConfirmModal.jsx
+==================================================
+
+File size: 71 lines
+IMPORTS:
+  import React from 'react';
+  import { ExclamationTriangleIcon } from '@heroicons/react/24/outline';
+
+PROPS/PARAMETERS:
+  5:export default function ConfirmModal({ 
+  17:  const typeStyles = {
+
+STATE MANAGEMENT:
+
+FORM ELEMENTS:
+  22:      button: "bg-red-600 hover:bg-red-700 focus:ring-red-500"
+  28:      button: "bg-yellow-600 hover:bg-yellow-700 focus:ring-yellow-500"
+  34:      button: "bg-blue-600 hover:bg-blue-700 focus:ring-blue-500"
+  55:          <button
+  60:          </button>
+
+EVENT HANDLERS:
+  56:            onClick={onCancel}
+  62:            onClick={onConfirm}
+
+COMPONENT TYPE ANALYSIS:
+  - useEffect calls: 0
+  - API calls: 0
+  - Props usage: 0
+  - Context usage: 0
+  -> ASSESSMENT: Pure UI component (no data fetching needed)
+
+USAGE IN OTHER FILES:
+  Used in: src/pages/ViewJobs.jsx
+    9:import ConfirmModal from '../components/modals/ConfirmModal';
+    116:      {/*... (Pagination and ConfirmModal remain the same, powered by filteredJobs.length)... */}
+  Used in: src/pages/VehicleList.jsx
+    6:import ConfirmModal from '../components/modals/ConfirmModal';
+    121:        <ConfirmModal
+  Used in: src/pages/EstimatesList.jsx
+    10:import ConfirmModal from '../components/modals/ConfirmModal';
+    257:        <ConfirmModal
+  Used in: src/pages/PartsLaborManagement.jsx
+    5:import ConfirmModal from '../components/modals/ConfirmModal';
+    386:      {showConfirm && <ConfirmModal message="Are you sure you want to delete this item?" onConfirm={()=>handleConfirmResponse(true)} onCancel={()=>handleConfirmResponse(false)} />}
+  Used in: src/pages/AddAndEditCustomer.jsx
+    40:  const [isConfirmModalOpen, setConfirmModalOpen] = useState(false);
+    149:      setConfirmModalOpen(false);
+  Used in: src/pages/Vehicles.jsx
+    6:import ConfirmModal from '../components/modals/ConfirmModal';
+    121:        <ConfirmModal
+  Used in: src/pages/Jobs.jsx
+    9:import ConfirmModal from '../components/modals/ConfirmModal';
+    116:      {/*... (Pagination and ConfirmModal remain the same, powered by filteredJobs.length)... */}
+  Used in: src/pages/Estimates.jsx
+    10:import ConfirmModal from '../components/modals/ConfirmModal';
+    263:        <ConfirmModal
+
+================================================================================
+
+COMPONENT: PromptModal.jsx
+Path: src/components/modals/PromptModal.jsx
+==================================================
+
+File size: 89 lines
+IMPORTS:
+  import React, { useState, useEffect } from 'react';
+
+PROPS/PARAMETERS:
+  5:const PromptModal = ({
+  24:  const handleSubmit = () => {
+  30:    const handleKeyDown = (e) => {
+
+STATE MANAGEMENT:
+  3:import React, { useState, useEffect } from 'react';
+  16:  const [internalInputValue, setInternalInputValue] = useState(inputValue || '');
+  29:  useEffect(() => {
+
+FORM ELEMENTS:
+  9:  inputValue,
+  14:  inputPlaceholder = '',
+  16:  const [internalInputValue, setInternalInputValue] = useState(inputValue || '');
+  18:  const currentValue = typeof inputValue !== 'undefined' ? inputValue : internalInputValue;
+  61:        <input
+
+EVENT HANDLERS:
+  10:  onInputChange,
+  20:    typeof onInputChange === 'function'
+  21:      ? onInputChange
+  64:          onChange={handleInputChange}
+  72:            onClick={handleSubmit}
+
+COMPONENT TYPE ANALYSIS:
+  - useEffect calls: 2
+  - API calls: 0
+  - Props usage: 0
+  - Context usage: 0
+  -> ASSESSMENT: May need API connection review
+
+USAGE IN OTHER FILES:
+  Not found in other files (may be unused or imported differently)
+
+================================================================================
+
+COMPONENT: UserDropdown.jsx
+Path: src/components/UserDropdown.jsx
+==================================================
+
+File size: 117 lines
+IMPORTS:
+  import React, { Fragment } from 'react';
+  import { Menu, Transition } from '@headlessui/react';
+  import {
+  import { Link } from 'react-router-dom';
+  import { useAuth } from "../contexts/AuthContext";
+
+PROPS/PARAMETERS:
+  14:export default function UserDropdown() {
+
+STATE MANAGEMENT:
+
+FORM ELEMENTS:
+  48:        enterFrom="transform opacity-0 scale-95"
+  49:        enterTo="transform opacity-100 scale-100"
+  51:        leaveFrom="transform opacity-100 scale-100"
+  52:        leaveTo="transform opacity-0 scale-95"
+  100:                <button
+
+EVENT HANDLERS:
+  101:                  onClick={logout}
+
+COMPONENT TYPE ANALYSIS:
+  - useEffect calls: 0
+  - API calls: 0
+  - Props usage: 0
+  - Context usage: 0
+  -> ASSESSMENT: Pure UI component (no data fetching needed)
+
+USAGE IN OTHER FILES:
+  Used in: src/components/Navbar.jsx
+    6:import UserDropdown from './UserDropdown';
+    58:            <UserDropdown />
+  Used in: src/components/index.js
+    8:export { default as UserDropdown } from './UserDropdown';
+  Used in: src/index.js
+    7:export { default as UserDropdown } from './components/UserDropdown';
+
+================================================================================
+
+COMPONENT: ShareableActions.jsx
+Path: src/components/ShareableActions.jsx
+==================================================
+
+File size: 149 lines
+IMPORTS:
+  import React, { useState } from 'react';
+  import {
+
+PROPS/PARAMETERS:
+  16:export const ShareableActions = ({
+  28:  const generateShareLink = () => {
+  34:  const handleCopyLink = async () => {
+
+STATE MANAGEMENT:
+  2:import React, { useState } from 'react';
+  24:  const [showShareMenu, setShowShareMenu] = useState(false);
+  25:  const [copied, setCopied] = useState(false);
+
+FORM ELEMENTS:
+  77:      <button
+  84:      </button>
+  88:        <button
+  95:        </button>
+  101:              <button
+
+EVENT HANDLERS:
+  78:        onClick={handlePrint}
+  89:          onClick={() => setShowShareMenu(!showShareMenu)}
+  102:                onClick={handleCopyLink}
+  115:                onClick={handleEmailShare}
+  125:                  onClick={() => {
+
+COMPONENT TYPE ANALYSIS:
+  - useEffect calls: 0
+  - API calls: 0
+  - Props usage: 0
+  - Context usage: 0
+  -> ASSESSMENT: Pure UI component (no data fetching needed)
+
+USAGE IN OTHER FILES:
+  Used in: src/index.js
+    11:export { default as ShareableActions } from './components/ShareableActions';
+
+================================================================================
+
+COMPONENT: Navigation.jsx
+Path: src/components/Navigation.jsx
+==================================================
+
+File size: 257 lines
+IMPORTS:
+  import React from 'react';
+  import { NavLink } from 'react-router-dom';
+  import {
+
+PROPS/PARAMETERS:
+  215:const Navigation = ({ isCollapsed = false }) => {
+
+STATE MANAGEMENT:
+
+FORM ELEMENTS:
+  49:        description: 'Manage customer information'
+
+EVENT HANDLERS:
+
+COMPONENT TYPE ANALYSIS:
+  - useEffect calls: 0
+  - API calls: 0
+  - Props usage: 0
+  - Context usage: 0
+  -> ASSESSMENT: Pure UI component (no data fetching needed)
+
+USAGE IN OTHER FILES:
+  Used in: src/pages/CustomerList.jsx
+    21:import { useEnhancedNavigation } from "../hooks";
+    25:  const { navigateTo, savePageState, getPageState, currentPath } = useEnhancedNavigation();
+  Used in: src/pages/Settings.jsx
+    267:        {/* Tab Navigation */}
+  Used in: src/pages/AddAndEditCustomer.jsx
+    91:  const handleNavigation = (path) => {
+    95:      setError(`Navigation failed: ${err.message}`);
+  Used in: src/pages/Customers.jsx
+    21:import { useEnhancedNavigation } from "../hooks";
+    25:  const { navigateTo, savePageState, getPageState, currentPath } = useEnhancedNavigation();
+  Used in: src/components/layout/MobileNavigation.jsx
+    3:import './MobileNavigation.css';
+    5:const MobileNavigation = ({ active, setActive }) => {
+  Used in: src/components/index.js
+    25:export { default as MobileNavigation } from './MobileNavigation';
+  Used in: src/config/navigation.js
+    4:// 🎯 Core Workflow Navigation (primary daily operations)
+    44:// 🏢 Business Management Navigation (admin and reporting)
+  Used in: src/hooks/useEnhancedNavigation.js
+    1:// src/hooks/useEnhancedNavigation.js - CLEANED VERSION
+    5:// Enhanced Navigation Hook with State Persistence
+  Used in: src/hooks/index.js
+    17:// From useEnhancedNavigation
+    18:export { useEnhancedNavigation } from './useEnhancedNavigation';
+  Used in: src/layouts/Layout.jsx
+    8://import CompleteNavigationMenu from "../components/CompleteNavigationMenu";
+    24:        {/* Top Navigation / Main Navbar */}
+  Used in: src/layouts/ProtectedDashboardLayout.jsx
+    9:import CompleteNavigationMenu from "../components/CompleteNavigationMenu";
+    38:        {/* Top Navigation / Main Navbar */}
+  Used in: src/_backups/MobileTechApp.tsx
+    138:        {/* Navigation back */}
+  Used in: src/index.js
+    25:export { default as MobileNavigation } from './components/MobileNavigation';
+
+================================================================================
+
+COMPONENTS LIKELY NEEDING API REVIEW
+====================================
+
+HIGH PRIORITY: PromptModal.jsx (score: 8)
+  - useEffect: 2
+  - Form submissions: 3
+  - Data state: 0
+  - Loading state: 0
+
+HIGH PRIORITY: SearchSystem.jsx (score: 10)
+  - useEffect: 3
+  - Form submissions: 0
+  - Data state: 0
+  - Loading state: 7
+
+HIGH PRIORITY: TimeClockWidget.jsx (score: 12)
+  - useEffect: 3
+  - Form submissions: 0
+  - Data state: 0
+  - Loading state: 9
+
+HIGH PRIORITY: LogoSplash.jsx (score: 4)
+  - useEffect: 2
+  - Form submissions: 0
+  - Data state: 0
+  - Loading state: 2
+
+HIGH PRIORITY: EnhancedJobCreation.jsx (score: 6)
+  - useEffect: 2
+  - Form submissions: 0
+  - Data state: 1
+  - Loading state: 2
+
+HIGH PRIORITY: RealTimeNotifications.jsx (score: 4)
+  - useEffect: 2
+  - Form submissions: 0
+  - Data state: 1
+  - Loading state: 0
+
+HIGH PRIORITY: AIChat.jsx (score: 12)
+  - useEffect: 2
+  - Form submissions: 0
+  - Data state: 0
+  - Loading state: 10
+
+HIGH PRIORITY: OBD2Lookup.jsx (score: 6)
+  - useEffect: 0
+  - Form submissions: 0
+  - Data state: 0
+  - Loading state: 6
+
+HIGH PRIORITY: ProtectedRoute.jsx (score: 3)
+  - useEffect: 0
+  - Form submissions: 0
+  - Data state: 0
+  - Loading state: 3
+
+HIGH PRIORITY: AppointmentBar.jsx (score: 4)
+  - useEffect: 2
+  - Form submissions: 0
+  - Data state: 1
+  - Loading state: 0
+
+HIGH PRIORITY: CustomerAuthorization.jsx (score: 6)
+  - useEffect: 4
+  - Form submissions: 0
+  - Data state: 1
+  - Loading state: 0
+
+HIGH PRIORITY: ViewJobs.jsx (score: 4)
+  - useEffect: 0
+  - Form submissions: 0
+  - Data state: 0
+  - Loading state: 4
+
+HIGH PRIORITY: Login.jsx (score: 9)
+  - useEffect: 0
+  - Form submissions: 3
+  - Data state: 0
+  - Loading state: 3
+
+HIGH PRIORITY: VehicleList.jsx (score: 6)
+  - useEffect: 0
+  - Form submissions: 0
+  - Data state: 0
+  - Loading state: 6
+
+HIGH PRIORITY: Register.jsx (score: 8)
+  - useEffect: 0
+  - Form submissions: 3
+  - Data state: 0
+  - Loading state: 2
+
+HIGH PRIORITY: Reports.jsx (score: 11)
+  - useEffect: 2
+  - Form submissions: 0
+  - Data state: 0
+  - Loading state: 9
+
+HIGH PRIORITY: AppointmentCalendar.jsx (score: 22)
+  - useEffect: 3
+  - Form submissions: 5
+  - Data state: 2
+  - Loading state: 5
+
+HIGH PRIORITY: Diagnosis.jsx (score: 3)
+  - useEffect: 0
+  - Form submissions: 0
+  - Data state: 0
+  - Loading state: 3
+
+HIGH PRIORITY: CreateInvoice.jsx (score: 15)
+  - useEffect: 4
+  - Form submissions: 0
+  - Data state: 3
+  - Loading state: 5
+
+HIGH PRIORITY: EstimatesList.jsx (score: 8)
+  - useEffect: 2
+  - Form submissions: 0
+  - Data state: 1
+  - Loading state: 4
+
+HIGH PRIORITY: AddAndEditCustomer.jsx (score: 21)
+  - useEffect: 3
+  - Form submissions: 2
+  - Data state: 1
+  - Loading state: 12
+
+HIGH PRIORITY: DataMigration.jsx (score: 5)
+  - useEffect: 0
+  - Form submissions: 0
+  - Data state: 0
+  - Loading state: 5
+
+HIGH PRIORITY: CustomerDetail.jsx (score: 3)
+  - useEffect: 1
+  - Form submissions: 0
+  - Data state: 0
+  - Loading state: 2
+
+HIGH PRIORITY: Vehicles.jsx (score: 6)
+  - useEffect: 0
+  - Form submissions: 0
+  - Data state: 0
+  - Loading state: 6
+
+HIGH PRIORITY: Jobs.jsx (score: 4)
+  - useEffect: 0
+  - Form submissions: 0
+  - Data state: 0
+  - Loading state: 4
+
+HIGH PRIORITY: Estimates.jsx (score: 8)
+  - useEffect: 2
+  - Form submissions: 0
+  - Data state: 1
+  - Loading state: 4
+
+HIGH PRIORITY: AIDiagnostics.jsx (score: 15)
+  - useEffect: 1
+  - Form submissions: 0
+  - Data state: 1
+  - Loading state: 12
+
+HIGH PRIORITY: AddAppointmentModal.jsx (score: 8)
+  - useEffect: 0
+  - Form submissions: 4
+  - Data state: 0
+  - Loading state: 0
+
+HIGH PRIORITY: index.jsx (score: 4)
+  - useEffect: 0
+  - Form submissions: 1
+  - Data state: 1
+  - Loading state: 0
+
+INVESTIGATION SUMMARY
+====================
+
+Flagged components investigated: 6
+Investigation completed at: Fri Aug 29 14:40:00 PDT 2025

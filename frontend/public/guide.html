@@ -1,0 +1,967 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Route Implementation Guide - Get Your App Live</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'SF Pro Text', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px;
+            text-align: center;
+            margin-bottom: 30px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            font-weight: 700;
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 20px;
+            background: #e9ecef;
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 20px 0;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #4ecdc4 0%, #44a08d 100%);
+            width: 0%;
+            transition: width 0.5s ease;
+        }
+
+        .step-container {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            margin-bottom: 20px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .step-header {
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            color: white;
+            padding: 20px 30px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.3s ease;
+        }
+
+        .step-header:hover {
+            background: linear-gradient(135deg, #34495e 0%, #2c3e50 100%);
+        }
+
+        .step-header.completed {
+            background: linear-gradient(135deg, #27ae60 0%, #2ecc71 100%);
+        }
+
+        .step-number {
+            background: rgba(255, 255, 255, 0.2);
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1.2em;
+        }
+
+        .step-title {
+            flex-grow: 1;
+            margin-left: 20px;
+            font-size: 1.3em;
+            font-weight: 600;
+        }
+
+        .step-status {
+            font-size: 1.5em;
+        }
+
+        .step-content {
+            display: none;
+            padding: 30px;
+        }
+
+        .step-content.active {
+            display: block;
+        }
+
+        .code-block {
+            background: #1e1e1e;
+            color: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 15px 0;
+            font-family: 'SF Mono', Monaco, 'Cascadia Code', monospace;
+            font-size: 0.9em;
+            overflow-x: auto;
+            position: relative;
+        }
+
+        .code-header {
+            background: #333;
+            color: #fff;
+            padding: 10px 15px;
+            border-radius: 5px 5px 0 0;
+            font-size: 0.8em;
+            font-weight: bold;
+            margin: -20px -20px 15px -20px;
+        }
+
+        .copy-btn {
+            position: absolute;
+            top: 45px;
+            right: 15px;
+            background: #007acc;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.8em;
+            transition: background 0.3s ease;
+        }
+
+        .copy-btn:hover {
+            background: #005a9e;
+        }
+
+        .action-buttons {
+            margin-top: 20px;
+            display: flex;
+            gap: 15px;
+        }
+
+        .btn {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 1em;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(52, 152, 219, 0.3);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #27ae60 0%, #2ecc71 100%);
+            color: white;
+        }
+
+        .btn-success:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(39, 174, 96, 0.3);
+        }
+
+        .warning-box {
+            background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 15px 0;
+        }
+
+        .info-box {
+            background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 15px 0;
+        }
+
+        .checklist {
+            list-style: none;
+            margin: 20px 0;
+        }
+
+        .checklist li {
+            padding: 10px 0;
+            border-bottom: 1px solid #eee;
+            position: relative;
+            padding-left: 30px;
+        }
+
+        .checklist li::before {
+            content: '☐';
+            position: absolute;
+            left: 0;
+            font-size: 1.2em;
+            color: #ccc;
+        }
+
+        .checklist li.completed::before {
+            content: '✅';
+        }
+
+        .file-structure {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 15px 0;
+            font-family: monospace;
+            white-space: pre-line;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+            
+            .header, .step-content {
+                padding: 20px;
+            }
+        }
+
+        .syntax-keyword { color: #569cd6; }
+        .syntax-string { color: #ce9178; }
+        .syntax-comment { color: #6a9955; }
+        .syntax-function { color: #dcdcaa; }
+        .syntax-decorator { color: #4ec9b0; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🚀 Get Your App Live</h1>
+            <p>Step-by-step guide to implement missing Flask routes</p>
+            <div class="progress-bar">
+                <div class="progress-fill" id="progress"></div>
+            </div>
+            <p id="progress-text">Progress: 0 of 8 steps completed</p>
+        </div>
+
+        <div class="step-container">
+            <div class="step-header" onclick="toggleStep(1)">
+                <div class="step-number">1</div>
+                <div class="step-title">Prepare Your Flask App Structure</div>
+                <div class="step-status">⏳</div>
+            </div>
+            <div class="step-content" id="step-1">
+                <div class="info-box">
+                    <strong>Goal:</strong> Ensure your Flask app has the proper structure for adding new routes
+                </div>
+                
+                <h3>Required File Structure:</h3>
+                <div class="file-structure">app/
+├── __init__.py
+├── routes/
+│   ├── __init__.py
+│   ├── auth.py
+│   ├── api.py
+│   ├── ai.py
+│   └── main.py
+├── models/
+├── static/
+└── templates/</div>
+
+                <div class="warning-box">
+                    <strong>⚠️ Important:</strong> Make sure you have proper imports and blueprints set up in your Flask app
+                </div>
+
+                <div class="code-block">
+                    <div class="code-header">app/__init__.py - Basic Flask App Setup</div>
+                    <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+<pre><span class="syntax-keyword">from</span> flask <span class="syntax-keyword">import</span> Flask
+<span class="syntax-keyword">from</span> flask_sqlalchemy <span class="syntax-keyword">import</span> SQLAlchemy
+<span class="syntax-keyword">from</span> flask_migrate <span class="syntax-keyword">import</span> Migrate
+<span class="syntax-keyword">from</span> flask_cors <span class="syntax-keyword">import</span> CORS
+
+db = SQLAlchemy()
+migrate = Migrate()
+
+<span class="syntax-keyword">def</span> <span class="syntax-function">create_app</span>():
+    app = Flask(__name__)
+    
+    <span class="syntax-comment"># Configuration</span>
+    app.config[<span class="syntax-string">'SECRET_KEY'</span>] = <span class="syntax-string">'your-secret-key'</span>
+    app.config[<span class="syntax-string">'SQLALCHEMY_DATABASE_URI'</span>] = <span class="syntax-string">'sqlite:///automotive.db'</span>
+    
+    <span class="syntax-comment"># Initialize extensions</span>
+    db.init_app(app)
+    migrate.init_app(app, db)
+    CORS(app)
+    
+    <span class="syntax-comment"># Register blueprints</span>
+    <span class="syntax-keyword">from</span> app.routes.main <span class="syntax-keyword">import</span> bp as main_bp
+    <span class="syntax-keyword">from</span> app.routes.api <span class="syntax-keyword">import</span> bp as api_bp
+    <span class="syntax-keyword">from</span> app.routes.ai <span class="syntax-keyword">import</span> bp as ai_bp
+    <span class="syntax-keyword">from</span> app.routes.auth <span class="syntax-keyword">import</span> bp as auth_bp
+    
+    app.register_blueprint(main_bp)
+    app.register_blueprint(api_bp, url_prefix=<span class="syntax-string">'/api'</span>)
+    app.register_blueprint(ai_bp, url_prefix=<span class="syntax-string">'/ai'</span>)
+    app.register_blueprint(auth_bp, url_prefix=<span class="syntax-string">'/auth'</span>)
+    
+    <span class="syntax-keyword">return</span> app</pre>
+                </div>
+
+                <ul class="checklist">
+                    <li>Create the required directory structure</li>
+                    <li>Set up Flask app with proper imports</li>
+                    <li>Configure database connection</li>
+                    <li>Set up blueprints for route organization</li>
+                </ul>
+
+                <div class="action-buttons">
+                    <button class="btn btn-success" onclick="completeStep(1)">✅ Structure Ready</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="step-container">
+            <div class="step-header" onclick="toggleStep(2)">
+                <div class="step-number">2</div>
+                <div class="step-title">Implement Missing AI Routes</div>
+                <div class="step-status">⏳</div>
+            </div>
+            <div class="step-content" id="step-2">
+                <div class="info-box">
+                    <strong>Missing Route:</strong> /ai/generate-estimate
+                </div>
+
+                <div class="code-block">
+                    <div class="code-header">app/routes/ai.py - AI Routes Blueprint</div>
+                    <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+<pre><span class="syntax-keyword">from</span> flask <span class="syntax-keyword">import</span> Blueprint, request, jsonify
+<span class="syntax-keyword">from</span> app.models <span class="syntax-keyword">import</span> Vehicle, Customer, Estimate
+<span class="syntax-keyword">from</span> app <span class="syntax-keyword">import</span> db
+<span class="syntax-keyword">import</span> openai  <span class="syntax-comment"># or your AI service</span>
+
+bp = Blueprint(<span class="syntax-string">'ai'</span>, __name__)
+
+<span class="syntax-decorator">@bp.route</span>(<span class="syntax-string">'/diagnosis'</span>, methods=[<span class="syntax-string">'POST'</span>])
+<span class="syntax-keyword">def</span> <span class="syntax-function">ai_diagnosis</span>():
+    <span class="syntax-string">"""AI-powered vehicle diagnosis"""</span>
+    data = request.get_json()
+    
+    <span class="syntax-keyword">try</span>:
+        vehicle_id = data.get(<span class="syntax-string">'vehicle_id'</span>)
+        symptoms = data.get(<span class="syntax-string">'symptoms'</span>)
+        
+        <span class="syntax-comment"># Your AI diagnosis logic here</span>
+        diagnosis = {
+            <span class="syntax-string">'diagnosis'</span>: <span class="syntax-string">'AI diagnosis result'</span>,
+            <span class="syntax-string">'confidence'</span>: 0.85,
+            <span class="syntax-string">'recommended_actions'</span>: []
+        }
+        
+        <span class="syntax-keyword">return</span> jsonify({
+            <span class="syntax-string">'success'</span>: <span class="syntax-keyword">True</span>,
+            <span class="syntax-string">'diagnosis'</span>: diagnosis
+        })
+    
+    <span class="syntax-keyword">except</span> Exception <span class="syntax-keyword">as</span> e:
+        <span class="syntax-keyword">return</span> jsonify({
+            <span class="syntax-string">'success'</span>: <span class="syntax-keyword">False</span>,
+            <span class="syntax-string">'error'</span>: str(e)
+        }), 400
+
+<span class="syntax-decorator">@bp.route</span>(<span class="syntax-string">'/generate-estimate'</span>, methods=[<span class="syntax-string">'POST'</span>])
+<span class="syntax-keyword">def</span> <span class="syntax-function">generate_estimate</span>():
+    <span class="syntax-string">"""AI-powered estimate generation"""</span>
+    data = request.get_json()
+    
+    <span class="syntax-keyword">try</span>:
+        vehicle_id = data.get(<span class="syntax-string">'vehicle_id'</span>)
+        services = data.get(<span class="syntax-string">'services'</span>, [])
+        
+        <span class="syntax-comment"># AI estimate generation logic</span>
+        estimate_data = {
+            <span class="syntax-string">'labor_hours'</span>: 2.5,
+            <span class="syntax-string">'parts_cost'</span>: 150.00,
+            <span class="syntax-string">'labor_cost'</span>: 200.00,
+            <span class="syntax-string">'total'</span>: 350.00
+        }
+        
+        <span class="syntax-comment"># Create estimate in database</span>
+        estimate = Estimate(
+            vehicle_id=vehicle_id,
+            total=estimate_data[<span class="syntax-string">'total'</span>],
+            status=<span class="syntax-string">'draft'</span>
+        )
+        db.session.add(estimate)
+        db.session.commit()
+        
+        <span class="syntax-keyword">return</span> jsonify({
+            <span class="syntax-string">'success'</span>: <span class="syntax-keyword">True</span>,
+            <span class="syntax-string">'estimate_id'</span>: estimate.id,
+            <span class="syntax-string">'estimate'</span>: estimate_data
+        })
+    
+    <span class="syntax-keyword">except</span> Exception <span class="syntax-keyword">as</span> e:
+        <span class="syntax-keyword">return</span> jsonify({
+            <span class="syntax-string">'success'</span>: <span class="syntax-keyword">False</span>,
+            <span class="syntax-string">'error'</span>: str(e)
+        }), 400</pre>
+                </div>
+
+                <ul class="checklist">
+                    <li>Create ai.py blueprint file</li>
+                    <li>Implement /ai/diagnosis route</li>
+                    <li>Implement /ai/generate-estimate route</li>
+                    <li>Add error handling</li>
+                    <li>Test AI routes with sample data</li>
+                </ul>
+
+                <div class="action-buttons">
+                    <button class="btn btn-success" onclick="completeStep(2)">✅ AI Routes Complete</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="step-container">
+            <div class="step-header" onclick="toggleStep(3)">
+                <div class="step-number">3</div>
+                <div class="step-title">Fix Customer & Vehicle Route Inconsistencies</div>
+                <div class="step-status">⏳</div>
+            </div>
+            <div class="step-content" id="step-3">
+                <div class="warning-box">
+                    <strong>Issue:</strong> Frontend calls /customers/ and /vehicles/ but backend expects /api/customers and /api/vehicles. The routes below are correct.
+                </div>
+
+                <div class="code-block">
+                    <div class="code-header">app/routes/api.py - Customer & Vehicle Routes</div>
+                    <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+<pre><span class="syntax-keyword">from</span> flask <span class="syntax-keyword">import</span> Blueprint, request, jsonify
+<span class="syntax-keyword">from</span> app.models <span class="syntax-keyword">import</span> Customer, Vehicle
+<span class="syntax-keyword">from</span> app <span class="syntax-keyword">import</span> db
+
+bp = Blueprint(<span class="syntax-string">'api'</span>, __name__)
+
+<span class="syntax-comment"># Customer routes</span>
+<span class="syntax-decorator">@bp.route</span>(<span class="syntax-string">'/customers'</span>, methods=[<span class="syntax-string">'GET', 'POST'</span>])
+<span class="syntax-keyword">def</span> <span class="syntax-function">customers</span>():
+    <span class="syntax-keyword">if</span> request.method == <span class="syntax-string">'POST'</span>:
+        data = request.get_json()
+        <span class="syntax-keyword">try</span>:
+            customer = Customer(
+                name=data.get(<span class="syntax-string">'name'</span>),
+                email=data.get(<span class="syntax-string">'email'</span>),
+                phone=data.get(<span class="syntax-string">'phone'</span>)
+            )
+            db.session.add(customer)
+            db.session.commit()
+            
+            <span class="syntax-keyword">return</span> jsonify({
+                <span class="syntax-string">'success'</span>: <span class="syntax-keyword">True</span>,
+                <span class="syntax-string">'customer_id'</span>: customer.id
+            })
+        <span class="syntax-keyword">except</span> Exception <span class="syntax-keyword">as</span> e:
+            <span class="syntax-keyword">return</span> jsonify({
+                <span class="syntax-string">'success'</span>: <span class="syntax-keyword">False</span>,
+                <span class="syntax-string">'error'</span>: str(e)
+            }), 400
+    
+    <span class="syntax-keyword">else</span>:  <span class="syntax-comment"># GET</span>
+        customers = Customer.query.all()
+        <span class="syntax-keyword">return</span> jsonify([{
+            <span class="syntax-string">'id'</span>: c.id,
+            <span class="syntax-string">'name'</span>: c.name,
+            <span class="syntax-string">'email'</span>: c.email,
+            <span class="syntax-string">'phone'</span>: c.phone
+        } <span class="syntax-keyword">for</span> c <span class="syntax-keyword">in</span> customers])
+
+<span class="syntax-decorator">@bp.route</span>(<span class="syntax-string">'/customers/diagnosis'</span>, methods=[<span class="syntax-string">'POST'</span>])
+<span class="syntax-keyword">def</span> <span class="syntax-function">customer_diagnosis</span>():
+    <span class="syntax-string">"""Handle customer diagnosis requests"""</span>
+    data = request.get_json()
+    
+    <span class="syntax-keyword">try</span>:
+        customer_id = data.get(<span class="syntax-string">'customer_id'</span>)
+        vehicle_id = data.get(<span class="syntax-string">'vehicle_id'</span>)
+        symptoms = data.get(<span class="syntax-string">'symptoms'</span>)
+        
+        <span class="syntax-comment"># Process diagnosis</span>
+        diagnosis_result = {
+            <span class="syntax-string">'diagnosis_id'</span>: 123,
+            <span class="syntax-string">'status'</span>: <span class="syntax-string">'completed'</span>,
+            <span class="syntax-string">'results'</span>: <span class="syntax-string">'Diagnosis results here'</span>
+        }
+        
+        <span class="syntax-keyword">return</span> jsonify({
+            <span class="syntax-string">'success'</span>: <span class="syntax-keyword">True</span>,
+            <span class="syntax-string">'diagnosis'</span>: diagnosis_result
+        })
+        
+    <span class="syntax-keyword">except</span> Exception <span class="syntax-keyword">as</span> e:
+        <span class="syntax-keyword">return</span> jsonify({
+            <span class="syntax-string">'success'</span>: <span class="syntax-keyword">False</span>,
+            <span class="syntax-string">'error'</span>: str(e)
+        }), 400
+
+<span class="syntax-comment"># Vehicle routes</span>
+<span class="syntax-decorator">@bp.route</span>(<span class="syntax-string">'/vehicles'</span>, methods=[<span class="syntax-string">'GET', 'POST'</span>])
+<span class="syntax-keyword">def</span> <span class="syntax-function">vehicles</span>():
+    <span class="syntax-keyword">if</span> request.method == <span class="syntax-string">'POST'</span>:
+        data = request.get_json()
+        <span class="syntax-keyword">try</span>:
+            vehicle = Vehicle(
+                customer_id=data.get(<span class="syntax-string">'customer_id'</span>),
+                make=data.get(<span class="syntax-string">'make'</span>),
+                model=data.get(<span class="syntax-string">'model'</span>),
+                year=data.get(<span class="syntax-string">'year'</span>),
+                vin=data.get(<span class="syntax-string">'vin'</span>)
+            )
+            db.session.add(vehicle)
+            db.session.commit()
+            
+            <span class="syntax-keyword">return</span> jsonify({
+                <span class="syntax-string">'success'</span>: <span class="syntax-keyword">True</span>,
+                <span class="syntax-string">'vehicle_id'</span>: vehicle.id
+            })
+        <span class="syntax-keyword">except</span> Exception <span class="syntax-keyword">as</span> e:
+            <span class="syntax-keyword">return</span> jsonify({
+                <span class="syntax-string">'success'</span>: <span class="syntax-keyword">False</span>,
+                <span class="syntax-string">'error'</span>: str(e)
+            }), 400
+    
+    <span class="syntax-keyword">else</span>:  <span class="syntax-comment"># GET</span>
+        vehicles = Vehicle.query.all()
+        <span class="syntax-keyword">return</span> jsonify([{
+            <span class="syntax-string">'id'</span>: v.id,
+            <span class="syntax-string">'customer_id'</span>: v.customer_id,
+            <span class="syntax-string">'make'</span>: v.make,
+            <span class="syntax-string">'model'</span>: v.model,
+            <span class="syntax-string">'year'</span>: v.year,
+            <span class="syntax-string">'vin'</span>: v.vin
+        } <span class="syntax-keyword">for</span> v <span class="syntax-keyword">in</span> vehicles])</pre>
+                </div>
+
+                <ul class="checklist">
+                    <li>Add missing /customers/diagnosis route</li>
+                    <li>Ensure /customers and /vehicles handle both GET and POST</li>
+                    <li>Add proper error handling</li>
+                    <li>Test customer creation and listing</li>
+                    <li>Test vehicle creation and listing</li>
+                </ul>
+
+                <div class="action-buttons">
+                    <button class="btn btn-success" onclick="completeStep(3)">✅ Customer/Vehicle Routes Complete</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="step-container">
+            <div class="step-header" onclick="toggleStep(4)">
+                <div class="step-number">4</div>
+                <div class="step-title">Implement Data Management Routes</div>
+                <div class="step-status">⏳</div>
+            </div>
+            <div class="step-content" id="step-4">
+                <div class="info-box">
+                    <strong>Missing Routes:</strong> /api/data/analyze and /api/data/import
+                </div>
+
+                <div class="code-block">
+                    <div class="code-header">app/routes/api.py - Add Data Management Routes</div>
+                    <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+<pre><span class="syntax-comment"># Add these routes to your existing api.py file</span>
+
+<span class="syntax-decorator">@bp.route</span>(<span class="syntax-string">'/data/analyze'</span>, methods=[<span class="syntax-string">'POST'</span>])
+<span class="syntax-keyword">def</span> <span class="syntax-function">analyze_data</span>():
+    <span class="syntax-string">"""Analyze uploaded data files"""</span>
+    <span class="syntax-keyword">try</span>:
+        <span class="syntax-keyword">if</span> <span class="syntax-string">'file'</span> <span class="syntax-keyword">not in</span> request.files:
+            <span class="syntax-keyword">return</span> jsonify({<span class="syntax-string">'success'</span>: <span class="syntax-keyword">False</span>, <span class="syntax-string">'error'</span>: <span class="syntax-string">'No file provided'</span>}), 400
+        
+        file = request.files[<span class="syntax-string">'file'</span>]
+        
+        <span class="syntax-keyword">if</span> file.filename == <span class="syntax-string">''</span>:
+            <span class="syntax-keyword">return</span> jsonify({<span class="syntax-string">'success'</span>: <span class="syntax-keyword">False</span>, <span class="syntax-string">'error'</span>: <span class="syntax-string">'No file selected'</span>}), 400
+        
+        <span class="syntax-comment"># Analyze file content</span>
+        <span class="syntax-keyword">if</span> file.filename.endswith(<span class="syntax-string">'.csv'</span>):
+            <span class="syntax-keyword">import</span> pandas <span class="syntax-keyword">as</span> pd
+            <span class="syntax-keyword">import</span> io
+            
+            stream = io.StringIO(file.stream.read().decode(<span class="syntax-string">"UTF8"</span>), newline=None)
+            df = pd.read_csv(stream)
+            
+            analysis = {
+                <span class="syntax-string">'rows'</span>: len(df),
+                <span class="syntax-string">'columns'</span>: list(df.columns),
+                <span class="syntax-string">'data_types'</span>: {k: str(v) <span class="syntax-keyword">for</span> k, v <span class="syntax-keyword">in</span> df.dtypes.to_dict().items()},
+                <span class="syntax-string">'sample_data'</span>: df.head().to_dict(<span class="syntax-string">'records'</span>)
+            }
+            
+            <span class="syntax-keyword">return</span> jsonify({<span class="syntax-string">'success'</span>: <span class="syntax-keyword">True</span>, <span class="syntax-string">'analysis'</span>: analysis})
+        <span class="syntax-keyword">else</span>:
+            <span class="syntax-keyword">return</span> jsonify({<span class="syntax-string">'success'</span>: <span class="syntax-keyword">False</span>, <span class="syntax-string">'error'</span>: <span class="syntax-string">'Unsupported file type'</span>}), 400
+
+    <span class="syntax-keyword">except</span> Exception <span class="syntax-keyword">as</span> e:
+        <span class="syntax-keyword">return</span> jsonify({<span class="syntax-string">'success'</span>: <span class="syntax-keyword">False</span>, <span class="syntax-string">'error'</span>: str(e)}), 500
+
+<span class="syntax-decorator">@bp.route</span>(<span class="syntax-string">'/data/import'</span>, methods=[<span class="syntax-string">'POST'</span>])
+<span class="syntax-keyword">def</span> <span class="syntax-function">import_data</span>():
+    <span class="syntax-string">"""Import data from file to database"""</span>
+    data = request.get_json()
+    file_content = data.get(<span class="syntax-string">'file_content'</span>)
+    mapping = data.get(<span class="syntax-string">'mapping'</span>) <span class="syntax-comment"># e.g., {'name': 'Customer Name', 'email': 'Email Address'}</span>
+
+    <span class="syntax-keyword">try</span>:
+        <span class="syntax-comment"># Logic to parse file_content and use mapping to import data</span>
+        <span class="syntax-comment"># This is a placeholder for your actual import logic</span>
+        imported_count = 0
+        <span class="syntax-comment"># for row in parsed_data:</span>
+        <span class="syntax-comment">#     customer = Customer(...)</span>
+        <span class="syntax-comment">#     db.session.add(customer)</span>
+        <span class="syntax-comment">#     imported_count += 1</span>
+        <span class="syntax-comment"># db.session.commit()</span>
+        
+        imported_count = 10 <span class="syntax-comment"># Placeholder</span>
+
+        <span class="syntax-keyword">return</span> jsonify({<span class="syntax-string">'success'</span>: <span class="syntax-keyword">True</span>, <span class="syntax-string">'imported_rows'</span>: imported_count})
+        
+    <span class="syntax-keyword">except</span> Exception <span class="syntax-keyword">as</span> e:
+        db.session.rollback()
+        <span class="syntax-keyword">return</span> jsonify({<span class="syntax-string">'success'</span>: <span class="syntax-keyword">False</span>, <span class="syntax-string">'error'</span>: str(e)}), 500
+</pre>
+                </div>
+
+                <ul class="checklist">
+                    <li>Create file upload endpoint for analysis</li>
+                    <li>Implement CSV parsing and analysis</li>
+                    <li>Create data import endpoint</li>
+                    <li>Add robust error handling for file operations</li>
+                </ul>
+
+                <div class="action-buttons">
+                    <button class="btn btn-success" onclick="completeStep(4)">✅ Data Routes Complete</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="step-container">
+            <div class="step-header" onclick="toggleStep(5)">
+                <div class="step-number">5</div>
+                <div class="step-title">Implement User Authentication</div>
+                <div class="step-status">⏳</div>
+            </div>
+            <div class="step-content" id="step-5">
+                <div class="info-box">
+                    <strong>Goal:</strong> Secure your application with user registration and login.
+                </div>
+                <div class="code-block">
+                    <div class="code-header">app/routes/auth.py - Authentication Routes</div>
+                    <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+<pre><span class="syntax-keyword">from</span> flask <span class="syntax-keyword">import</span> Blueprint, request, jsonify
+<span class="syntax-keyword">from</span> werkzeug.security <span class="syntax-keyword">import</span> generate_password_hash, check_password_hash
+<span class="syntax-keyword">from</span> app.models <span class="syntax-keyword">import</span> User
+<span class="syntax-keyword">from</span> app <span class="syntax-keyword">import</span> db
+
+bp = Blueprint(<span class="syntax-string">'auth'</span>, __name__)
+
+<span class="syntax-decorator">@bp.route</span>(<span class="syntax-string">'/register'</span>, methods=[<span class="syntax-string">'POST'</span>])
+<span class="syntax-keyword">def</span> <span class="syntax-function">register</span>():
+    data = request.get_json()
+    hashed_password = generate_password_hash(data[<span class="syntax-string">'password'</span>], method=<span class="syntax-string">'pbkdf2:sha256'</span>)
+    new_user = User(username=data[<span class="syntax-string">'username'</span>], password=hashed_password)
+    db.session.add(new_user)
+    db.session.commit()
+    <span class="syntax-keyword">return</span> jsonify({<span class="syntax-string">'success'</span>: <span class="syntax-keyword">True</span>, <span class="syntax-string">'message'</span>: <span class="syntax-string">'User created successfully'</span>})
+
+<span class="syntax-decorator">@bp.route</span>(<span class="syntax-string">'/login'</span>, methods=[<span class="syntax-string">'POST'</span>])
+<span class="syntax-keyword">def</span> <span class="syntax-function">login</span>():
+    data = request.get_json()
+    user = User.query.filter_by(username=data[<span class="syntax-string">'username'</span>]).first()
+    <span class="syntax-keyword">if not</span> user <span class="syntax-keyword">or not</span> check_password_hash(user.password, data[<span class="syntax-string">'password'</span>]):
+        <span class="syntax-keyword">return</span> jsonify({<span class="syntax-string">'success'</span>: <span class="syntax-keyword">False</span>, <span class="syntax-string">'message'</span>: <span class="syntax-string">'Invalid credentials'</span>}), 401
+    
+    <span class="syntax-comment"># Here you would typically generate a JWT token or set up a session</span>
+    <span class="syntax-keyword">return</span> jsonify({<span class="syntax-string">'success'</span>: <span class="syntax-keyword">True</span>, <span class="syntax-string">'message'</span>: <span class="syntax-string">'Login successful'</span>})
+</pre>
+                </div>
+                <ul class="checklist">
+                    <li>Create auth.py blueprint</li>
+                    <li>Implement /register route with password hashing</li>
+                    <li>Implement /login route with password verification</li>
+                    <li>Register the auth blueprint in app/__init__.py</li>
+                </ul>
+                <div class="action-buttons">
+                    <button class="btn btn-success" onclick="completeStep(5)">✅ Auth Complete</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="step-container">
+            <div class="step-header" onclick="toggleStep(6)">
+                <div class="step-number">6</div>
+                <div class="step-title">Add Real-time Capabilities</div>
+                <div class="step-status">⏳</div>
+            </div>
+            <div class="step-content" id="step-6">
+                <div class="info-box">
+                    <strong>Goal:</strong> Use WebSockets for live updates (e.g., job status).
+                </div>
+                <div class="code-block">
+                    <div class="code-header">run.py - Add Flask-SocketIO</div>
+                    <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+<pre><span class="syntax-keyword">from</span> app <span class="syntax-keyword">import</span> create_app, db
+<span class="syntax-keyword">from</span> flask_socketio <span class="syntax-keyword">import</span> SocketIO
+
+app = create_app()
+socketio = SocketIO(app, cors_allowed_origins=<span class="syntax-string">"*"</span>)
+
+<span class="syntax-decorator">@socketio.on</span>(<span class="syntax-string">'connect'</span>)
+<span class="syntax-keyword">def</span> <span class="syntax-function">handle_connect</span>():
+    print(<span class="syntax-string">'Client connected'</span>)
+
+<span class="syntax-decorator">@socketio.on</span>(<span class="syntax-string">'disconnect'</span>)
+<span class="syntax-keyword">def</span> <span class="syntax-function">handle_disconnect</span>():
+    print(<span class="syntax-string">'Client disconnected'</span>)
+
+<span class="syntax-comment"># Example of emitting an event from a route</span>
+<span class="syntax-decorator">@app.route</span>(<span class="syntax-string">'/trigger-update'</span>)
+<span class="syntax-keyword">def</span> <span class="syntax-function">trigger_update</span>():
+    socketio.emit(<span class="syntax-string">'status_update'</span>, {<span class="syntax-string">'data'</span>: <span class="syntax-string">'A new job has started!'</span>})
+    <span class="syntax-keyword">return</span> <span class="syntax-string">'Update sent!'</span>
+
+<span class="syntax-keyword">if</span> __name__ == <span class="syntax-string">'__main__'</span>:
+    socketio.run(app, debug=<span class="syntax-keyword">True</span>)
+</pre>
+                </div>
+                <ul class="checklist">
+                    <li>Install Flask-SocketIO: `pip install Flask-SocketIO`</li>
+                    <li>Initialize SocketIO in your main application file</li>
+                    <li>Define handlers for 'connect' and other custom events</li>
+                    <li>Use `socketio.emit()` to send real-time data to clients</li>
+                </ul>
+                <div class="action-buttons">
+                    <button class="btn btn-success" onclick="completeStep(6)">✅ Real-time Complete</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="step-container">
+            <div class="step-header" onclick="toggleStep(7)">
+                <div class="step-number">7</div>
+                <div class="step-title">Write Tests for Your Routes</div>
+                <div class="step-status">⏳</div>
+            </div>
+            <div class="step-content" id="step-7">
+                <div class="info-box">
+                    <strong>Goal:</strong> Ensure your API is reliable by writing automated tests.
+                </div>
+                <div class="code-block">
+                    <div class="code-header">tests/test_api.py - Example with Pytest</div>
+                    <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+<pre><span class="syntax-keyword">import</span> pytest
+<span class="syntax-keyword">from</span> app <span class="syntax-keyword">import</span> create_app, db
+
+<span class="syntax-decorator">@pytest.fixture</span>
+<span class="syntax-keyword">def</span> <span class="syntax-function">client</span>():
+    app = create_app()
+    app.config[<span class="syntax-string">'TESTING'</span>] = <span class="syntax-keyword">True</span>
+    app.config[<span class="syntax-string">'SQLALCHEMY_DATABASE_URI'</span>] = <span class="syntax-string">'sqlite:///:memory:'</span>
+
+    <span class="syntax-keyword">with</span> app.test_client() <span class="syntax-keyword">as</span> client:
+        <span class="syntax-keyword">with</span> app.app_context():
+            db.create_all()
+        <span class="syntax-keyword">yield</span> client
+
+<span class="syntax-keyword">def</span> <span class="syntax-function">test_get_customers</span>(client):
+    <span class="syntax-string">"""Test fetching all customers"""</span>
+    rv = client.get(<span class="syntax-string">'/api/customers'</span>)
+    <span class="syntax-keyword">assert</span> rv.status_code == 200
+    <span class="syntax-keyword">assert</span> isinstance(rv.json, list)
+
+<span class="syntax-keyword">def</span> <span class="syntax-function">test_create_customer</span>(client):
+    <span class="syntax-string">"""Test creating a new customer"""</span>
+    new_customer = {
+        <span class="syntax-string">'name'</span>: <span class="syntax-string">'John Doe'</span>,
+        <span class="syntax-string">'email'</span>: <span class="syntax-string">'john.doe@example.com'</span>,
+        <span class="syntax-string">'phone'</span>: <span class="syntax-string">'1234567890'</span>
+    }
+    rv = client.post(<span class="syntax-string">'/api/customers'</span>, json=new_customer)
+    <span class="syntax-keyword">assert</span> rv.status_code == 200
+    <span class="syntax-keyword">assert</span> rv.json[<span class="syntax-string">'success'</span>] == <span class="syntax-keyword">True</span>
+    <span class="syntax-keyword">assert</span> <span class="syntax-string">'customer_id'</span> <span class="syntax-keyword">in</span> rv.json
+</pre>
+                </div>
+                <ul class="checklist">
+                    <li>Install Pytest: `pip install pytest`</li>
+                    <li>Create a `tests` directory</li>
+                    <li>Set up a test client fixture for your Flask app</li>
+                    <li>Write tests for successful requests (200 OK)</li>
+                    <li>Write tests for error cases (400, 404, etc.)</li>
+                </ul>
+                <div class="action-buttons">
+                    <button class="btn btn-success" onclick="completeStep(7)">✅ Testing Complete</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="step-container">
+            <div class="step-header" onclick="toggleStep(8)">
+                <div class="step-number">8</div>
+                <div class="step-title">Deploy Your Application</div>
+                <div class="step-status">⏳</div>
+            </div>
+            <div class="step-content" id="step-8">
+                <div class="info-box">
+                    <strong>Goal:</strong> Make your app available to the world!
+                </div>
+                <h3>Using Gunicorn as a WSGI Server:</h3>
+                <p>The Flask development server is not suitable for production. Use a production-ready WSGI server like Gunicorn.</p>
+                <div class="code-block">
+                    <div class="code-header">Terminal Command</div>
+                    <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                    <pre>$ pip install gunicorn
+$ gunicorn --workers 4 --bind 0.0.0.0:8000 run:app</pre>
+                </div>
+                
+                <h3>Using Nginx as a Reverse Proxy:</h3>
+                <p>Nginx can act as a reverse proxy to handle incoming traffic, serve static files, and forward requests to Gunicorn.</p>
+                <div class="code-block">
+                    <div class="code-header">/etc/nginx/sites-available/yourapp</div>
+                    <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+<pre>server {
+    listen 80;
+    server_name your_domain.com;
+
+    location / {
+        proxy_pass http://127.0.0.1:8000;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    }
+
+    location /static {
+        alias /path/to/your/app/static;
+    }
+}</pre>
+                </div>
+
+                <ul class="checklist">
+                    <li>Install Gunicorn</li>
+                    <li>Run the app using Gunicorn</li>
+                    <li>Configure Nginx as a reverse proxy</li>
+                    <li>Set up SSL/TLS with Let's Encrypt for HTTPS</li>
+                    <li>Configure environment variables for production (e.g., SECRET_KEY, DATABASE_URI)</li>
+                </ul>
+
+                <div class="action-buttons">
+                    <button class="btn btn-success" onclick="completeStep(8)">🎉 All Done!</button>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        const totalSteps = 8;
+        let completedSteps = new Set();
+        let activeStep = 1;
+
+        function toggleStep(stepNumber) {
+            const currentContent = document.getElementById(`step-${stepNumber}`);
+            if (activeStep === stepNumber) {
+                // Clicking the active step closes it
+                currentContent.classList.remove('active');
+                activeStep = null;
+            } else {
+                // Close previously active step if any
+                if (activeStep !== null) {
+                    const oldContent = document.getElementById(`step-${activeStep}`);
+                    if (oldContent) {
+                        oldContent.classList.remove('active');
+                    }
+                }
+                // Open the new step
+                currentContent.classList.add('active');
+                activeStep = stepNumber;
+            }
+        }
+
+        function copyCode(buttonElement) {
+            const preElement = buttonElement.nextElementSibling;
+            const codeText = preElement.innerText;
+            navigator.clipboard.writeText(codeText).then(() => {
+                buttonElement.innerText = 'Copied!';
+                setTimeout(() => {
+                    buttonElement.innerText = 'Copy';
+                }, 2000);
+            }).catch(err => {
+                console.error('Failed to copy text: ', err);
+            });
+        }
+
+        function completeStep(stepNumber) {
+            if (completedSteps.has(stepNumber)) return;
+
+            completedSteps.add(stepNumber);
+            const stepHeader = document.querySelector(`#step-${stepNumber}`).previousElementSibling;
+            stepHeader.classList.add('completed');
+            stepHeader.querySelector('.step-status').textContent = '✅';
+
+            // Mark checklist items as complete
+            const checklistItems = document.querySelectorAll(`#step-${stepNumber} .checklist li`);
+            checklistItems.forEach(item => item.classList.add('completed'));
+
+            updateProgress();
+
+            // Automatically open the next step
+            if (stepNumber < totalSteps) {
+                toggleStep(stepNumber + 1);
+            }
+        }
+
+        function updateProgress() {
+            const progressFill = document.getElementById('progress');
+            const progressText = document.getElementById('progress-text');
+            const percentage = (completedSteps.size / totalSteps) * 100;
+
+            progressFill.style.width = `${percentage}%`;
+            progressText.textContent = `Progress: ${completedSteps.size} of ${totalSteps} steps completed`;
+        }
+        
+        // Open the first step by default on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            toggleStep(1);
+        });
+
+    </script>
+</body>
+</html>

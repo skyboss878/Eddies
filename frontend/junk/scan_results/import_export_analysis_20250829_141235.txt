@@ -1,0 +1,2406 @@
+React Project Import/Export Analysis
+Generated: Fri Aug 29 14:12:35 PDT 2025
+Project Directory: /data/data/com.termux/files/home/eddies-asian-automotive/frontend
+=====================================
+
+
+📁 DIRECTORY SUMMARY: components
+=============================================
+Files: 43 total (.js: 2, .jsx: 41, .ts: 0, .tsx: 0)
+
+File List:
+  - components/AIEstimateCard.jsx
+  - components/AppointmentBar.jsx
+  - components/AppointmentCard.jsx
+  - components/ComplianceNoticeCA.jsx
+  - components/CustomerAuthorization.jsx
+  - components/CustomerPortal.jsx
+  - components/DashboardCard.jsx
+  - components/DocumentTemplplateRenderer.jsx
+  - components/EnhancedJobCreation.jsx
+  - components/ErrorBoundaryWithAuth.jsx
+  - components/GlobalToastDisplay.jsx
+  - components/HealthCheck.jsx
+  - components/JobCard.jsx
+  - components/LandingPage.jsx
+  - components/LoadingSpinner.jsx
+  - components/LogoSplash.jsx
+  - components/Navbar.jsx
+  - components/Navigation.jsx
+  - components/PayrollReportDetail.jsx
+  - components/PrintableLayout.jsx
+  - components/QuickActionButton.jsx
+  - components/RealTimeNotifications.jsx
+  - components/SearchSystem.jsx
+  - components/ShareableActions.jsx
+  - components/SmartBreadcrumb.jsx
+  - components/TechnicianCard.jsx
+  - components/TechnicianTimeClockCard.jsx
+  - components/TimeClockNavbar.jsx
+  - components/TimeClockWidget.jsx
+  - components/TimeclockHistory.jsx
+  - components/UserDropdown.jsx
+  - components/ai/AIChat.jsx
+  - components/ai/AIDashboard.jsx
+  - components/ai/AIDiagnosticHelper.jsx
+  - components/ai/AIEstimateModal.jsx
+  - components/ai/AIProvider.js
+  - components/ai/OBD2Lookup.jsx
+  - components/auth/ProtectedRoute.jsx
+  - components/index.js
+  - components/layout/MobileNavigation.jsx
+  - components/modals/ConfirmModal.jsx
+  - components/modals/PromptModal.jsx
+  - components/testing/IntegrationTest.jsx
+
+
+📁 DIRECTORY SUMMARY: pages
+=============================================
+Files: 42 total (.js: 2, .jsx: 40, .ts: 0, .tsx: 0)
+
+File List:
+  - pages/AIDiagnostics.jsx
+  - pages/AddAndEditCustomer.jsx
+  - pages/AddVehicle.jsx
+  - pages/AppointmentCalendar.jsx
+  - pages/AppointmentCalendar/AddAppointmentModal.jsx
+  - pages/AppointmentCalendar/AppointmentDetailsModal.jsx
+  - pages/AppointmentCalendar/helpers.js
+  - pages/AppointmentCalendar/index.jsx
+  - pages/CreateEditEstimate.jsx
+  - pages/CreateInvoice.jsx
+  - pages/CreateJob.jsx
+  - pages/CustomerDetail.jsx
+  - pages/CustomerList.jsx
+  - pages/Customers.jsx
+  - pages/Dashboard.jsx
+  - pages/DataMigration.jsx
+  - pages/Diagnosis.jsx
+  - pages/EstimateAI.jsx
+  - pages/EstimateDetail.jsx
+  - pages/Estimates.jsx
+  - pages/EstimatesList.jsx
+  - pages/Inventory.jsx
+  - pages/Invoice.jsx
+  - pages/InvoiceDetail.jsx
+  - pages/Invoices.jsx
+  - pages/JobDetail.jsx
+  - pages/Jobs.jsx
+  - pages/Landing.jsx
+  - pages/Login.jsx
+  - pages/Mobile.jsx
+  - pages/NotFound.jsx
+  - pages/PartsLaborManagement.jsx
+  - pages/Register.jsx
+  - pages/Reports.jsx
+  - pages/Settings.jsx
+  - pages/TimeClock.jsx
+  - pages/VehicleDetail.jsx
+  - pages/VehicleForm.jsx
+  - pages/VehicleList.jsx
+  - pages/Vehicles.jsx
+  - pages/ViewJobs.jsx
+  - pages/index.js
+
+
+📁 DIRECTORY SUMMARY: utils
+=============================================
+Files: 29 total (.js: 28, .jsx: 1, .ts: 0, .tsx: 0)
+
+File List:
+  - utils/aiDiagnosticsService.js
+  - utils/aiUtils.js
+  - utils/api.js
+  - utils/apiEndpoints.js
+  - utils/billing.js
+  - utils/calculations.js
+  - utils/dateUtils.js
+  - utils/employeeService.js
+  - utils/errorUtils.jsx
+  - utils/index.js
+  - utils/messageUtils.js
+  - utils/services/appointmentService.js
+  - utils/services/customerService.js
+  - utils/services/diagnosticsService.js
+  - utils/services/estimateService.js
+  - utils/services/index.js
+  - utils/services/invoiceService.js
+  - utils/services/jobService.js
+  - utils/services/migrationServices.js
+  - utils/services/reportService.js
+  - utils/services/timeclockService.js
+  - utils/services/vehicleService.js
+  - utils/socketUtils.js
+  - utils/statusUtils.js
+  - utils/testApi.js
+  - utils/toast.js
+  - utils/tokenManager.js
+  - utils/utilityService.js
+  - utils/vehicleHelpers.js
+
+
+📁 DIRECTORY SUMMARY: services
+=============================================
+Files: 3 total (.js: 2, .jsx: 0, .ts: 1, .tsx: 0)
+
+File List:
+  - services/aiService.js
+  - services/diagnosticsService.ts
+  - services/socket.js
+
+📄 Analyzing: src/App.jsx
+----------------------------------------
+IMPORTS:
+  Line 8:import ProtectedRoute from './components/auth/ProtectedRoute';
+  Line 11:import SearchSystem from './components/SearchSystem';
+  Line 12:import RealTimeNotifications from './components/RealTimeNotifications';
+  Line 13:import CustomerPortal from './components/CustomerPortal';
+  Line 39:import PartsLaborManagement from './pages/PartsLaborManagement';
+  Line 40:import TimeClock from './pages/TimeClock';
+  Line 41:import Inventory from './pages/Inventory';
+
+EXPORTS:
+  Line 102:export default App;
+  Line 102:export default App;
+
+========================================
+
+📄 Analyzing: src/pages/Invoice.jsx
+----------------------------------------
+IMPORTS:
+  Line 4:import { apiEndpoints } from "../utils";
+
+EXPORTS:
+  Line 290:export default Invoice;
+  Line 290:export default Invoice;
+
+========================================
+
+📄 Analyzing: src/pages/CustomerList.jsx
+----------------------------------------
+IMPORTS:
+  Line 22:import SmartBreadcrumb from "../components/SmartBreadcrumb";
+
+EXPORTS:
+  Line 892:export default CustomerList;
+  Line 892:export default CustomerList;
+
+========================================
+
+📄 Analyzing: src/pages/AddVehicle.jsx
+----------------------------------------
+IMPORTS:
+  Line 4:import { apiEndpoints } from "../utils";
+
+EXPORTS:
+  Line 7:export default function AddVehicle() {
+  Line 7:export default function AddVehicle() {
+  Line 7:export default function AddVehicle() {
+
+========================================
+
+📄 Analyzing: src/pages/CreateJob.jsx
+----------------------------------------
+IMPORTS:
+
+EXPORTS:
+  Line 1127:export default CreateJob;
+  Line 1127:export default CreateJob;
+
+========================================
+
+📄 Analyzing: src/pages/ViewJobs.jsx
+----------------------------------------
+IMPORTS:
+  Line 9:import ConfirmModal from '../components/modals/ConfirmModal';
+
+EXPORTS:
+  Line 121:export default ViewJobs;
+  Line 121:export default ViewJobs;
+
+========================================
+
+📄 Analyzing: src/pages/Login.jsx
+----------------------------------------
+IMPORTS:
+
+EXPORTS:
+  Line 223:export default Login;
+  Line 223:export default Login;
+
+========================================
+
+📄 Analyzing: src/pages/Dashboard.jsx
+----------------------------------------
+IMPORTS:
+  Line 12:import LoadingSpinner from '../components/LoadingSpinner';
+  Line 13:import DashboardCard from '../components/DashboardCard';
+  Line 14:import SearchSystem from '../components/SearchSystem';
+  Line 15:import RealTimeNotifications from '../components/RealTimeNotifications';
+
+EXPORTS:
+  Line 626:export default Dashboard;
+  Line 626:export default Dashboard;
+
+========================================
+
+📄 Analyzing: src/pages/VehicleList.jsx
+----------------------------------------
+IMPORTS:
+  Line 6:import ConfirmModal from '../components/modals/ConfirmModal';
+
+EXPORTS:
+  Line 9:export default function VehicleList() {
+  Line 9:export default function VehicleList() {
+  Line 9:export default function VehicleList() {
+
+========================================
+
+📄 Analyzing: src/pages/Landing.jsx
+----------------------------------------
+IMPORTS:
+  Line 4:// import RouteTest from '../components/RouteTest';
+
+EXPORTS:
+  Line 457:export default Landing;
+  Line 457:export default Landing;
+
+========================================
+
+📄 Analyzing: src/pages/Mobile.jsx
+----------------------------------------
+IMPORTS:
+
+EXPORTS:
+  Line 47:export default Mobile;
+  Line 47:export default Mobile;
+
+========================================
+
+📄 Analyzing: src/pages/Register.jsx
+----------------------------------------
+IMPORTS:
+
+EXPORTS:
+  Line 315:export default Register;
+  Line 315:export default Register;
+
+========================================
+
+📄 Analyzing: src/pages/JobDetail.jsx
+----------------------------------------
+IMPORTS:
+
+EXPORTS:
+  Line 5:export default function JobDetail() {
+  Line 5:export default function JobDetail() {
+  Line 5:export default function JobDetail() {
+
+========================================
+
+📄 Analyzing: src/pages/EstimateDetail.jsx
+----------------------------------------
+IMPORTS:
+
+EXPORTS:
+  Line 5:export default function EstimateDetail() {
+  Line 5:export default function EstimateDetail() {
+  Line 5:export default function EstimateDetail() {
+
+========================================
+
+📄 Analyzing: src/pages/Reports.jsx
+----------------------------------------
+IMPORTS:
+  Line 17:import { reportsService, dashboardService } from '../utils';
+  Line 18:import { showError, showSuccess } from '../utils';
+
+EXPORTS:
+  Line 33:const exportAsJson = (data, fileName) => {
+  Line 43:const exportAsCsv = (data, fileName) => {
+  Line 525:export default Reports;
+  Line 525:export default Reports;
+
+========================================
+
+📄 Analyzing: src/pages/VehicleForm.jsx
+----------------------------------------
+IMPORTS:
+
+EXPORTS:
+  Line 556:export default VehicleForm;
+  Line 556:export default VehicleForm;
+
+========================================
+
+📄 Analyzing: src/pages/AppointmentCalendar.jsx
+----------------------------------------
+IMPORTS:
+
+EXPORTS:
+  Line 695:export default AppointmentCalendar;
+  Line 695:export default AppointmentCalendar;
+
+========================================
+
+📄 Analyzing: src/pages/CreateEditEstimate.jsx
+----------------------------------------
+IMPORTS:
+  Line 5:import DocumentTemplplateRenderer from "../components/DocumentTemplplateRenderer";
+  Line 6:import CustomerAuthorization from "../components/CustomerAuthorization";
+  Line 7:import { computeTotals } from "../utils";
+  Line 8:import { showMessage } from "../utils";
+
+EXPORTS:
+  Line 10:export default function CreateEditEstimate() {
+  Line 10:export default function CreateEditEstimate() {
+  Line 10:export default function CreateEditEstimate() {
+
+========================================
+
+📄 Analyzing: src/pages/Diagnosis.jsx
+----------------------------------------
+IMPORTS:
+  Line 4:import AIDiagnosticHelper from '../components/ai/AIDiagnosticHelper';
+
+EXPORTS:
+  Line 9:export default function Diagnosis() {
+  Line 9:export default function Diagnosis() {
+  Line 9:export default function Diagnosis() {
+
+========================================
+
+📄 Analyzing: src/pages/CreateInvoice.jsx
+----------------------------------------
+IMPORTS:
+  Line 4:import { apiEndpoints } from '../utils';
+
+EXPORTS:
+  Line 736:export default CreateInvoice;
+  Line 736:export default CreateInvoice;
+
+========================================
+
+📄 Analyzing: src/pages/EstimatesList.jsx
+----------------------------------------
+IMPORTS:
+  Line 9:import { apiEndpoints } from "../utils";
+  Line 10:import ConfirmModal from '../components/modals/ConfirmModal';
+  Line 11:import { showMessage } from "../utils";
+
+EXPORTS:
+  Line 14:export default function EstimatesList() {
+  Line 70:  const exportToPDF = () => {
+  Line 91:  const exportToCSV = () => {
+  Line 14:export default function EstimatesList() {
+  Line 14:export default function EstimatesList() {
+
+========================================
+
+📄 Analyzing: src/pages/Settings.jsx
+----------------------------------------
+IMPORTS:
+
+EXPORTS:
+  Line 6:export default function Settings() {
+  Line 6:export default function Settings() {
+  Line 6:export default function Settings() {
+
+========================================
+
+📄 Analyzing: src/pages/PartsLaborManagement.jsx
+----------------------------------------
+IMPORTS:
+  Line 3:import { apiEndpoints } from "../utils";
+  Line 5:import ConfirmModal from '../components/modals/ConfirmModal';
+  Line 6:import { showMessage } from "../utils";
+
+EXPORTS:
+  Line 394:export default PartsLaborManagement;
+  Line 394:export default PartsLaborManagement;
+
+========================================
+
+📄 Analyzing: src/pages/AddAndEditCustomer.jsx
+----------------------------------------
+IMPORTS:
+  Line 5:import { showMessage } from "../utils";
+
+EXPORTS:
+  Line 408:export default AddAndEditCustomer;
+  Line 408:export default AddAndEditCustomer;
+
+========================================
+
+📄 Analyzing: src/pages/DataMigration.jsx
+----------------------------------------
+IMPORTS:
+
+EXPORTS:
+  Line 268:export default function DataMigration() {
+  Line 268:export default function DataMigration() {
+  Line 268:export default function DataMigration() {
+
+========================================
+
+📄 Analyzing: src/pages/NotFound.jsx
+----------------------------------------
+IMPORTS:
+
+EXPORTS:
+  Line 6:export default function NotFound() {
+  Line 6:export default function NotFound() {
+  Line 6:export default function NotFound() {
+
+========================================
+
+📄 Analyzing: src/pages/EstimateAI.jsx
+----------------------------------------
+IMPORTS:
+
+EXPORTS:
+  Line 1:export { default } from "./Estimates";
+  Line 1:export { default } from "./Estimates";
+
+========================================
+
+📄 Analyzing: src/pages/Inventory.jsx
+----------------------------------------
+IMPORTS:
+
+EXPORTS:
+  Line 4:export default function InventoryStats({ parts }) {
+  Line 4:export default function InventoryStats({ parts }) {
+  Line 4:export default function InventoryStats({ parts }) {
+
+========================================
+
+📄 Analyzing: src/pages/CustomerDetail.jsx
+----------------------------------------
+IMPORTS:
+
+EXPORTS:
+  Line 20:export default function CustomerDetail() {
+  Line 20:export default function CustomerDetail() {
+  Line 20:export default function CustomerDetail() {
+
+========================================
+
+📄 Analyzing: src/pages/VehicleDetail.jsx
+----------------------------------------
+IMPORTS:
+  Line 5:import { vehicleHelpers } from "../utils/vehicleHelpers";
+
+EXPORTS:
+  Line 16:export default function VehicleDetail() {
+  Line 16:export default function VehicleDetail() {
+  Line 16:export default function VehicleDetail() {
+
+========================================
+
+📄 Analyzing: src/pages/Customers.jsx
+----------------------------------------
+IMPORTS:
+  Line 22:import SmartBreadcrumb from "../components/SmartBreadcrumb";
+
+EXPORTS:
+  Line 892:export default CustomerList;
+  Line 892:export default CustomerList;
+
+========================================
+
+📄 Analyzing: src/pages/Vehicles.jsx
+----------------------------------------
+IMPORTS:
+  Line 6:import ConfirmModal from '../components/modals/ConfirmModal';
+
+EXPORTS:
+  Line 9:export default function VehicleList() {
+  Line 9:export default function VehicleList() {
+  Line 9:export default function VehicleList() {
+
+========================================
+
+📄 Analyzing: src/pages/Jobs.jsx
+----------------------------------------
+IMPORTS:
+  Line 9:import ConfirmModal from '../components/modals/ConfirmModal';
+
+EXPORTS:
+  Line 121:export default ViewJobs;
+  Line 121:export default ViewJobs;
+
+========================================
+
+📄 Analyzing: src/pages/Estimates.jsx
+----------------------------------------
+IMPORTS:
+  Line 9:import { apiEndpoints } from "../utils";
+  Line 10:import ConfirmModal from '../components/modals/ConfirmModal';
+  Line 11:import { showMessage } from "../utils";
+
+EXPORTS:
+  Line 14:export default function EstimatesList() {
+  Line 70:  const exportToPDF = () => {
+  Line 91:  const exportToCSV = () => {
+  Line 14:export default function EstimatesList() {
+  Line 14:export default function EstimatesList() {
+
+========================================
+
+📄 Analyzing: src/pages/Invoices.jsx
+----------------------------------------
+IMPORTS:
+  Line 4:import { apiEndpoints } from "../utils";
+
+EXPORTS:
+  Line 290:export default Invoice;
+  Line 290:export default Invoice;
+
+========================================
+
+📄 Analyzing: src/pages/TimeClock.jsx
+----------------------------------------
+IMPORTS:
+
+EXPORTS:
+  Line 227:export default TimeClock;
+  Line 227:export default TimeClock;
+
+========================================
+
+📄 Analyzing: src/pages/AIDiagnostics.jsx
+----------------------------------------
+IMPORTS:
+  Line 3:import api from "../utils/api";
+  Line 4:import LoadingSpinner from "../components/LoadingSpinner";
+
+EXPORTS:
+  Line 428:export default AIDiagnostics;
+  Line 428:export default AIDiagnostics;
+
+========================================
+
+📄 Analyzing: src/pages/AppointmentCalendar/helpers.js
+----------------------------------------
+IMPORTS:
+
+EXPORTS:
+  Line 4:export const getStatusColor = (status) => {
+  Line 14:export const getStatusIcon = (status) => {
+  Line 4:export const getStatusColor = (status) => {
+  Line 14:export const getStatusIcon = (status) => {
+  Line 24:export const formatDate = (dateString) =>
+  Line 29:export const formatTime = (timeString) =>
+
+========================================
+
+📄 Analyzing: src/pages/AppointmentCalendar/AddAppointmentModal.jsx
+----------------------------------------
+IMPORTS:
+
+EXPORTS:
+  Line 128:export default AddAppointmentModal;
+  Line 128:export default AddAppointmentModal;
+
+========================================
+
+📄 Analyzing: src/pages/AppointmentCalendar/AppointmentDetailsModal.jsx
+----------------------------------------
+IMPORTS:
+
+EXPORTS:
+  Line 96:export default AppointmentDetailsModal;
+  Line 96:export default AppointmentDetailsModal;
+
+========================================
+
+📄 Analyzing: src/pages/AppointmentCalendar/index.jsx
+----------------------------------------
+IMPORTS:
+
+EXPORTS:
+  Line 42:export default AppointmentCalendar;
+  Line 42:export default AppointmentCalendar;
+
+========================================
+
+📄 Analyzing: src/pages/index.js
+----------------------------------------
+IMPORTS:
+
+EXPORTS:
+  Line 2:export { default as Dashboard } from './Dashboard';
+  Line 3:export { default as Login } from './Login';
+  Line 4:export { default as Register } from './Register';
+  Line 5:export { default as Landing } from './Landing';
+  Line 6:export { default as NotFound } from './NotFound';
+  Line 9:export { default as Customers } from './Customers';
+  Line 10:export { default as CustomerDetail } from './CustomerDetail';
+  Line 11:export { default as CustomerList } from './CustomerList';
+  Line 12:export { default as AddAndEditCustomer } from './AddAndEditCustomer';
+  Line 15:export { default as Vehicles } from './Vehicles';
+  Line 16:export { default as VehicleDetail } from './VehicleDetail';
+  Line 17:export { default as VehicleList } from './VehicleList';
+  Line 18:export { default as VehicleForm } from './VehicleForm';
+  Line 19:export { default as AddVehicle } from './AddVehicle';
+  Line 22:export { default as Jobs } from './Jobs';
+  Line 23:export { default as JobDetail } from './JobDetail';
+  Line 24:export { default as CreateJob } from './CreateJob';
+  Line 25:export { default as ViewJobs } from './ViewJobs';
+  Line 28:export { default as Estimates } from './Estimates';
+  Line 29:export { default as EstimateDetail } from './EstimateDetail';
+  Line 30:export { default as EstimatesList } from './EstimatesList';
+  Line 31:export { default as CreateEditEstimate } from './CreateEditEstimate';
+  Line 34:export { default as Invoices } from './Invoices';
+  Line 35:export { default as Invoice } from './Invoice';
+  Line 36:export { default as InvoiceDetail } from './InvoiceDetail';
+  Line 37:export { default as CreateInvoice } from './CreateInvoice';
+  Line 40:export { default as AppointmentCalendar } from './AppointmentCalendar';
+  Line 41:export { default as Reports } from './Reports';
+  Line 42:export { default as Settings } from './Settings';
+  Line 43:export { default as AIDiagnostics } from './AIDiagnostics';
+  Line 44:export { default as Diagnosis } from './Diagnosis';
+  Line 45:export { default as PartsLaborManagement } from './PartsLaborManagement';
+  Line 46:export { default as Inventory } from './Inventory';
+  Line 47:export { default as TimeClock } from './TimeClock';
+  Line 48:export { default as DataMigration } from './DataMigration';
+  Line 49:export { default as Mobile } from './Mobile';
+  Line 2:export { default as Dashboard } from './Dashboard';
+  Line 3:export { default as Login } from './Login';
+  Line 4:export { default as Register } from './Register';
+  Line 5:export { default as Landing } from './Landing';
+  Line 6:export { default as NotFound } from './NotFound';
+  Line 9:export { default as Customers } from './Customers';
+  Line 10:export { default as CustomerDetail } from './CustomerDetail';
+  Line 11:export { default as CustomerList } from './CustomerList';
+  Line 12:export { default as AddAndEditCustomer } from './AddAndEditCustomer';
+  Line 15:export { default as Vehicles } from './Vehicles';
+  Line 16:export { default as VehicleDetail } from './VehicleDetail';
+  Line 17:export { default as VehicleList } from './VehicleList';
+  Line 18:export { default as VehicleForm } from './VehicleForm';
+  Line 19:export { default as AddVehicle } from './AddVehicle';
+  Line 22:export { default as Jobs } from './Jobs';
+  Line 23:export { default as JobDetail } from './JobDetail';
+  Line 24:export { default as CreateJob } from './CreateJob';
+  Line 25:export { default as ViewJobs } from './ViewJobs';
+  Line 28:export { default as Estimates } from './Estimates';
+  Line 29:export { default as EstimateDetail } from './EstimateDetail';
+  Line 30:export { default as EstimatesList } from './EstimatesList';
+  Line 31:export { default as CreateEditEstimate } from './CreateEditEstimate';
+  Line 34:export { default as Invoices } from './Invoices';
+  Line 35:export { default as Invoice } from './Invoice';
+  Line 36:export { default as InvoiceDetail } from './InvoiceDetail';
+  Line 37:export { default as CreateInvoice } from './CreateInvoice';
+  Line 40:export { default as AppointmentCalendar } from './AppointmentCalendar';
+  Line 41:export { default as Reports } from './Reports';
+  Line 42:export { default as Settings } from './Settings';
+  Line 43:export { default as AIDiagnostics } from './AIDiagnostics';
+  Line 44:export { default as Diagnosis } from './Diagnosis';
+  Line 45:export { default as PartsLaborManagement } from './PartsLaborManagement';
+  Line 46:export { default as Inventory } from './Inventory';
+  Line 47:export { default as TimeClock } from './TimeClock';
+  Line 48:export { default as DataMigration } from './DataMigration';
+  Line 49:export { default as Mobile } from './Mobile';
+
+========================================
+
+📄 Analyzing: src/pages/InvoiceDetail.jsx
+----------------------------------------
+IMPORTS:
+
+EXPORTS:
+  Line 488:export default AutomotiveInvoice;
+  Line 488:export default AutomotiveInvoice;
+
+========================================
+
+📄 Analyzing: src/components/Navbar.jsx
+----------------------------------------
+IMPORTS:
+
+EXPORTS:
+  Line 93:export default Navbar;
+  Line 93:export default Navbar;
+
+========================================
+
+📄 Analyzing: src/components/modals/ConfirmModal.jsx
+----------------------------------------
+IMPORTS:
+
+EXPORTS:
+  Line 5:export default function ConfirmModal({ 
+  Line 5:export default function ConfirmModal({ 
+  Line 5:export default function ConfirmModal({ 
+
+========================================
+
+📄 Analyzing: src/components/modals/PromptModal.jsx
+----------------------------------------
+IMPORTS:
+
+EXPORTS:
+  Line 89:export default PromptModal;
+  Line 89:export default PromptModal;
+
+========================================
+
+📄 Analyzing: src/components/ErrorBoundaryWithAuth.jsx
+----------------------------------------
+IMPORTS:
+  Line 2:import { showError } from '../utils/toast';
+  Line 3:import { apiUtils } from '../utils/api';
+
+EXPORTS:
+  Line 93:export default ErrorBoundaryWithAuth;
+  Line 93:export default ErrorBoundaryWithAuth;
+
+========================================
+
+📄 Analyzing: src/components/GlobalToastDisplay.jsx
+----------------------------------------
+IMPORTS:
+
+EXPORTS:
+  Line 11:export default function GlobalToastDisplay() {
+  Line 11:export default function GlobalToastDisplay() {
+  Line 11:export default function GlobalToastDisplay() {
+
+========================================
+
+📄 Analyzing: src/components/DashboardCard.jsx
+----------------------------------------
+IMPORTS:
+
+EXPORTS:
+  Line 19:export default DashboardCard;
+  Line 19:export default DashboardCard;
+
+========================================
+
+📄 Analyzing: src/components/UserDropdown.jsx
+----------------------------------------
+IMPORTS:
+
+EXPORTS:
+  Line 14:export default function UserDropdown() {
+  Line 14:export default function UserDropdown() {
+  Line 14:export default function UserDropdown() {
+
+========================================
+
+📄 Analyzing: src/components/HealthCheck.jsx
+----------------------------------------
+IMPORTS:
+
+EXPORTS:
+  Line 47:export default HealthCheck;
+  Line 47:export default HealthCheck;
+
+========================================
+
+📄 Analyzing: src/components/LoadingSpinner.jsx
+----------------------------------------
+IMPORTS:
+
+EXPORTS:
+  Line 4:export default function LoadingSpinner({ size = 'md', className = '' }) {
+  Line 4:export default function LoadingSpinner({ size = 'md', className = '' }) {
+  Line 4:export default function LoadingSpinner({ size = 'md', className = '' }) {
+
+========================================
+
+📄 Analyzing: src/components/SearchSystem.jsx
+----------------------------------------
+IMPORTS:
+  Line 6:import { customerService, vehicleService, jobService } from "../utils";
+  Line 7:import { showError } from "../utils";
+
+EXPORTS:
+  Line 10:export const useGlobalSearch = () => {
+  Line 18:export const SearchButton = ({ onClick }) => (
+  Line 275:export default SearchSystem;
+  Line 10:export const useGlobalSearch = () => {
+  Line 18:export const SearchButton = ({ onClick }) => (
+  Line 275:export default SearchSystem;
+
+========================================
+
+📄 Analyzing: src/components/ShareableActions.jsx
+----------------------------------------
+IMPORTS:
+
+EXPORTS:
+  Line 16:export const ShareableActions = ({
+  Line 16:export const ShareableActions = ({
+
+========================================
+
+📄 Analyzing: src/components/Navigation.jsx
+----------------------------------------
+IMPORTS:
+
+EXPORTS:
+  Line 257:export default Navigation;
+  Line 30:export const navigationConfig = [
+  Line 193:export const quickAccessItems = [
+  Line 257:export default Navigation;
+
+========================================
+
+📄 Analyzing: src/components/TimeClockNavbar.jsx
+----------------------------------------
+IMPORTS:
+
+EXPORTS:
+  Line 115:export default TimeClockNavbar;
+  Line 115:export default TimeClockNavbar;
+
+========================================
+
+📄 Analyzing: src/components/QuickActionButton.jsx
+----------------------------------------
+IMPORTS:
+
+EXPORTS:
+  Line 16:export default QuickActionButton;
+  Line 16:export default QuickActionButton;
+
+========================================
+
+📄 Analyzing: src/components/TechnicianTimeClockCard.jsx
+----------------------------------------
+IMPORTS:
+
+EXPORTS:
+  Line 105:export default TechnicianTimeClockCard;
+  Line 105:export default TechnicianTimeClockCard;
+
+========================================
+
+📄 Analyzing: src/components/AppointmentCard.jsx
+----------------------------------------
+IMPORTS:
+  Line 11:import api from "../utils/api";
+
+EXPORTS:
+  Line 158:export default AppointmentCard;
+  Line 158:export default AppointmentCard;
+
+========================================
+
+📄 Analyzing: src/components/JobCard.jsx
+----------------------------------------
+IMPORTS:
+  Line 12:import api from "../utils/api";
+
+EXPORTS:
+  Line 163:export default JobCard;
+  Line 163:export default JobCard;
+
+========================================
+
+📄 Analyzing: src/components/TechnicianCard.jsx
+----------------------------------------
+IMPORTS:
+  Line 11:import api from "../utils/api";
+
+EXPORTS:
+  Line 170:export default TechnicianCard;
+  Line 170:export default TechnicianCard;
+
+========================================
+
+📄 Analyzing: src/components/TimeClockWidget.jsx
+----------------------------------------
+IMPORTS:
+  Line 11:import { timeclockService } from "../utils";
+  Line 12:import { showError, showSuccess } from "../utils";
+
+EXPORTS:
+  Line 207:export default TimeClockWidget;
+  Line 207:export default TimeClockWidget;
+
+========================================
+
+📄 Analyzing: src/components/LogoSplash.jsx
+----------------------------------------
+IMPORTS:
+
+EXPORTS:
+  Line 130:export default LogoSplash;
+  Line 130:export default LogoSplash;
+
+========================================
+
+📄 Analyzing: src/components/EnhancedJobCreation.jsx
+----------------------------------------
+IMPORTS:
+
+EXPORTS:
+  Line 362:export default EnhancedJobCreation;
+  Line 362:export default EnhancedJobCreation;
+
+========================================
+
+📄 Analyzing: src/components/PrintableLayout.jsx
+----------------------------------------
+IMPORTS:
+
+EXPORTS:
+  Line 9:export const PrintableLayout = ({
+  Line 9:export const PrintableLayout = ({
+
+========================================
+
+📄 Analyzing: src/components/PayrollReportDetail.jsx
+----------------------------------------
+IMPORTS:
+
+EXPORTS:
+  Line 10:export default PayrollReportDetail;
+  Line 10:export default PayrollReportDetail;
+
+========================================
+
+📄 Analyzing: src/components/TimeclockHistory.jsx
+----------------------------------------
+IMPORTS:
+
+EXPORTS:
+  Line 102:export default TimeclockHistory;
+  Line 102:export default TimeclockHistory;
+
+========================================
+
+📄 Analyzing: src/components/RealTimeNotifications.jsx
+----------------------------------------
+IMPORTS:
+
+EXPORTS:
+  Line 45:export default RealTimeNotifications;
+  Line 45:export default RealTimeNotifications;
+
+========================================
+
+📄 Analyzing: src/components/CustomerPortal.jsx
+----------------------------------------
+IMPORTS:
+
+EXPORTS:
+  Line 138:export default CustomerPortal;
+  Line 138:export default CustomerPortal;
+
+========================================
+
+📄 Analyzing: src/components/ai/AIProvider.js
+----------------------------------------
+IMPORTS:
+
+EXPORTS:
+  Line 9:export const generateAIResponse = async (prompt, options = {}) => {
+  Line 9:export const generateAIResponse = async (prompt, options = {}) => {
+
+========================================
+
+📄 Analyzing: src/components/ai/AIDiagnosticHelper.jsx
+----------------------------------------
+IMPORTS:
+
+EXPORTS:
+  Line 57:export default AIDiagnosticHelper;
+  Line 57:export default AIDiagnosticHelper;
+
+========================================
+
+📄 Analyzing: src/components/ai/AIEstimateModal.jsx
+----------------------------------------
+IMPORTS:
+
+EXPORTS:
+  Line 34:export default AIEstimateModal;
+  Line 34:export default AIEstimateModal;
+
+========================================
+
+📄 Analyzing: src/components/ai/AIDashboard.jsx
+----------------------------------------
+IMPORTS:
+
+EXPORTS:
+  Line 118:export default AIDashboard;
+  Line 118:export default AIDashboard;
+
+========================================
+
+📄 Analyzing: src/components/ai/AIChat.jsx
+----------------------------------------
+IMPORTS:
+  Line 5:import { aiService } from '../../services/aiService';
+
+EXPORTS:
+  Line 226:export default AIChat;
+  Line 226:export default AIChat;
+
+========================================
+
+📄 Analyzing: src/components/ai/OBD2Lookup.jsx
+----------------------------------------
+IMPORTS:
+  Line 2:import { obd2Service } from '../../services/aiService';
+
+EXPORTS:
+  Line 71:export default OBD2Lookup;
+  Line 71:export default OBD2Lookup;
+
+========================================
+
+📄 Analyzing: src/components/layout/MobileNavigation.jsx
+----------------------------------------
+IMPORTS:
+
+EXPORTS:
+  Line 15:export default MobileNavigation;
+  Line 15:export default MobileNavigation;
+
+========================================
+
+📄 Analyzing: src/components/auth/ProtectedRoute.jsx
+----------------------------------------
+IMPORTS:
+
+EXPORTS:
+  Line 54:export default ProtectedRoute;
+  Line 54:export default ProtectedRoute;
+
+========================================
+
+📄 Analyzing: src/components/AppointmentBar.jsx
+----------------------------------------
+IMPORTS:
+
+EXPORTS:
+  Line 58:export default AppointmentBar;
+  Line 58:export default AppointmentBar;
+
+========================================
+
+📄 Analyzing: src/components/ComplianceNoticeCA.jsx
+----------------------------------------
+IMPORTS:
+
+EXPORTS:
+  Line 8:export default function ComplianceNoticeCA({ className = "" }) {
+  Line 8:export default function ComplianceNoticeCA({ className = "" }) {
+  Line 8:export default function ComplianceNoticeCA({ className = "" }) {
+
+========================================
+
+📄 Analyzing: src/components/CustomerAuthorization.jsx
+----------------------------------------
+IMPORTS:
+
+EXPORTS:
+  Line 24:export default function CustomerAuthorization({
+  Line 109:  const exportSignature = () => {
+  Line 24:export default function CustomerAuthorization({
+  Line 24:export default function CustomerAuthorization({
+
+========================================
+
+📄 Analyzing: src/components/DocumentTemplplateRenderer.jsx
+----------------------------------------
+IMPORTS:
+
+EXPORTS:
+  Line 9:export default function DocumentTemplateRenderer({
+  Line 9:export default function DocumentTemplateRenderer({
+  Line 9:export default function DocumentTemplateRenderer({
+
+========================================
+
+📄 Analyzing: src/components/SmartBreadcrumb.jsx
+----------------------------------------
+IMPORTS:
+
+EXPORTS:
+  Line 116:export default SmartBreadcrumb;
+  Line 116:export default SmartBreadcrumb;
+
+========================================
+
+📄 Analyzing: src/components/LandingPage.jsx
+----------------------------------------
+IMPORTS:
+
+EXPORTS:
+  Line 107:export default LandingPage;
+  Line 107:export default LandingPage;
+
+========================================
+
+📄 Analyzing: src/components/index.js
+----------------------------------------
+IMPORTS:
+
+EXPORTS:
+  Line 4:export { default as Navbar } from './Navbar';
+  Line 5:export { default as ErrorBoundary } from './ErrorBoundary';
+  Line 6:export { default as GlobalToastDisplay } from './GlobalToastDisplay';
+  Line 7:export { default as DashboardCard } from './DashboardCard';
+  Line 8:export { default as UserDropdown } from './UserDropdown';
+  Line 9:export { default as HealthCheck } from './HealthCheck';
+  Line 10:export { default as LoadingSpinner } from './LoadingSpinner';
+  Line 11:export { default as SearchSystem } from './SearchSystem';
+  Line 12:export { default as AIEstimateModal } from './AIEstimateModal';
+  Line 13:export { default as QuickActionButton } from './QuickActionButton';
+  Line 14:export { default as TechnicianTimeClockCard } from './TechnicianTimeClockCard';
+  Line 15:export { default as AppointmentCard } from './AppointmentCard';
+  Line 16:export { default as JobCard } from './JobCard';
+  Line 17:export { default as TechnicianCard } from './TechnicianCard';
+  Line 18:export { default as LogoSplash } from './LogoSplash';
+  Line 19:export { default as EnhancedJobCreation } from './EnhancedJobCreation';
+  Line 20:export { default as TimeClockNavbar } from './TimeClockNavbar';
+  Line 21:export { default as PayrollReportDetail } from './PayrollReportDetail';
+  Line 22:export { default as ProtectedRoute } from './ProtectedRoute';
+  Line 23:export { default as TimeclockHistory } from './TimeclockHistory';
+  Line 24:export { default as RealTimeNotifications } from './RealTimeNotifications';
+  Line 25:export { default as MobileNavigation } from './MobileNavigation';
+  Line 26:export { default as CustomerPortal } from './CustomerPortal';
+  Line 27:export { default as AIDiagnosticHelper } from './AIDiagnosticHelper';
+  Line 28:export { default as Dashboard } from './Dashboard';
+  Line 29:export { default as AppointmentBar } from './AppointmentBar';
+  Line 30:export { default as ApiTest } from './ApiTest';
+  Line 31:export { default as ComplianceNoticeCA } from './ComplianceNoticeCA';
+  Line 32:export { default as CustomerAuthorization } from './CustomerAuthorization';
+  Line 33:export { default as ErrorBoundaryWithAuth } from './ErrorBoundaryWithAuth';
+  Line 34:export { default as DocumentTemplplateRenderer } from './DocumentTemplplateRenderer';
+  Line 35:export { default as TimeClockWidget } from './TimeClockWidget';
+  Line 36:export { default as Layout } from './Layout';
+  Line 37:export { default as SmartBreadcrumb } from './SmartBreadcrumb';
+  Line 38:export { default as LandingPage } from './LandingPage';
+  Line 39:export { default as RouteTest } from './RouteTest';
+  Line 40:export { default as RoutingTestComponent } from './RoutingTestComponent';
+  Line 41:export { default as FullDashboardNavbar } from './FullDashboardNavbar';
+  Line 42:export { default as IntegrationTest } from './testing/IntegrationTest';
+  Line 43:export { default as OBD2Lookup } from './ai/OBD2Lookup';
+  Line 44:export { default as AIChat } from './ai/AIChat';
+  Line 4:export { default as Navbar } from './Navbar';
+  Line 5:export { default as ErrorBoundary } from './ErrorBoundary';
+  Line 6:export { default as GlobalToastDisplay } from './GlobalToastDisplay';
+  Line 7:export { default as DashboardCard } from './DashboardCard';
+  Line 8:export { default as UserDropdown } from './UserDropdown';
+  Line 9:export { default as HealthCheck } from './HealthCheck';
+  Line 10:export { default as LoadingSpinner } from './LoadingSpinner';
+  Line 11:export { default as SearchSystem } from './SearchSystem';
+  Line 12:export { default as AIEstimateModal } from './AIEstimateModal';
+  Line 13:export { default as QuickActionButton } from './QuickActionButton';
+  Line 14:export { default as TechnicianTimeClockCard } from './TechnicianTimeClockCard';
+  Line 15:export { default as AppointmentCard } from './AppointmentCard';
+  Line 16:export { default as JobCard } from './JobCard';
+  Line 17:export { default as TechnicianCard } from './TechnicianCard';
+  Line 18:export { default as LogoSplash } from './LogoSplash';
+  Line 19:export { default as EnhancedJobCreation } from './EnhancedJobCreation';
+  Line 20:export { default as TimeClockNavbar } from './TimeClockNavbar';
+  Line 21:export { default as PayrollReportDetail } from './PayrollReportDetail';
+  Line 22:export { default as ProtectedRoute } from './ProtectedRoute';
+  Line 23:export { default as TimeclockHistory } from './TimeclockHistory';
+  Line 24:export { default as RealTimeNotifications } from './RealTimeNotifications';
+  Line 25:export { default as MobileNavigation } from './MobileNavigation';
+  Line 26:export { default as CustomerPortal } from './CustomerPortal';
+  Line 27:export { default as AIDiagnosticHelper } from './AIDiagnosticHelper';
+  Line 28:export { default as Dashboard } from './Dashboard';
+  Line 29:export { default as AppointmentBar } from './AppointmentBar';
+  Line 30:export { default as ApiTest } from './ApiTest';
+  Line 31:export { default as ComplianceNoticeCA } from './ComplianceNoticeCA';
+  Line 32:export { default as CustomerAuthorization } from './CustomerAuthorization';
+  Line 33:export { default as ErrorBoundaryWithAuth } from './ErrorBoundaryWithAuth';
+  Line 34:export { default as DocumentTemplplateRenderer } from './DocumentTemplplateRenderer';
+  Line 35:export { default as TimeClockWidget } from './TimeClockWidget';
+  Line 36:export { default as Layout } from './Layout';
+  Line 37:export { default as SmartBreadcrumb } from './SmartBreadcrumb';
+  Line 38:export { default as LandingPage } from './LandingPage';
+  Line 39:export { default as RouteTest } from './RouteTest';
+  Line 40:export { default as RoutingTestComponent } from './RoutingTestComponent';
+  Line 41:export { default as FullDashboardNavbar } from './FullDashboardNavbar';
+  Line 42:export { default as IntegrationTest } from './testing/IntegrationTest';
+  Line 43:export { default as OBD2Lookup } from './ai/OBD2Lookup';
+  Line 44:export { default as AIChat } from './ai/AIChat';
+
+========================================
+
+📄 Analyzing: src/components/AIEstimateCard.jsx
+----------------------------------------
+IMPORTS:
+
+EXPORTS:
+  Line 162:export default AIEstimateCard;
+  Line 162:export default AIEstimateCard;
+
+========================================
+
+📄 Analyzing: src/components/testing/IntegrationTest.jsx
+----------------------------------------
+IMPORTS:
+  Line 2:import { apiEndpoints } from '../../utils/apiEndpoints';
+  Line 3:import { handleApiError } from '../../utils/errorUtils.jsx';
+  Line 4:import { showSuccess, showError } from '../../utils/messageUtils';
+  Line 5:import { initializeSocket, getSocket } from '../../utils/socketUtils';
+
+EXPORTS:
+  Line 295:export default IntegrationTest;
+  Line 295:export default IntegrationTest;
+
+========================================
+
+📄 Analyzing: src/main.jsx
+----------------------------------------
+IMPORTS:
+
+EXPORTS:
+
+========================================
+
+📄 Analyzing: src/services/aiService.js
+----------------------------------------
+IMPORTS:
+
+EXPORTS:
+  Line 4:export const aiService = {
+  Line 75:export const obd2Service = {
+  Line 99:export default aiService;
+  Line 4:export const aiService = {
+  Line 75:export const obd2Service = {
+  Line 99:export default aiService;
+
+========================================
+
+📄 Analyzing: src/services/socket.js
+----------------------------------------
+IMPORTS:
+
+EXPORTS:
+  Line 3:export const socket = io(SOCKET_URL, { transports: ['websocket'] });
+  Line 3:export const socket = io(SOCKET_URL, { transports: ['websocket'] });
+
+========================================
+
+📄 Analyzing: src/services/diagnosticsService.ts
+----------------------------------------
+IMPORTS:
+
+EXPORTS:
+  Line 3:export const diagnosticsService = {
+  Line 3:export const diagnosticsService = {
+
+========================================
+
+📄 Analyzing: src/config/navigation.js
+----------------------------------------
+IMPORTS:
+
+EXPORTS:
+  Line 166:export const featureStatus = {
+  Line 195:export const navigationByRole = {
+  Line 212:export const breadcrumbConfig = {
+  Line 238:export const shopInfo = {
+  Line 263:export default {
+  Line 263:export default {
+  Line 5:export const mainNavLinks = [
+  Line 45:export const managementNavLinks = [
+  Line 73:export const aiNavLinks = [
+  Line 97:export const advancedNavLinks = [
+  Line 119:export const quickActions = [
+  Line 155:export const mobileQuickLinks = [
+  Line 163:export const ctaButton = quickActions[1]; // New Job (most common action)
+  Line 166:export const featureStatus = {
+  Line 195:export const navigationByRole = {
+  Line 212:export const breadcrumbConfig = {
+  Line 238:export const shopInfo = {
+  Line 263:export default {
+
+========================================
+
+📄 Analyzing: src/utils/toast.js
+----------------------------------------
+IMPORTS:
+
+EXPORTS:
+  Line 3:export const showMessage = (message, type = 'info', options = {}) => {
+  Line 23:export const showSuccess = (message, options = {}) => {
+  Line 27:export const showError = (message, options = {}) => {
+  Line 31:export const showLoading = (message, options = {}) => {
+  Line 35:export const dismissToast = (toastId) => {
+  Line 39:export const dismissAllToasts = () => {
+  Line 43:export const promiseToast = (promise, messages = {}) => {
+  Line 54:export default {
+  Line 54:export default {
+  Line 3:export const showMessage = (message, type = 'info', options = {}) => {
+  Line 23:export const showSuccess = (message, options = {}) => {
+  Line 27:export const showError = (message, options = {}) => {
+  Line 31:export const showLoading = (message, options = {}) => {
+  Line 35:export const dismissToast = (toastId) => {
+  Line 39:export const dismissAllToasts = () => {
+  Line 43:export const promiseToast = (promise, messages = {}) => {
+  Line 54:export default {
+
+========================================
+
+📄 Analyzing: src/utils/api.js
+----------------------------------------
+IMPORTS:
+
+EXPORTS:
+  Line 9:export const api = axios.create({
+  Line 15:export const healthApi = axios.create({ baseURL: API_BASE_URL, timeout: 5000 });
+  Line 17:export const uploadApi = axios.create({
+  Line 79:export class ApiCache {
+  Line 109:export const enhancedGet = async (url, options = {}) => {
+  Line 135:export class RequestQueueClass {
+  Line 165:export const migrationService = {
+  Line 177:export const apiEndpoints = {
+  Line 228:export default api;
+  Line 6:export const API_BASE_URL = import.meta.env?.VITE_API_BASE_URL || "http://localhost:5000";
+  Line 9:export const api = axios.create({
+  Line 15:export const healthApi = axios.create({ baseURL: API_BASE_URL, timeout: 5000 });
+  Line 17:export const uploadApi = axios.create({
+  Line 79:export class ApiCache {
+  Line 106:export const apiCache = new ApiCache();
+  Line 109:export const enhancedGet = async (url, options = {}) => {
+  Line 135:export class RequestQueueClass {
+  Line 162:export const RequestQueue = new RequestQueueClass();
+  Line 165:export const migrationService = {
+  Line 177:export const apiEndpoints = {
+  Line 223:export const customerService = apiEndpoints.customers;
+  Line 224:export const vehicleService = apiEndpoints.vehicles;
+  Line 225:export const jobService = apiEndpoints.jobs;
+  Line 228:export default api;
+
+========================================
+
+📄 Analyzing: src/utils/vehicleHelpers.js
+----------------------------------------
+IMPORTS:
+
+EXPORTS:
+  Line 1:export const vehicleHelpers = {
+  Line 1:export const vehicleHelpers = {
+
+========================================
+
+📄 Analyzing: src/utils/aiDiagnosticsService.js
+----------------------------------------
+IMPORTS:
+
+EXPORTS:
+  Line 4:export const aiDiagnosticsService = {
+  Line 98:  exportDiagnosisToPDF: async (diagnosis) => {
+  Line 106:      const exportFileDefaultName = `diagnosis_${Date.now()}.json`;
+  Line 342:export default aiDiagnosticsService;
+  Line 4:export const aiDiagnosticsService = {
+  Line 342:export default aiDiagnosticsService;
+
+========================================
+
+📄 Analyzing: src/utils/tokenManager.js
+----------------------------------------
+IMPORTS:
+
+EXPORTS:
+  Line 6:export const getToken = () => {
+  Line 10:export const setToken = (token) => {
+  Line 14:export const removeToken = () => {
+  Line 18:export const getUserData = () => {
+  Line 23:export const setUserData = (userData) => {
+  Line 27:export const removeUserData = () => {
+  Line 31:export const clearAllAuthData = () => {
+  Line 36:export const isAuthenticated = () => {
+  Line 42:export const isTokenExpired = () => {
+  Line 56:export default {
+  Line 56:export default {
+  Line 6:export const getToken = () => {
+  Line 10:export const setToken = (token) => {
+  Line 14:export const removeToken = () => {
+  Line 18:export const getUserData = () => {
+  Line 23:export const setUserData = (userData) => {
+  Line 27:export const removeUserData = () => {
+  Line 31:export const clearAllAuthData = () => {
+  Line 36:export const isAuthenticated = () => {
+  Line 42:export const isTokenExpired = () => {
+  Line 56:export default {
+
+========================================
+
+📄 Analyzing: src/utils/apiEndpoints.js
+----------------------------------------
+IMPORTS:
+
+EXPORTS:
+  Line 17:export const uploadApi = axios.create({
+  Line 109:export const enhancedGet = async (url, options = {}) => {
+  Line 164:export const migrationService = {
+  Line 176:export const apiEndpoints = {
+  Line 237:export default api;
+  Line 6:export const API_BASE_URL = import.meta.env?.VITE_API_BASE_URL || "http://localhost:5000";
+  Line 17:export const uploadApi = axios.create({
+  Line 106:export const apiCache = new ApiCache();
+  Line 109:export const enhancedGet = async (url, options = {}) => {
+  Line 161:export const RequestQueue = new RequestQueueClass();
+  Line 164:export const migrationService = {
+  Line 176:export const apiEndpoints = {
+  Line 222:export const customerService = apiEndpoints.customers;
+  Line 223:export const vehicleService = apiEndpoints.vehicles;
+  Line 224:export const jobService = apiEndpoints.jobs;
+  Line 225:export const estimateService = apiEndpoints.estimates;
+  Line 226:export const invoiceService = apiEndpoints.invoices;
+  Line 227:export const dashboardService = apiEndpoints.dashboard;
+  Line 228:export const settingsService = apiEndpoints.settings;
+  Line 229:export const partsService = apiEndpoints.parts;
+  Line 230:export const inventoryService = apiEndpoints.inventory;
+  Line 231:export const timeclockService = apiEndpoints.timeclock;
+  Line 232:export const reportsService = apiEndpoints.reports;
+  Line 233:export const appointmentService = apiEndpoints.appointments;
+  Line 234:export const aiService = apiEndpoints.ai;
+  Line 237:export default api;
+
+========================================
+
+📄 Analyzing: src/utils/testApi.js
+----------------------------------------
+IMPORTS:
+
+EXPORTS:
+  Line 4:export const testApiConnections = async () => {
+  Line 81:export const quickHealthCheck = async () => {
+  Line 106:export const testEndpoint = async (endpointName, ...args) => {
+  Line 141:export default testApiConnections;
+  Line 4:export const testApiConnections = async () => {
+  Line 81:export const quickHealthCheck = async () => {
+  Line 106:export const testEndpoint = async (endpointName, ...args) => {
+  Line 141:export default testApiConnections;
+
+========================================
+
+📄 Analyzing: src/utils/billing.js
+----------------------------------------
+IMPORTS:
+
+EXPORTS:
+  Line 2:export function calcPartsSubtotal(parts = []) {
+  Line 6:export function calcPartsMarkup(partsSubtotal, partsMarkup) {
+  Line 10:export function calcLaborSubtotal(labor = [], defaultRate) {
+  Line 18:export function calcShopSupplies(subtotal, shopSuppliesRate) {
+  Line 22:export function calcTax(taxable, taxRate) {
+  Line 29:export function computeTotals({ parts, labor }, settings) {
+  Line 2:export function calcPartsSubtotal(parts = []) {
+  Line 6:export function calcPartsMarkup(partsSubtotal, partsMarkup) {
+  Line 10:export function calcLaborSubtotal(labor = [], defaultRate) {
+  Line 18:export function calcShopSupplies(subtotal, shopSuppliesRate) {
+  Line 22:export function calcTax(taxable, taxRate) {
+  Line 29:export function computeTotals({ parts, labor }, settings) {
+
+========================================
+
+📄 Analyzing: src/utils/aiUtils.js
+----------------------------------------
+IMPORTS:
+
+EXPORTS:
+  Line 9:export const generateAIResponse = async (symptoms, vehicleInfo = {}) => {
+  Line 40:export const analyzeDiagnosticCodes = async (codes, vehicleInfo = {}) => {
+  Line 9:export const generateAIResponse = async (symptoms, vehicleInfo = {}) => {
+  Line 40:export const analyzeDiagnosticCodes = async (codes, vehicleInfo = {}) => {
+
+========================================
+
+📄 Analyzing: src/utils/index.js
+----------------------------------------
+IMPORTS:
+
+EXPORTS:
+  Line 4:export {
+  Line 42:export { default as aiDiagnosticsService } from './aiDiagnosticsService';
+  Line 45:export { apiEndpoints as endpoints } from './apiEndpoints';
+  Line 4:export {
+  Line 26:export * from './tokenManager';
+  Line 27:export * from './testApi';
+  Line 28:export * from './aiUtils';
+  Line 29:export * from './calculations';
+  Line 30:export * from './dateUtils';
+  Line 31:export * from './errorUtils.jsx';
+  Line 32:export * from './messageUtils';
+  Line 33:export * from './socketUtils';
+  Line 34:export * from './statusUtils';
+  Line 35:export * from './vehicleHelpers';
+  Line 36:export * from './toast';
+  Line 37:export * from './billing';
+  Line 38:export * from './employeeService';
+  Line 39:export * from './utilityService';
+  Line 42:export { default as aiDiagnosticsService } from './aiDiagnosticsService';
+  Line 45:export { apiEndpoints as endpoints } from './apiEndpoints';
+
+========================================
+
+📄 Analyzing: src/utils/services/customerService.js
+----------------------------------------
+IMPORTS:
+
+EXPORTS:
+  Line 13:export const getAll = async (params = {}) => {
+  Line 22:export const getById = async (id) => {
+  Line 31:export const create = async (customerData) => {
+  Line 40:export const update = async (id, customerData) => {
+  Line 49:export const deleteCustomer = async (id) => {
+  Line 58:export default {
+  Line 58:export default {
+  Line 13:export const getAll = async (params = {}) => {
+  Line 22:export const getById = async (id) => {
+  Line 31:export const create = async (customerData) => {
+  Line 40:export const update = async (id, customerData) => {
+  Line 49:export const deleteCustomer = async (id) => {
+  Line 58:export default {
+
+========================================
+
+📄 Analyzing: src/utils/services/vehicleService.js
+----------------------------------------
+IMPORTS:
+
+EXPORTS:
+  Line 13:export const getAll = async (params = {}) => {
+  Line 22:export const getById = async (id) => {
+  Line 31:export const create = async (vehicleData) => {
+  Line 40:export const update = async (id, vehicleData) => {
+  Line 49:export const deleteVehicle = async (id) => {
+  Line 58:export default {
+  Line 58:export default {
+  Line 13:export const getAll = async (params = {}) => {
+  Line 22:export const getById = async (id) => {
+  Line 31:export const create = async (vehicleData) => {
+  Line 40:export const update = async (id, vehicleData) => {
+  Line 49:export const deleteVehicle = async (id) => {
+  Line 58:export default {
+
+========================================
+
+📄 Analyzing: src/utils/services/jobService.js
+----------------------------------------
+IMPORTS:
+
+EXPORTS:
+  Line 13:export const getAll = async (params = {}) => {
+  Line 22:export const getById = async (id) => {
+  Line 31:export const create = async (jobData) => {
+  Line 40:export const update = async (id, jobData) => {
+  Line 49:export const updateStatus = async (id, statusData) => {
+  Line 58:export const deleteJob = async (id) => {
+  Line 67:export default {
+  Line 67:export default {
+  Line 13:export const getAll = async (params = {}) => {
+  Line 22:export const getById = async (id) => {
+  Line 31:export const create = async (jobData) => {
+  Line 40:export const update = async (id, jobData) => {
+  Line 49:export const updateStatus = async (id, statusData) => {
+  Line 58:export const deleteJob = async (id) => {
+  Line 67:export default {
+
+========================================
+
+📄 Analyzing: src/utils/services/estimateService.js
+----------------------------------------
+IMPORTS:
+
+EXPORTS:
+  Line 13:export const getAll = async (params = {}) => {
+  Line 22:export const getById = async (id) => {
+  Line 31:export const create = async (estimateData) => {
+  Line 40:export const update = async (id, estimateData) => {
+  Line 49:export const deleteEstimate = async (id) => {
+  Line 58:export default {
+  Line 58:export default {
+  Line 13:export const getAll = async (params = {}) => {
+  Line 22:export const getById = async (id) => {
+  Line 31:export const create = async (estimateData) => {
+  Line 40:export const update = async (id, estimateData) => {
+  Line 49:export const deleteEstimate = async (id) => {
+  Line 58:export default {
+
+========================================
+
+📄 Analyzing: src/utils/services/invoiceService.js
+----------------------------------------
+IMPORTS:
+
+EXPORTS:
+  Line 13:export const getAll = async (params = {}) => {
+  Line 22:export const getById = async (id) => {
+  Line 31:export const create = async (invoiceData) => {
+  Line 40:export const update = async (id, invoiceData) => {
+  Line 49:export const deleteInvoice = async (id) => {
+  Line 58:export default {
+  Line 58:export default {
+  Line 13:export const getAll = async (params = {}) => {
+  Line 22:export const getById = async (id) => {
+  Line 31:export const create = async (invoiceData) => {
+  Line 40:export const update = async (id, invoiceData) => {
+  Line 49:export const deleteInvoice = async (id) => {
+  Line 58:export default {
+
+========================================
+
+📄 Analyzing: src/utils/services/appointmentService.js
+----------------------------------------
+IMPORTS:
+
+EXPORTS:
+  Line 13:export const getAll = async (params = {}) => {
+  Line 22:export const getById = async (id) => {
+  Line 31:export const create = async (appointmentData) => {
+  Line 40:export const update = async (id, appointmentData) => {
+  Line 49:export const deleteAppointment = async (id) => {
+  Line 58:export default {
+  Line 58:export default {
+  Line 13:export const getAll = async (params = {}) => {
+  Line 22:export const getById = async (id) => {
+  Line 31:export const create = async (appointmentData) => {
+  Line 40:export const update = async (id, appointmentData) => {
+  Line 49:export const deleteAppointment = async (id) => {
+  Line 58:export default {
+
+========================================
+
+📄 Analyzing: src/utils/services/timeclockService.js
+----------------------------------------
+IMPORTS:
+
+EXPORTS:
+  Line 13:export const status = async () => {
+  Line 22:export const clockIn = async () => {
+  Line 31:export const clockOut = async () => {
+  Line 40:export default {
+  Line 40:export default {
+  Line 13:export const status = async () => {
+  Line 22:export const clockIn = async () => {
+  Line 31:export const clockOut = async () => {
+  Line 40:export default {
+
+========================================
+
+📄 Analyzing: src/utils/services/reportService.js
+----------------------------------------
+IMPORTS:
+
+EXPORTS:
+  Line 14:export const getAll = async (params = {}) => {
+  Line 24:export const getByType = async (reportType, params = {}) => {
+  Line 34:export const generateCustomReport = async (reportData) => {
+  Line 43:export default {
+  Line 43:export default {
+  Line 14:export const getAll = async (params = {}) => {
+  Line 24:export const getByType = async (reportType, params = {}) => {
+  Line 34:export const generateCustomReport = async (reportData) => {
+  Line 43:export default {
+
+========================================
+
+📄 Analyzing: src/utils/services/diagnosticsService.js
+----------------------------------------
+IMPORTS:
+
+EXPORTS:
+  Line 14:export const getSystemStatus = async () => {
+  Line 24:export const runTest = async (testType) => {
+  Line 34:export default {
+  Line 34:export default {
+  Line 14:export const getSystemStatus = async () => {
+  Line 24:export const runTest = async (testType) => {
+  Line 34:export default {
+
+========================================
+
+📄 Analyzing: src/utils/services/index.js
+----------------------------------------
+IMPORTS:
+
+EXPORTS:
+  Line 12:export {
+  Line 12:export {
+
+========================================
+
+📄 Analyzing: src/utils/services/migrationServices.js
+----------------------------------------
+IMPORTS:
+
+EXPORTS:
+  Line 38:export default migrationService;
+  Line 38:export default migrationService;
+
+========================================
+
+📄 Analyzing: src/utils/utilityService.js
+----------------------------------------
+IMPORTS:
+
+EXPORTS:
+  Line 2:export default utilityService;
+  Line 2:export default utilityService;
+
+========================================
+
+📄 Analyzing: src/utils/employeeService.js
+----------------------------------------
+IMPORTS:
+
+EXPORTS:
+  Line 2:export default employeeService;
+  Line 2:export default employeeService;
+
+========================================
+
+📄 Analyzing: src/utils/messageUtils.js
+----------------------------------------
+IMPORTS:
+
+EXPORTS:
+  Line 4:export const showMessage = (message, type = 'info', duration = 5000) => {
+  Line 27:export const hideMessage = (messageId) => {
+  Line 31:export const clearAllMessages = () => {
+  Line 35:export const getActiveMessages = () => {
+  Line 40:export const showSuccess = (message, duration = 3000) => {
+  Line 45:export const showError = (message, duration = 8000) => {
+  Line 50:export const showWarning = (message, duration = 5000) => {
+  Line 55:export const showInfo = (message, duration = 4000) => {
+  Line 4:export const showMessage = (message, type = 'info', duration = 5000) => {
+  Line 27:export const hideMessage = (messageId) => {
+  Line 31:export const clearAllMessages = () => {
+  Line 35:export const getActiveMessages = () => {
+  Line 40:export const showSuccess = (message, duration = 3000) => {
+  Line 45:export const showError = (message, duration = 8000) => {
+  Line 50:export const showWarning = (message, duration = 5000) => {
+  Line 55:export const showInfo = (message, duration = 4000) => {
+
+========================================
+
+📄 Analyzing: src/utils/socketUtils.js
+----------------------------------------
+IMPORTS:
+
+EXPORTS:
+  Line 6:export const initializeSocket = (serverUrl = 'http://localhost:5000') => {
+  Line 29:export const getSocket = () => {
+  Line 36:export const disconnectSocket = () => {
+  Line 44:export { socket };
+  Line 47:export const emitSocketEvent = (event, data) => {
+  Line 55:export const onSocketEvent = (event, callback) => {
+  Line 60:export const offSocketEvent = (event, callback) => {
+  Line 6:export const initializeSocket = (serverUrl = 'http://localhost:5000') => {
+  Line 29:export const getSocket = () => {
+  Line 36:export const disconnectSocket = () => {
+  Line 44:export { socket };
+  Line 47:export const emitSocketEvent = (event, data) => {
+  Line 55:export const onSocketEvent = (event, callback) => {
+  Line 60:export const offSocketEvent = (event, callback) => {
+
+========================================
+
+📄 Analyzing: src/utils/calculations.js
+----------------------------------------
+IMPORTS:
+
+EXPORTS:
+  Line 3:export const computeTotals = (items = []) => {
+  Line 55:export const calculateLaborCost = (hours, rate = 120) => {
+  Line 59:export const calculatePartMarkup = (cost, markupPercentage = 0.30) => {
+  Line 64:export const formatCurrency = (amount, currency = 'USD') => {
+  Line 71:export const calculateEstimateAccuracy = (estimate, actual) => {
+  Line 3:export const computeTotals = (items = []) => {
+  Line 55:export const calculateLaborCost = (hours, rate = 120) => {
+  Line 59:export const calculatePartMarkup = (cost, markupPercentage = 0.30) => {
+  Line 64:export const formatCurrency = (amount, currency = 'USD') => {
+  Line 71:export const calculateEstimateAccuracy = (estimate, actual) => {
+
+========================================
+
+📄 Analyzing: src/utils/dateUtils.js
+----------------------------------------
+IMPORTS:
+
+EXPORTS:
+  Line 3:export const formatDate = (date, format = 'MM/dd/yyyy') => {
+  Line 31:export const formatTime = (time, format = '12h') => {
+  Line 52:export const formatDateTime = (datetime, dateFormat = 'MM/dd/yyyy', timeFormat = '12h') => {
+  Line 61:export const getRelativeTime = (date) => {
+  Line 82:export const addDays = (date, days) => {
+  Line 88:export const addHours = (date, hours) => {
+  Line 3:export const formatDate = (date, format = 'MM/dd/yyyy') => {
+  Line 31:export const formatTime = (time, format = '12h') => {
+  Line 52:export const formatDateTime = (datetime, dateFormat = 'MM/dd/yyyy', timeFormat = '12h') => {
+  Line 61:export const getRelativeTime = (date) => {
+  Line 82:export const addDays = (date, days) => {
+  Line 88:export const addHours = (date, hours) => {
+
+========================================
+
+📄 Analyzing: src/utils/statusUtils.js
+----------------------------------------
+IMPORTS:
+
+EXPORTS:
+  Line 3:export const getStatusColor = (status) => {
+  Line 39:export const getStatusIcon = (status) => {
+  Line 75:export const getStatusText = (status) => {
+  Line 84:export const getStatusBadgeProps = (status) => {
+  Line 3:export const getStatusColor = (status) => {
+  Line 39:export const getStatusIcon = (status) => {
+  Line 75:export const getStatusText = (status) => {
+  Line 84:export const getStatusBadgeProps = (status) => {
+
+========================================
+
+📄 Analyzing: src/utils/errorUtils.jsx
+----------------------------------------
+IMPORTS:
+
+EXPORTS:
+  Line 3:export const handleApiError = (error, context = '') => {
+  Line 42:export const createErrorBoundary = (fallbackComponent) => {
+  Line 67:export const retryOperation = async (operation, maxRetries = 3, delay = 1000) => {
+  Line 81:export const validateRequiredFields = (data, requiredFields) => {
+  Line 3:export const handleApiError = (error, context = '') => {
+  Line 42:export const createErrorBoundary = (fallbackComponent) => {
+  Line 67:export const retryOperation = async (operation, maxRetries = 3, delay = 1000) => {
+  Line 81:export const validateRequiredFields = (data, requiredFields) => {
+
+========================================
+
+📄 Analyzing: src/hooks/useSearchFilter.js
+----------------------------------------
+IMPORTS:
+
+EXPORTS:
+  Line 3:export const useSearchFilter = (data = [], searchFields = []) => {
+  Line 3:export const useSearchFilter = (data = [], searchFields = []) => {
+
+========================================
+
+📄 Analyzing: src/hooks/useDataOperations.js
+----------------------------------------
+IMPORTS:
+  Line 13:import { showError, showSuccess } from "../utils/toast";
+
+EXPORTS:
+  Line 15:export const useDataOperations = () => {
+  Line 15:export const useDataOperations = () => {
+
+========================================
+
+📄 Analyzing: src/hooks/useLocalStorage.js
+----------------------------------------
+IMPORTS:
+
+EXPORTS:
+  Line 23:export const useLocalStorage = (key, defaultValue) => {
+  Line 23:export const useLocalStorage = (key, defaultValue) => {
+
+========================================
+
+📄 Analyzing: src/hooks/useApi.jsx
+----------------------------------------
+IMPORTS:
+  Line 3:import api, { enhancedGet, apiUtils } from '../utils/api';
+  Line 4:import { showError } from '../utils/toast';
+
+EXPORTS:
+  Line 9:export const useApi = () => {
+  Line 9:export const useApi = () => {
+
+========================================
+
+📄 Analyzing: src/hooks/useAuth.js
+----------------------------------------
+IMPORTS:
+  Line 3:import { apiEndpoints, apiUtils } from '../utils/api';
+  Line 4:import { tokenManager } from '../utils/tokenManager';
+
+EXPORTS:
+  Line 6:export const useAuth = () => {
+  Line 6:export const useAuth = () => {
+
+========================================
+
+📄 Analyzing: src/hooks/useEnhancedNavigation.js
+----------------------------------------
+IMPORTS:
+
+EXPORTS:
+  Line 6:export const useEnhancedNavigation = () => {
+  Line 6:export const useEnhancedNavigation = () => {
+
+========================================
+
+📄 Analyzing: src/hooks/index.js
+----------------------------------------
+IMPORTS:
+
+EXPORTS:
+  Line 4:export { useSearchFilter } from './useSearchFilter';
+  Line 7:export { useDataOperations } from './useDataOperations';
+  Line 10:export { useLocalStorage } from './useLocalStorage';
+  Line 13:export { useApi } from './useApi.jsx';
+  Line 16:export { useAuth } from '../contexts/AuthContext';
+  Line 18:export { useEnhancedNavigation } from './useEnhancedNavigation';
+  Line 4:export { useSearchFilter } from './useSearchFilter';
+  Line 7:export { useDataOperations } from './useDataOperations';
+  Line 10:export { useLocalStorage } from './useLocalStorage';
+  Line 13:export { useApi } from './useApi.jsx';
+  Line 16:export { useAuth } from '../contexts/AuthContext';
+  Line 18:export { useEnhancedNavigation } from './useEnhancedNavigation';
+
+========================================
+
+📄 Analyzing: src/hooks/usePrintable.js
+----------------------------------------
+IMPORTS:
+
+EXPORTS:
+  Line 10:export const usePrintable = (title, isActive = false) => {
+  Line 10:export const usePrintable = (title, isActive = false) => {
+
+========================================
+
+📄 Analyzing: src/contexts/AuthContext.jsx
+----------------------------------------
+IMPORTS:
+  Line 3:import { login_post, register_post, me_get, logout_post } from "../utils/api";
+
+EXPORTS:
+  Line 7:export const useAuth = () => {
+  Line 15:export const AuthProvider = ({ children }) => {
+  Line 7:export const useAuth = () => {
+  Line 15:export const AuthProvider = ({ children }) => {
+
+========================================
+
+📄 Analyzing: src/contexts/DataContext.jsx
+----------------------------------------
+IMPORTS:
+
+EXPORTS:
+  Line 15:export const DataProvider = ({ children }) => {
+  Line 251:export const useData = () => {
+  Line 15:export const DataProvider = ({ children }) => {
+  Line 251:export const useData = () => {
+
+========================================
+
+📄 Analyzing: src/contexts/ShopContext.jsx
+----------------------------------------
+IMPORTS:
+
+EXPORTS:
+  Line 5:export const ShopProvider = ({ children }) => {
+  Line 25:export const useShop = () => {
+  Line 5:export const ShopProvider = ({ children }) => {
+  Line 25:export const useShop = () => {
+
+========================================
+
+📄 Analyzing: src/contexts/SettingsProvider.jsx
+----------------------------------------
+IMPORTS:
+  Line 3:import { settings_get, settings_shop_get, settings_shop_put } from "../utils/api";
+
+EXPORTS:
+  Line 8:export const SettingsProvider = ({ children }) => {
+  Line 99:export const useSettings = () => {
+  Line 8:export const SettingsProvider = ({ children }) => {
+  Line 99:export const useSettings = () => {
+
+========================================
+
+📄 Analyzing: src/contexts/CombinedProviders.jsx
+----------------------------------------
+IMPORTS:
+
+EXPORTS:
+  Line 7:export const CombinedProviders = ({ children }) => (
+  Line 7:export const CombinedProviders = ({ children }) => (
+
+========================================
+
+📄 Analyzing: src/contexts/index.js
+----------------------------------------
+IMPORTS:
+
+EXPORTS:
+  Line 2:export { useAuth } from './AuthContext';
+  Line 3:export { useData } from './DataContext';
+  Line 4:export { useSettings } from './SettingsProvider';
+  Line 5:export { useShop } from './ShopContext';
+  Line 8:export { AuthProvider } from './AuthContext';
+  Line 9:export { DataProvider } from './DataContext';
+  Line 10:export { SettingsProvider } from './SettingsProvider';
+  Line 11:export { ShopProvider } from './ShopContext';
+  Line 14:export { CombinedProviders } from './CombinedProviders';
+  Line 2:export { useAuth } from './AuthContext';
+  Line 3:export { useData } from './DataContext';
+  Line 4:export { useSettings } from './SettingsProvider';
+  Line 5:export { useShop } from './ShopContext';
+  Line 8:export { AuthProvider } from './AuthContext';
+  Line 9:export { DataProvider } from './DataContext';
+  Line 10:export { SettingsProvider } from './SettingsProvider';
+  Line 11:export { ShopProvider } from './ShopContext';
+  Line 14:export { CombinedProviders } from './CombinedProviders';
+
+========================================
+
+📄 Analyzing: src/layouts/Layout.jsx
+----------------------------------------
+IMPORTS:
+  Line 5:import ErrorBoundaryWithAuth from "../components/ErrorBoundaryWithAuth";
+  Line 8://import CompleteNavigationMenu from "../components/CompleteNavigationMenu";
+  Line 9:import Navbar from "../components/TimeClockNavbar";
+
+EXPORTS:
+  Line 11:export default function Layout() {
+  Line 11:export default function Layout() {
+  Line 11:export default function Layout() {
+
+========================================
+
+📄 Analyzing: src/layouts/ProtectedLayout.jsx
+----------------------------------------
+IMPORTS:
+  Line 5:import LoadingSpinner from "../components/LoadingSpinner";
+
+EXPORTS:
+  Line 7:export default function ProtectedLayout() {
+  Line 7:export default function ProtectedLayout() {
+  Line 7:export default function ProtectedLayout() {
+
+========================================
+
+📄 Analyzing: src/layouts/ProtectedDashboardLayout.jsx
+----------------------------------------
+IMPORTS:
+  Line 5:import LoadingSpinner from "../components/LoadingSpinner";
+  Line 6:import ErrorBoundaryWithAuth from "../components/ErrorBoundaryWithAuth";
+  Line 9:import CompleteNavigationMenu from "../components/CompleteNavigationMenu";
+  Line 10:import TimeClockNavbar from "../components/TimeClockNavbar";
+
+EXPORTS:
+  Line 13:export default function ProtectedDashboardLayout() {
+  Line 13:export default function ProtectedDashboardLayout() {
+  Line 13:export default function ProtectedDashboardLayout() {
+
+========================================
+
+📄 Analyzing: src/_backups/Mobile.tsx
+----------------------------------------
+IMPORTS:
+  Line 2:import MobileTechApp from '../components/mobile/MobileTechApp'
+
+EXPORTS:
+  Line 8:export default Mobile
+  Line 8:export default Mobile
+
+========================================
+
+📄 Analyzing: src/_backups/MobileTechApp.tsx
+----------------------------------------
+IMPORTS:
+
+EXPORTS:
+  Line 153:export default MobileTechApp
+  Line 153:export default MobileTechApp
+
+========================================
+
+📄 Analyzing: src/_backups/Dashboard.tsx
+----------------------------------------
+IMPORTS:
+
+EXPORTS:
+  Line 118:export default Dashboard;
+  Line 118:export default Dashboard;
+
+========================================
+
+📄 Analyzing: src/_backups/VehicleDiagnostics.tsx
+----------------------------------------
+IMPORTS:
+  Line 5:import { apiEndpoints } from '../../utils/api';
+
+EXPORTS:
+  Line 49:export default VehicleDiagnostics;
+  Line 49:export default VehicleDiagnostics;
+
+========================================
+
+📄 Analyzing: src/_backups/App.tsx
+----------------------------------------
+IMPORTS:
+  Line 5:import ErrorBoundary from './components/ErrorBoundary'
+  Line 6:import LoadingSpinner from './components/LoadingSpinner'
+  Line 7:import ProtectedRoute from './components/ProtectedRoute'
+  Line 8:import Layout from './components/Layout'
+  Line 11:const Dashboard = lazy(() => import('./pages/Dashboard'))
+  Line 12:const Login = lazy(() => import('./pages/Login'))
+  Line 13:const Register = lazy(() => import('./pages/Register'))
+  Line 14:const VehicleList = lazy(() => import('./pages/VehicleList'))
+  Line 15:const VehicleDetail = lazy(() => import('./pages/VehicleDetail'))
+  Line 16:const AddVehicle = lazy(() => import('./pages/AddVehicle'))
+  Line 17:const ViewJobs = lazy(() => import('./pages/ViewJobs'))
+  Line 18:const CreateJob = lazy(() => import('./pages/CreateJob'))
+  Line 19:const EstimateAI = lazy(() => import('./pages/EstimateAI'))
+  Line 20:const CustomerList = lazy(() => import('./pages/CustomerList'))
+  Line 21:const CustomerDetail = lazy(() => import('./pages/CustomerDetail'))
+  Line 22:const AddAndEditCustomer = lazy(() => import('./pages/AddAndEditCustomer'))
+  Line 23:const Invoice = lazy(() => import('./pages/Invoice'))
+  Line 24:const Reports = lazy(() => import('./pages/Reports'))
+  Line 25:const AppointmentCalendar = lazy(() => import('./pages/AppointmentCalendar'))
+  Line 26:const PartsLaborManagement = lazy(() => import('./pages/PartsLaborManagement'))
+  Line 27:const Settings = lazy(() => import('./pages/Settings'))
+  Line 28:const NotFound = lazy(() => import('./pages/NotFound'))
+  Line 31:const MobileTechApp = lazy(() => import('./components/mobile/MobileTechApp'))
+
+EXPORTS:
+  Line 36:export const useData = () => {
+  Line 173:export default App
+  Line 36:export const useData = () => {
+  Line 173:export default App
+
+========================================
+
+📄 Analyzing: src/types/index.ts
+----------------------------------------
+IMPORTS:
+
+EXPORTS:
+  Line 1:export interface Vehicle {
+  Line 12:export interface DashboardStats {
+  Line 26:export interface Appointment {
+  Line 1:export interface Vehicle {
+  Line 12:export interface DashboardStats {
+  Line 26:export interface Appointment {
+
+========================================
+
+📄 Analyzing: src/index.js
+----------------------------------------
+IMPORTS:
+
+EXPORTS:
+  Line 3:export { default as Navbar } from './components/Navbar';
+  Line 4:export { default as ErrorBoundary } from './components/ErrorBoundary';
+  Line 5:export { default as GlobalToastDisplay } from './components/GlobalToastDisplay';
+  Line 6:export { default as DashboardCard } from './components/DashboardCard';
+  Line 7:export { default as UserDropdown } from './components/UserDropdown';
+  Line 8:export { default as HealthCheck } from './components/HealthCheck';
+  Line 9:export { default as LoadingSpinner } from './components/LoadingSpinner';
+  Line 10:export { default as SearchSystem } from './components/SearchSystem';
+  Line 11:export { default as ShareableActions } from './components/ShareableActions';
+  Line 12:export { default as AIEstimateModal } from './components/AIEstimateModal';
+  Line 13:export { default as QuickActionButton } from './components/QuickActionButton';
+  Line 14:export { default as TechnicianTimeClockCard } from './components/TechnicianTimeClockCard';
+  Line 15:export { default as AppointmentCard } from './components/AppointmentCard';
+  Line 16:export { default as JobCard } from './components/JobCard';
+  Line 17:export { default as TechnicianCard } from './components/TechnicianCard';
+  Line 18:export { default as LogoSplash } from './components/LogoSplash';
+  Line 19:export { default as EnhancedJobCreation } from './components/EnhancedJobCreation';
+  Line 20:export { default as TimeClockNavbar } from './components/TimeClockNavbar';
+  Line 21:export { default as PayrollReportDetail } from './components/PayrollReportDetail';
+  Line 22:export { default as ProtectedRoute } from './components/ProtectedRoute';
+  Line 23:export { default as TimeclockHistory } from './components/TimeclockHistory';
+  Line 24:export { default as RealTimeNotifications } from './components/RealTimeNotifications';
+  Line 25:export { default as MobileNavigation } from './components/MobileNavigation';
+  Line 26:export { default as CustomerPortal } from './components/CustomerPortal';
+  Line 27:export { default as AIDiagnosticHelper } from './components/AIDiagnosticHelper';
+  Line 28:export { default as AppointmentBar } from './components/AppointmentBar';
+  Line 29:export { default as ApiTest } from './components/ApiTest';
+  Line 30:export { default as ComplianceNoticeCA } from './components/ComplianceNoticeCA';
+  Line 31:export { default as CustomerAuthorization } from './components/CustomerAuthorization';
+  Line 32:export { default as ErrorBoundaryWithAuth } from './components/ErrorBoundaryWithAuth';
+  Line 33:export { default as DocumentTemplplateRenderer } from './components/DocumentTemplplateRenderer';
+  Line 34:export { default as TimeClockWidget } from './components/TimeClockWidget';
+  Line 35:export { default as Layout } from './components/Layout';
+  Line 36:export { default as SmartBreadcrumb } from './components/SmartBreadcrumb';
+  Line 37:export { default as LandingPage } from './components/LandingPage';
+  Line 38:export { default as RouteTest } from './components/RouteTest';
+  Line 39:export { default as RoutingTestComponent } from './components/RoutingTestComponent';
+  Line 40:export { default as FullDashboardNavbar } from './components/FullDashboardNavbar';
+  Line 41:export { default as Invoice } from './pages/Invoice';
+  Line 42:export { default as CustomerList } from './pages/CustomerList';
+  Line 43:export { default as AddVehicle } from './pages/AddVehicle';
+  Line 44:export { default as CreateJob } from './pages/CreateJob';
+  Line 45:export { default as ViewJobs } from './pages/ViewJobs';
+  Line 46:export { default as Login } from './pages/Login';
+  Line 47:export { default as Dashboard } from './pages/Dashboard';
+  Line 48:export { default as VehicleList } from './pages/VehicleList';
+  Line 49:export { default as Landing } from './pages/Landing';
+  Line 50:export { default as Mobile } from './pages/Mobile';
+  Line 51:export { default as Register } from './pages/Register';
+  Line 52:export { default as JobDetail } from './pages/JobDetail';
+  Line 53:export { default as EstimateDetail } from './pages/EstimateDetail';
+  Line 54:export { default as VehicleForm } from './pages/VehicleForm';
+  Line 55:export { default as Reports } from './pages/Reports';
+  Line 56:export { default as AppointmentCalendar } from './pages/AppointmentCalendar';
+  Line 57:export { default as CreateEditEstimate } from './pages/CreateEditEstimate';
+  Line 58:export { default as Diagnosis } from './pages/Diagnosis';
+  Line 59:export { default as your_file_new } from './pages/your_file_new';
+  Line 60:export { default as EstimatesList } from './pages/EstimatesList';
+  Line 61:export { default as Settings } from './pages/Settings';
+  Line 62:export { default as PartsLaborManagement } from './pages/PartsLaborManagement';
+  Line 63:export { default as AddAndEditCustomer } from './pages/AddAndEditCustomer';
+  Line 64:export { default as DataMigration } from './pages/DataMigration';
+  Line 65:export { default as NotFound } from './pages/NotFound';
+  Line 66:export { default as EstimateAI } from './pages/EstimateAI';
+  Line 67:export { default as Inventory } from './pages/Inventory';
+  Line 68:export { default as CustomerDetail } from './pages/CustomerDetail';
+  Line 69:export { default as VehicleDetail } from './pages/VehicleDetail';
+  Line 70:export { default as Customers } from './pages/Customers';
+  Line 71:export { default as Vehicles } from './pages/Vehicles';
+  Line 72:export { default as Jobs } from './pages/Jobs';
+  Line 73:export { default as Estimates } from './pages/Estimates';
+  Line 74:export { default as Invoices } from './pages/Invoices';
+  Line 75:export { default as TimeClock } from './pages/TimeClock';
+  Line 76:export { default as AIDiagnostics } from './pages/AIDiagnostics';
+  Line 3:export { default as Navbar } from './components/Navbar';
+  Line 4:export { default as ErrorBoundary } from './components/ErrorBoundary';
+  Line 5:export { default as GlobalToastDisplay } from './components/GlobalToastDisplay';
+  Line 6:export { default as DashboardCard } from './components/DashboardCard';
+  Line 7:export { default as UserDropdown } from './components/UserDropdown';
+  Line 8:export { default as HealthCheck } from './components/HealthCheck';
+  Line 9:export { default as LoadingSpinner } from './components/LoadingSpinner';
+  Line 10:export { default as SearchSystem } from './components/SearchSystem';
+  Line 11:export { default as ShareableActions } from './components/ShareableActions';
+  Line 12:export { default as AIEstimateModal } from './components/AIEstimateModal';
+  Line 13:export { default as QuickActionButton } from './components/QuickActionButton';
+  Line 14:export { default as TechnicianTimeClockCard } from './components/TechnicianTimeClockCard';
+  Line 15:export { default as AppointmentCard } from './components/AppointmentCard';
+  Line 16:export { default as JobCard } from './components/JobCard';
+  Line 17:export { default as TechnicianCard } from './components/TechnicianCard';
+  Line 18:export { default as LogoSplash } from './components/LogoSplash';
+  Line 19:export { default as EnhancedJobCreation } from './components/EnhancedJobCreation';
+  Line 20:export { default as TimeClockNavbar } from './components/TimeClockNavbar';
+  Line 21:export { default as PayrollReportDetail } from './components/PayrollReportDetail';
+  Line 22:export { default as ProtectedRoute } from './components/ProtectedRoute';
+  Line 23:export { default as TimeclockHistory } from './components/TimeclockHistory';
+  Line 24:export { default as RealTimeNotifications } from './components/RealTimeNotifications';
+  Line 25:export { default as MobileNavigation } from './components/MobileNavigation';
+  Line 26:export { default as CustomerPortal } from './components/CustomerPortal';
+  Line 27:export { default as AIDiagnosticHelper } from './components/AIDiagnosticHelper';
+  Line 28:export { default as AppointmentBar } from './components/AppointmentBar';
+  Line 29:export { default as ApiTest } from './components/ApiTest';
+  Line 30:export { default as ComplianceNoticeCA } from './components/ComplianceNoticeCA';
+  Line 31:export { default as CustomerAuthorization } from './components/CustomerAuthorization';
+  Line 32:export { default as ErrorBoundaryWithAuth } from './components/ErrorBoundaryWithAuth';
+  Line 33:export { default as DocumentTemplplateRenderer } from './components/DocumentTemplplateRenderer';
+  Line 34:export { default as TimeClockWidget } from './components/TimeClockWidget';
+  Line 35:export { default as Layout } from './components/Layout';
+  Line 36:export { default as SmartBreadcrumb } from './components/SmartBreadcrumb';
+  Line 37:export { default as LandingPage } from './components/LandingPage';
+  Line 38:export { default as RouteTest } from './components/RouteTest';
+  Line 39:export { default as RoutingTestComponent } from './components/RoutingTestComponent';
+  Line 40:export { default as FullDashboardNavbar } from './components/FullDashboardNavbar';
+  Line 41:export { default as Invoice } from './pages/Invoice';
+  Line 42:export { default as CustomerList } from './pages/CustomerList';
+  Line 43:export { default as AddVehicle } from './pages/AddVehicle';
+  Line 44:export { default as CreateJob } from './pages/CreateJob';
+  Line 45:export { default as ViewJobs } from './pages/ViewJobs';
+  Line 46:export { default as Login } from './pages/Login';
+  Line 47:export { default as Dashboard } from './pages/Dashboard';
+  Line 48:export { default as VehicleList } from './pages/VehicleList';
+  Line 49:export { default as Landing } from './pages/Landing';
+  Line 50:export { default as Mobile } from './pages/Mobile';
+  Line 51:export { default as Register } from './pages/Register';
+  Line 52:export { default as JobDetail } from './pages/JobDetail';
+  Line 53:export { default as EstimateDetail } from './pages/EstimateDetail';
+  Line 54:export { default as VehicleForm } from './pages/VehicleForm';
+  Line 55:export { default as Reports } from './pages/Reports';
+  Line 56:export { default as AppointmentCalendar } from './pages/AppointmentCalendar';
+  Line 57:export { default as CreateEditEstimate } from './pages/CreateEditEstimate';
+  Line 58:export { default as Diagnosis } from './pages/Diagnosis';
+  Line 59:export { default as your_file_new } from './pages/your_file_new';
+  Line 60:export { default as EstimatesList } from './pages/EstimatesList';
+  Line 61:export { default as Settings } from './pages/Settings';
+  Line 62:export { default as PartsLaborManagement } from './pages/PartsLaborManagement';
+  Line 63:export { default as AddAndEditCustomer } from './pages/AddAndEditCustomer';
+  Line 64:export { default as DataMigration } from './pages/DataMigration';
+  Line 65:export { default as NotFound } from './pages/NotFound';
+  Line 66:export { default as EstimateAI } from './pages/EstimateAI';
+  Line 67:export { default as Inventory } from './pages/Inventory';
+  Line 68:export { default as CustomerDetail } from './pages/CustomerDetail';
+  Line 69:export { default as VehicleDetail } from './pages/VehicleDetail';
+  Line 70:export { default as Customers } from './pages/Customers';
+  Line 71:export { default as Vehicles } from './pages/Vehicles';
+  Line 72:export { default as Jobs } from './pages/Jobs';
+  Line 73:export { default as Estimates } from './pages/Estimates';
+  Line 74:export { default as Invoices } from './pages/Invoices';
+  Line 75:export { default as TimeClock } from './pages/TimeClock';
+  Line 76:export { default as AIDiagnostics } from './pages/AIDiagnostics';
+
+========================================
+
+
+📈 SUMMARY STATISTICS
+=====================
+Total files analyzed: 160
+Files with imports: 144
+Files with exports: 144
+
+Most imported from:
+      111 components
+       75 pages
+       38 utils
+        2 services
+
+🔄 POTENTIAL CIRCULAR DEPENDENCY CHECK
+=====================================
+Files that both import from and export to the same directories:
+  - src/App.jsx
+  - src/pages/Invoice.jsx
+  - src/pages/CustomerList.jsx
+  - src/pages/AddVehicle.jsx
+  - src/pages/ViewJobs.jsx
+  - src/pages/Dashboard.jsx
+  - src/pages/VehicleList.jsx
+  - src/pages/Landing.jsx
+  - src/pages/Reports.jsx
+  - src/pages/CreateEditEstimate.jsx
+  - src/pages/Diagnosis.jsx
+  - src/pages/CreateInvoice.jsx
+  - src/pages/EstimatesList.jsx
+  - src/pages/PartsLaborManagement.jsx
+  - src/pages/AddAndEditCustomer.jsx
+  - src/pages/VehicleDetail.jsx
+  - src/pages/Customers.jsx
+  - src/pages/Vehicles.jsx
+  - src/pages/Jobs.jsx
+  - src/pages/Estimates.jsx
+  - src/pages/Invoices.jsx
+  - src/pages/AIDiagnostics.jsx
+  - src/components/ErrorBoundaryWithAuth.jsx
+  - src/components/SearchSystem.jsx
+  - src/components/AppointmentCard.jsx
+  - src/components/JobCard.jsx
+  - src/components/TechnicianCard.jsx
+  - src/components/TimeClockWidget.jsx
+  - src/components/ai/AIChat.jsx
+  - src/components/ai/OBD2Lookup.jsx
+  - src/components/testing/IntegrationTest.jsx
+  - src/hooks/useDataOperations.js
+  - src/hooks/useApi.jsx
+  - src/hooks/useAuth.js
+  - src/contexts/AuthContext.jsx
+  - src/contexts/SettingsProvider.jsx
+  - src/layouts/Layout.jsx
+  - src/layouts/ProtectedLayout.jsx
+  - src/layouts/ProtectedDashboardLayout.jsx
+  - src/_backups/Mobile.tsx
+  - src/_backups/VehicleDiagnostics.tsx
+  - src/_backups/App.tsx
+
+Analysis completed at: Fri Aug 29 14:13:00 PDT 2025

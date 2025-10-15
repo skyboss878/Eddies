@@ -1,0 +1,24 @@
+#!/bin/bash
+
+echo "=== FIXING useDataOperations.js ==="
+echo
+
+# Show current incorrect endpoints
+echo "Current INCORRECT endpoints:"
+grep -n "generate-estimate" src/hooks/useDataOperations.js
+
+echo
+echo "Making the fix..."
+
+# Fix the endpoints
+sed -i.backup "s|'/ai/generate-estimate'|'/api/ai/generate-full-estimate'|g" src/hooks/useDataOperations.js
+
+echo "✅ Fixed endpoints in useDataOperations.js"
+
+# Verify the fix
+echo
+echo "Verification - NEW endpoints should be:"
+grep -n "generate-full-estimate" src/hooks/useDataOperations.js || echo "❌ Fix may not have worked"
+
+echo
+echo "=== FIX COMPLETE ==="

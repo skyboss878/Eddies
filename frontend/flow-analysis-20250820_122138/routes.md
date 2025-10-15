@@ -1,0 +1,86 @@
+# Route Analysis
+Generated on: Wed Aug 20 12:21:38 PDT 2025
+
+## Public Routes
+- 72:              path="/"
+- 78:              path="/login"
+- 82:              path="/register"
+- 87:            <Route path="/app" element={
+- 96:              <Route path="dashboard" element={<Dashboard />} />
+- 99:              <Route path="ai-diagnostics" element={<AIDiagnostics />} />
+- 100:              <Route path="ai" element={<AIDiagnostics />} />
+- 101:              <Route path="diagnostics" element={<AIDiagnostics />} />
+- 104:              <Route path="vehicles">
+- 106:                <Route path="add" element={<AddVehicle />} />
+- 107:                <Route path="new" element={<AddVehicle />} />
+- 108:                <Route path=":id" element={<VehicleDetail />} />
+- 109:                <Route path=":id/edit" element={<AddVehicle />} />
+- 113:              <Route path="jobs">
+- 115:                <Route path="create" element={<CreateJob />} />
+- 116:                <Route path="new" element={<CreateJob />} />
+- 117:                <Route path=":id" element={<JobDetail />} />
+- 118:                <Route path=":id/edit" element={<CreateJob />} />
+- 122:              <Route path="customers">
+- 124:                <Route path="add" element={<AddAndEditCustomer />} />
+- 125:                <Route path="new" element={<AddAndEditCustomer />} />
+- 126:                <Route path=":id" element={<CustomerDetail />} />
+- 127:                <Route path=":id/edit" element={<AddAndEditCustomer />} />
+- 131:              <Route path="estimates">
+- 133:                <Route path="ai" element={<EstimateAI />} />
+- 134:                <Route path="new" element={<CreateEditEstimate />} />
+- 135:                <Route path="create" element={<CreateEditEstimate />} />
+- 136:                <Route path=":id" element={<EstimateDetail />} />
+- 137:                <Route path=":id/edit" element={<CreateEditEstimate />} />
+- 141:              <Route path="invoices">
+- 143:                <Route path="new" element={<Invoice />} />
+- 144:                <Route path="create" element={<Invoice />} />
+- 145:                <Route path=":id" element={<Invoice />} />
+- 146:                <Route path=":id/edit" element={<Invoice />} />
+- 150:              <Route path="appointments">
+- 152:                <Route path="calendar" element={<AppointmentCalendar />} />
+- 153:                <Route path="new" element={<AppointmentCalendar />} />
+- 154:                <Route path=":id" element={<AppointmentCalendar />} />
+- 158:              <Route path="calendar" element={<AppointmentCalendar />} />
+- 161:              <Route path="parts-labor" element={<PartsLaborManagement />} />
+- 162:              <Route path="inventory" element={<PartsLaborManagement />} />
+- 163:              <Route path="parts" element={<PartsLaborManagement />} />
+- 164:              <Route path="labor" element={<PartsLaborManagement />} />
+- 167:              <Route path="reports" element={<Reports />} />
+- 168:              <Route path="analytics" element={<Reports />} />
+- 169:              <Route path="export" element={<Reports />} />
+- 172:              <Route path="settings" element={<Settings />} />
+- 173:              <Route path="profile" element={<Settings />} />
+- 174:              <Route path="preferences" element={<Settings />} />
+- 177:              <Route path="invoice/:id" element={<Invoice />} />
+- 182:              path="/dashboard"
+- 191:            <Route path="*" element={<NotFound />} />
+
+## Protected Routes
+- <Route path="/app" element={
+- path="/dashboard"
+- <Route path="*" element={<NotFound />} />
+
+## Lazy Loaded Components
+- 12:const Landing = lazy(() => import('./pages/Landing'));
+- 13:const Dashboard = lazy(() => import('./pages/Dashboard'));
+- 14:const VehicleList = lazy(() => import('./pages/VehicleList'));
+- 15:const VehicleDetail = lazy(() => import('./pages/VehicleDetail'));
+- 16:const AddVehicle = lazy(() => import('./pages/AddVehicle'));
+- 17:const ViewJobs = lazy(() => import('./pages/ViewJobs'));
+- 18:const CreateJob = lazy(() => import('./pages/CreateJob'));
+- 19:const JobDetail = lazy(() => import('./pages/JobDetail'));
+- 20:const EstimateAI = lazy(() => import('./pages/EstimateAI'));
+- 21:const CreateEditEstimate = lazy(() => import('./pages/CreateEditEstimate'));
+- 22:const EstimateDetail = lazy(() => import('./pages/EstimateDetail'));
+- 23:const CustomerList = lazy(() => import('./pages/CustomerList'));
+- 24:const CustomerDetail = lazy(() => import('./pages/CustomerDetail'));
+- 25:const AddAndEditCustomer = lazy(() => import('./pages/AddAndEditCustomer'));
+- 26:const Invoice = lazy(() => import('./pages/Invoice'));
+- 27:const Reports = lazy(() => import('./pages/Reports'));
+- 28:const AppointmentCalendar = lazy(() => import('./pages/AppointmentCalendar'));
+- 29:const PartsLaborManagement = lazy(() => import('./pages/PartsLaborManagement'));
+- 30:const Settings = lazy(() => import('./pages/Settings'));
+- 31:const Login = lazy(() => import('./pages/Login'));
+- 32:const Register = lazy(() => import('./pages/Register'));
+- 33:const NotFound = lazy(() => import('./pages/NotFound'));
+- 36:const AIDiagnostics = lazy(() => import('./pages/AIDiagnostics.jsx'));

@@ -1,0 +1,70 @@
+API Endpoints Mapping
+Generated: Fri Aug 29 14:35:23 PDT 2025
+=====================================
+
+API ENDPOINTS DISCOVERED
+========================
+
+API Files Found:
+  - src/utils/api.js
+  - src/utils/apiEndpoints.js
+  - src/utils/testApi.js
+  - src/hooks/useApi.jsx
+  - src/fix_api.sh
+  - src/utils/services/customerService.js
+  - src/utils/services/vehicleService.js
+  - src/utils/services/jobService.js
+  - src/utils/services/estimateService.js
+  - src/utils/services/invoiceService.js
+  - src/utils/services/appointmentService.js
+  - src/utils/services/timeclockService.js
+  - src/utils/services/reportService.js
+  - src/utils/services/diagnosticsService.js
+  - src/utils/services/index.js
+  - src/utils/services/migrationServices.js
+
+Endpoints in api.js:
+
+Endpoints in apiEndpoints.js:
+
+Endpoints in testApi.js:
+  Line 18:      const response = await fetch('http://localhost:5000/api/health');
+  Line 83:    const response = await fetch('http://localhost:5000/api/health', {
+
+Endpoints in useApi.jsx:
+
+Endpoints in fix_api.sh:
+
+Endpoints in customerService.js:
+  Line 5:const baseURL = '/api/customers';
+
+Endpoints in vehicleService.js:
+  Line 5:const baseURL = '/api/vehicles';
+
+Endpoints in jobService.js:
+  Line 5:const baseURL = '/api/jobs';
+
+Endpoints in estimateService.js:
+  Line 5:const baseURL = '/api/estimates';
+
+Endpoints in invoiceService.js:
+  Line 5:const baseURL = '/api/invoices';
+
+Endpoints in appointmentService.js:
+  Line 5:const baseURL = '/api/appointments';
+
+Endpoints in timeclockService.js:
+  Line 5:const baseURL = '/api/timeclock';
+
+Endpoints in reportService.js:
+  Line 5:const baseURL = '/api/reports';
+
+Endpoints in diagnosticsService.js:
+  Line 5:const baseURL = '/api/diagnostics';
+
+Endpoints in index.js:
+
+Endpoints in migrationServices.js:
+  Line 13:      const response = await uploadApi.post('/api/migration/analyze', formData);
+  Line 28:      const response = await uploadApi.post('/api/migration/import', payload);
+

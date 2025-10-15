@@ -1,0 +1,8 @@
+src/pages/Invoice.jsx:import { jobService, vehicleService, customerService } from "../utils/api";
+src/pages/AddVehicle.jsx:import { customerService, vehicleService } from "../utils/api";
+src/pages/EstimatesList.jsx:import { estimateService } from '../utils/api';
+src/pages/PartsLaborManagement.jsx:import { partService, laborService } from '../utils/api';
+src/pages/EstimateAI.jsx:import { aiService } from '../utils/api';
+src/components/TimeClockNavbar.jsx:import { timeClockService, handleApiError, utilityService, timeClockUtils } from '../utils/api.js';
+src/components/ApiTest.jsx:import { healthService, apiUtils } from '../utils/api.js';
+src/hooks/useAuth.js:import { authService } from '../utils/api.js';

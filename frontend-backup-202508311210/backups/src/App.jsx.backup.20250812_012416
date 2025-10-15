@@ -1,0 +1,254 @@
+// src/App.jsx - COMPLETE AND CLEAN VERSION
+import React, { Suspense } from 'react';
+import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
+import { useAuth } from './contexts/AuthContext';
+
+// Layout Components
+import Navbar from './components/Navbar';
+
+// Lazy load all page components
+const Landing = React.lazy(() => import('./pages/Landing'));
+const Dashboard = React.lazy(() => import('./pages/Dashboard'));
+const Login = React.lazy(() => import('./pages/Login'));
+const Register = React.lazy(() => import('./pages/Register'));
+
+// Customer Management
+const CustomerList = React.lazy(() => import('./pages/CustomerList'));
+const AddAndEditCustomer = React.lazy(() => import('./pages/AddAndEditCustomer'));
+const CustomerDetail = React.lazy(() => import('./pages/CustomerDetail'));
+
+// Vehicle Management
+const VehicleList = React.lazy(() => import('./pages/VehicleList'));
+const AddVehicle = React.lazy(() => import('./pages/AddVehicle'));
+const VehicleDetail = React.lazy(() => './pages/VehicleDetail'));
+
+// Job Management
+const ViewJobs = React.lazy(() => import('./pages/ViewJobs'));
+const CreateJob = React.lazy(() => import('./pages/CreateJob'));
+const JobDetail = React.lazy(() => import('./pages/JobDetail'));
+
+// Estimate Management
+const EstimatesList = React.lazy(() => import('./pages/EstimatesList'));
+const CreateEditEstimate = React.lazy(() => import('./pages/CreateEditEstimate'));
+const EstimateDetail = React.lazy(() => import('./pages/EstimateDetail'));
+const EstimateAI = React.lazy(() => import('./pages/EstimateAI'));
+
+// Other Features
+const Invoice = React.lazy(() => import('./pages/Invoice'));
+const PartsLaborManagement = React.lazy(() => import('./pages/PartsLaborManagement'));
+const Inventory = React.lazy(() => import('./pages/Inventory'));
+const Reports = React.lazy(() => import('./pages/Reports'));
+const Settings = React.lazy(() => import('./pages/Settings'));
+const AIDiagnostics = React.lazy(() => import('./pages/AIDiagnostics'));
+const NotFound = React.lazy(() => import('./pages/NotFound'));
+
+const LoadingSpinner = ({ message = "Loading..." }) => (
+  <div className="min-h-screen flex items-center justify-center bg-gray-50">
+    <div className="text-center">
+      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+      <p className="mt-4 text-gray-600">{message}</p>
+    </div>
+  </div>
+);
+
+const ProtectedRoute = ({ children }) => {
+  const { isAuthenticated, loading } = useAuth();
+  const location = useLocation();
+
+  if (loading) {
+    return <LoadingSpinner message="Verifying authentication..." />;
+  }
+
+  if (!isAuthenticated) {
+    return <Navigate to="/login" state={{ from: location }} replace />;
+  }
+
+  return children;
+};
+
+const PublicRoute = ({ children }) => {
+  const { isAuthenticated, loading } = useAuth();
+
+  if (loading) {
+    return <LoadingSpinner message="Checking authentication..." />;
+  }
+
+  if (isAuthenticated) {
+    return <Navigate to="/dashboard" replace />;
+  }
+
+  return children;
+};
+
+const AppLayout = ({ children }) => {
+  return (
+    <div className="min-h-screen bg-gray-50">
+      <Navbar />
+      <main className="flex-1">
+        <Suspense fallback={<LoadingSpinner />}>
+          {children}
+        </Suspense>
+      </main>
+    </div>
+  );
+};
+
+const App = () => {
+  const { isAuthenticated, loading } = useAuth();
+
+  return (
+    <div className="App">
+      <Suspense fallback={<LoadingSpinner message="Initializing Eddie's Automotive..." />}>
+        <Routes>
+          {/* Landing page */}
+          <Route path="/" element={
+            loading ? <LoadingSpinner message="Checking session..." /> : (
+              isAuthenticated ? <Navigate to="/dashboard" replace /> : <Landing />
+            )
+          } />
+
+          {/* Public routes */}
+          <Route path="/login" element={<PublicRoute><Login /></PublicRoute>} />
+          <Route path="/register" element={<PublicRoute><Register /></PublicRoute>} />
+
+          {/* PROTECTED ROUTES */}
+          <Route path="/dashboard" element={
+            <ProtectedRoute>
+              <AppLayout><Dashboard /></AppLayout>
+            </ProtectedRoute>
+          } />
+
+          {/* Customer Management - COMPLETE */}
+          <Route path="/customers" element={
+            <ProtectedRoute>
+              <AppLayout><CustomerList /></AppLayout>
+            </ProtectedRoute>
+          } />
+          <Route path="/customers/add" element={
+            <ProtectedRoute>
+              <AppLayout><AddAndEditCustomer /></AppLayout>
+            </ProtectedRoute>
+          } />
+          <Route path="/customers/:id" element={
+            <ProtectedRoute>
+              <AppLayout><CustomerDetail /></AppLayout>
+            </ProtectedRoute>
+          } />
+          <Route path="/customers/:id/edit" element={
+            <ProtectedRoute>
+              <AppLayout><AddAndEditCustomer /></AppLayout>
+            </ProtectedRoute>
+          } />
+
+          {/* Vehicle Management - COMPLETE */}
+          <Route path="/vehicles" element={
+            <ProtectedRoute>
+              <AppLayout><VehicleList /></AppLayout>
+            </ProtectedRoute>
+          } />
+          <Route path="/vehicles/add" element={
+            <ProtectedRoute>
+              <AppLayout><AddVehicle /></AppLayout>
+            </ProtectedRoute>
+          } />
+          <Route path="/vehicles/:id" element={
+            <ProtectedRoute>
+              <AppLayout><VehicleDetail /></AppLayout>
+            </ProtectedRoute>
+          } />
+          <Route path="/vehicles/:id/edit" element={
+            <ProtectedRoute>
+              <AppLayout><AddVehicle /></AppLayout>
+            </ProtectedRoute>
+          } />
+
+          {/* Job Management - COMPLETE */}
+          <Route path="/jobs" element={
+            <ProtectedRoute>
+              <AppLayout><ViewJobs /></AppLayout>
+            </ProtectedRoute>
+          } />
+          <Route path="/jobs/create" element={
+            <ProtectedRoute>
+              <AppLayout><CreateJob /></AppLayout>
+            </ProtectedRoute>
+          } />
+          <Route path="/jobs/:id" element={
+            <ProtectedRoute>
+              <AppLayout><JobDetail /></AppLayout>
+            </ProtectedRoute>
+          } />
+          <Route path="/jobs/:id/edit" element={
+            <ProtectedRoute>
+              <AppLayout><CreateJob /></AppLayout>
+            </ProtectedRoute>
+          } />
+
+          {/* Estimate Management - COMPLETE */}
+          <Route path="/estimates" element={
+            <ProtectedRoute>
+              <AppLayout><EstimatesList /></AppLayout>
+            </ProtectedRoute>
+          } />
+          <Route path="/estimates/new" element={
+            <ProtectedRoute>
+              <AppLayout><CreateEditEstimate /></AppLayout>
+            </ProtectedRoute>
+          } />
+          <Route path="/estimates/ai" element={
+            <ProtectedRoute>
+              <AppLayout><EstimateAI /></AppLayout>
+            </ProtectedRoute>
+          } />
+          <Route path="/estimates/:id" element={
+            <ProtectedRoute>
+              <AppLayout><EstimateDetail /></AppLayout>
+            </ProtectedRoute>
+          } />
+          <Route path="/estimates/:id/edit" element={
+            <ProtectedRoute>
+              <AppLayout><CreateEditEstimate /></AppLayout>
+            </ProtectedRoute>
+          } />
+
+          {/* Other Features */}
+          <Route path="/invoices" element={
+            <ProtectedRoute>
+              <AppLayout><Invoice /></AppLayout>
+            </ProtectedRoute>
+          } />
+          <Route path="/parts" element={
+            <ProtectedRoute>
+              <AppLayout><PartsLaborManagement /></AppLayout>
+            </ProtectedRoute>
+          } />
+          <Route path="/inventory" element={
+            <ProtectedRoute>
+              <AppLayout><Inventory /></AppLayout>
+            </ProtectedRoute>
+          } />
+          <Route path="/ai-diagnostics" element={
+            <ProtectedRoute>
+              <AppLayout><AIDiagnostics /></AppLayout>
+            </ProtectedRoute>
+          } />
+          <Route path="/reports" element={
+            <ProtectedRoute>
+              <AppLayout><Reports /></AppLayout>
+            </ProtectedRoute>
+          } />
+          <Route path="/settings" element={
+            <ProtectedRoute>
+              <AppLayout><Settings /></AppLayout>
+            </ProtectedRoute>
+          } />
+
+          {/* 404 Handler */}
+          <Route path="*" element={<NotFound />} />
+        </Routes>
+      </Suspense>
+    </div>
+  );
+};
+
+export default App;

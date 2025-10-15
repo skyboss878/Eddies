@@ -1,0 +1,80 @@
+// src/utils/api.js
+import axios from "axios";
+
+const API_URL = "http://localhost:5000"; // change this to your backend URL
+
+// ---------------------------
+// Service Initializations
+// ---------------------------
+
+// User-related API calls
+const userService = axios.create({
+  baseURL: `${API_URL}/users`,
+});
+
+// Inventory-related API calls
+const inventoryService = axios.create({
+  baseURL: `${API_URL}/inventory`,
+});
+
+// Estimates API
+const estimateService = axios.create({
+  baseURL: `${API_URL}/estimates`,
+});
+
+// Jobs API
+const jobService = axios.create({
+  baseURL: `${API_URL}/jobs`,
+});
+
+// Customers API
+const customerService = axios.create({
+  baseURL: `${API_URL}/customers`,
+});
+
+// Appointments API
+const appointmentService = axios.create({
+  baseURL: `${API_URL}/appointments`,
+});
+
+// Invoices API
+const invoiceService = axios.create({
+  baseURL: `${API_URL}/invoices`,
+});
+
+// Parts & Labor API
+const partsLaborService = axios.create({
+  baseURL: `${API_URL}/partslabor`,
+});
+
+// Reports API
+const reportService = axios.create({
+  baseURL: `${API_URL}/reports`,
+});
+
+// Time Clock API
+const timeClockService = axios.create({
+  baseURL: `${API_URL}/timeclock`,
+});
+
+// AI Service (for diagnostics, suggestions, or any AI endpoint)
+const aiService = axios.create({
+  baseURL: `${API_URL}/ai`,
+});
+
+// ---------------------------
+// Export all services
+// ---------------------------
+export {
+  userService,
+  inventoryService,
+  estimateService,
+  jobService,
+  customerService,
+  appointmentService,
+  invoiceService,
+  partsLaborService,
+  reportService,
+  timeClockService,
+  aiService,
+};

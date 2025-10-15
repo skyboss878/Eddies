@@ -1,0 +1,324 @@
+// src/pages/Dashboard.jsx - Clean working version
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext';
+import {
+  Users, Car, Wrench, FileText, Calendar, DollarSign, BarChart3,
+  Clock, Plus, RefreshCw, Download, Bell, Settings, MapPin, Phone, Mail,
+  TrendingUp, Edit3, Sparkles, Brain, Zap, Search,
+  AlertTriangle, CheckCircle, Eye, Filter, Archive, Star,
+  Clipboard, Gauge, Target, Trophy, Database, X
+} from 'lucide-react';
+
+const Dashboard = () => {
+  const { user } = useAuth();
+  const navigate = useNavigate();
+
+  // State variables
+  const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
+  const [showAIPanel, setShowAIPanel] = useState(false);
+  const [recentJobs, setRecentJobs] = useState([]);
+  const [stats, setStats] = useState({
+    totalCustomers: 0,
+    totalVehicles: 0,
+    activeJobs: 0,
+    monthlyRevenue: 0
+  });
+
+  // Sample data
+  const sampleJobs = [
+    {
+      id: 1,
+      customer: 'Sarah Wilson',
+      vehicle: '2019 Honda Civic',
+      service: 'Oil Change',
+      status: 'completed',
+      total: 65.00
+    },
+    {
+      id: 2,
+      customer: 'Mike Johnson',
+      vehicle: '2020 Toyota Camry',
+      service: 'Brake Inspection',
+      status: 'in-progress',
+      total: 120.00
+    }
+  ];
+
+  useEffect(() => {
+    // Load dashboard data
+    loadDashboardData();
+  }, []);
+
+  const loadDashboardData = async () => {
+    setLoading(true);
+    try {
+      // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      setStats({
+        totalCustomers: 45,
+        totalVehicles: 67,
+        activeJobs: 12,
+        monthlyRevenue: 15420.00
+      });
+      
+      setRecentJobs(sampleJobs);
+    } catch (err) {
+      setError('Failed to load dashboard data');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleNavigation = (path) => {
+    navigate(path);
+  };
+
+  // Error state
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <AlertTriangle className="h-16 w-16 text-red-500 mx-auto mb-4" />
+          <h2 className="text-2xl font-bold text-gray-900 mb-2">Something went wrong</h2>
+          <p className="text-gray-600 mb-6">{error}</p>
+          <div className="space-x-4">
+            <button
+              onClick={() => setError(null)}
+              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+            >
+              Retry
+            </button>
+            <button
+              onClick={() => window.location.reload()}
+              className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700"
+            >
+              Reload Page
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Loading state
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading Dashboard...</p>
+          <p className="text-sm text-gray-500 mt-2">
+            Please wait while we load your data...
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-gray-50">
+      {/* Header */}
+      <div className="bg-white shadow-sm border-b">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center py-6">
+            <div>
+              <h1 className="text-3xl font-bold text-gray-900">
+                Welcome back, {user?.full_name || 'Admin'}!
+              </h1>
+              <p className="text-gray-600 mt-1">
+                Here's what's happening at Eddie's Automotive today.
+              </p>
+            </div>
+            <div className="flex items-center space-x-4">
+              <button
+                onClick={loadDashboardData}
+                className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+              >
+                <RefreshCw className="h-4 w-4 mr-2" />
+                Refresh
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Main Content */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Stats Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+          <div className="bg-white p-6 rounded-lg shadow-sm border">
+            <div className="flex items-center">
+              <Users className="h-8 w-8 text-blue-600" />
+              <div className="ml-4">
+                <p className="text-sm font-medium text-gray-600">Total Customers</p>
+                <p className="text-2xl font-bold text-gray-900">{stats.totalCustomers}</p>
+              </div>
+            </div>
+          </div>
+          
+          <div className="bg-white p-6 rounded-lg shadow-sm border">
+            <div className="flex items-center">
+              <Car className="h-8 w-8 text-green-600" />
+              <div className="ml-4">
+                <p className="text-sm font-medium text-gray-600">Total Vehicles</p>
+                <p className="text-2xl font-bold text-gray-900">{stats.totalVehicles}</p>
+              </div>
+            </div>
+          </div>
+          
+          <div className="bg-white p-6 rounded-lg shadow-sm border">
+            <div className="flex items-center">
+              <Wrench className="h-8 w-8 text-yellow-600" />
+              <div className="ml-4">
+                <p className="text-sm font-medium text-gray-600">Active Jobs</p>
+                <p className="text-2xl font-bold text-gray-900">{stats.activeJobs}</p>
+              </div>
+            </div>
+          </div>
+          
+          <div className="bg-white p-6 rounded-lg shadow-sm border">
+            <div className="flex items-center">
+              <DollarSign className="h-8 w-8 text-purple-600" />
+              <div className="ml-4">
+                <p className="text-sm font-medium text-gray-600">Monthly Revenue</p>
+                <p className="text-2xl font-bold text-gray-900">${stats.monthlyRevenue.toLocaleString()}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Quick Actions */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+          <div className="bg-white rounded-lg shadow-sm border">
+            <div className="p-6 border-b">
+              <h2 className="text-xl font-semibold text-gray-900">Quick Actions</h2>
+            </div>
+            <div className="p-6 grid grid-cols-2 gap-4">
+              <button
+                onClick={() => handleNavigation('/customers/create')}
+                className="flex items-center p-4 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors"
+              >
+                <Plus className="h-6 w-6 text-blue-600 mr-3" />
+                <span className="text-blue-900 font-medium">Add Customer</span>
+              </button>
+              
+              <button
+                onClick={() => handleNavigation('/jobs/create')}
+                className="flex items-center p-4 bg-green-50 rounded-lg hover:bg-green-100 transition-colors"
+              >
+                <Wrench className="h-6 w-6 text-green-600 mr-3" />
+                <span className="text-green-900 font-medium">New Job</span>
+              </button>
+              
+              <button
+                onClick={() => handleNavigation('/estimates/create')}
+                className="flex items-center p-4 bg-yellow-50 rounded-lg hover:bg-yellow-100 transition-colors"
+              >
+                <FileText className="h-6 w-6 text-yellow-600 mr-3" />
+                <span className="text-yellow-900 font-medium">Create Estimate</span>
+              </button>
+              
+              <button
+                onClick={() => handleNavigation('/parts')}
+                className="flex items-center p-4 bg-purple-50 rounded-lg hover:bg-purple-100 transition-colors"
+              >
+                <Database className="h-6 w-6 text-purple-600 mr-3" />
+                <span className="text-purple-900 font-medium">Parts Inventory</span>
+              </button>
+            </div>
+          </div>
+
+          {/* Recent Jobs */}
+          <div className="bg-white rounded-lg shadow-sm border">
+            <div className="p-6 border-b flex justify-between items-center">
+              <h2 className="text-xl font-semibold text-gray-900">Recent Jobs</h2>
+              <button
+                onClick={() => handleNavigation('/jobs')}
+                className="text-blue-600 hover:text-blue-700 text-sm font-medium"
+              >
+                View All
+              </button>
+            </div>
+            <div className="p-6">
+              {recentJobs.length > 0 ? (
+                <div className="space-y-4">
+                  {recentJobs.map((job) => (
+                    <div key={job.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                      <div>
+                        <p className="font-medium text-gray-900">{job.customer}</p>
+                        <p className="text-sm text-gray-600">{job.vehicle} - {job.service}</p>
+                      </div>
+                      <div className="text-right">
+                        <p className="font-medium text-gray-900">${job.total.toFixed(2)}</p>
+                        <span className={`text-xs px-2 py-1 rounded-full ${
+                          job.status === 'completed' 
+                            ? 'bg-green-100 text-green-800' 
+                            : 'bg-yellow-100 text-yellow-800'
+                        }`}>
+                          {job.status}
+                        </span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-gray-500 text-center py-4">No recent jobs</p>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* AI Panel */}
+        {showAIPanel && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
+            <div className="bg-white rounded-lg shadow-xl max-w-md w-full mx-4">
+              <div className="p-6">
+                <div className="flex justify-between items-center mb-4">
+                  <h3 className="text-lg font-semibold text-gray-900">AI Assistant</h3>
+                  <button
+                    onClick={() => setShowAIPanel(false)}
+                    className="text-gray-400 hover:text-gray-600"
+                  >
+                    <X className="h-6 w-6" />
+                  </button>
+                </div>
+                <p className="text-gray-600 mb-4">
+                  Get AI-powered assistance for diagnostics and estimates.
+                </p>
+                <div className="space-y-3">
+                  <button
+                    onClick={() => handleNavigation('/ai-diagnostics')}
+                    className="w-full text-left p-3 bg-blue-50 rounded-lg hover:bg-blue-100"
+                  >
+                    <Brain className="h-5 w-5 text-blue-600 inline mr-2" />
+                    AI Diagnostics
+                  </button>
+                  <button
+                    onClick={() => setShowAIPanel(false)}
+                    className="w-full text-center p-2 bg-gray-100 rounded-lg hover:bg-gray-200"
+                  >
+                    Close
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* AI Quick Access Button */}
+        <button
+          onClick={() => setShowAIPanel(true)}
+          className="fixed bottom-6 right-6 bg-blue-600 text-white p-4 rounded-full shadow-lg hover:bg-blue-700 transition-colors"
+        >
+          <Sparkles className="h-6 w-6" />
+        </button>
+      </div>
+    </div>
+  );
+};
+
+export default Dashboard;

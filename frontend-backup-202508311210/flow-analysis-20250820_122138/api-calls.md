@@ -1,0 +1,87 @@
+# API Analysis
+Generated on: Wed Aug 20 12:21:38 PDT 2025
+
+## Fetch API Calls
+- ./src/pages/CustomerList.jsx:79:      const response = await fetch('/api/customers');
+- ./src/pages/CustomerList.jsx:275:      const response = await fetch(`/api/customers/${customer.id}`, {
+- ./src/pages/CustomerList.jsx:318:        fetch(`/api/customers/${id}`, { method: 'DELETE' })
+- ./src/pages/CreateJob.jsx:56:        const customersResponse = await fetch('/api/customers');
+- ./src/pages/CreateJob.jsx:63:        const vehiclesResponse = await fetch('/api/vehicles');
+- ./src/pages/CreateJob.jsx:70:        const techniciansResponse = await fetch('/api/technicians');
+- ./src/pages/CreateJob.jsx:176:          const response = await fetch('/api/ai/openai-diagnosis', {
+- ./src/pages/CreateJob.jsx:200:          const response = await fetch('/api/ai/openrouter-diagnosis', {
+- ./src/pages/CreateJob.jsx:228:          const response = await fetch('/api/ai/huggingface-diagnosis', {
+- ./src/pages/CreateJob.jsx:324:      const response = await fetch('/api/carfax/report', {
+- ./src/pages/CreateJob.jsx:363:      const response = await fetch('/api/obd2/lookup', {
+- ./src/pages/CreateJob.jsx:397:      const response = await fetch('/api/wiring-diagrams', {
+- ./src/pages/CreateJob.jsx:450:      const response = await fetch('/api/jobs', {
+- ./src/pages/Landing.jsx:94:      const response = await fetch('/api/appointments', {
+- ./src/pages/VehicleForm.jsx:29:      const response = await fetch('/api/customers', {
+- ./src/pages/VehicleForm.jsx:345:      const response = await fetch('/api/vehicles', {
+- ./src/pages/CreateEditEstimate.jsx:30:        const res = await fetch(`/api/estimates/${id}`);
+- ./src/pages/CreateEditEstimate.jsx:51:      const res = await fetch(url, {
+- ./src/pages/Settings.jsx:79:        const res = await fetch('/api/settings', {
+- ./src/pages/Settings.jsx:142:      const res = await fetch('/api/settings', {
+- ./src/pages/Landing_backup.jsx:93:      const response = await fetch('/api/appointments', {
+- ./src/pages/Customers.jsx:79:      const response = await fetch('/api/customers');
+- ./src/pages/Customers.jsx:275:      const response = await fetch(`/api/customers/${customer.id}`, {
+- ./src/pages/Customers.jsx:318:        fetch(`/api/customers/${id}`, { method: 'DELETE' })
+- ./src/pages/TimeClock.jsx:20:      const response = await fetch('/api/timeclock/status', {
+- ./src/pages/TimeClock.jsx:35:      const response = await fetch('/api/timeclock/history', {
+- ./src/pages/TimeClock.jsx:51:      const response = await fetch('/api/timeclock/clock-in', {
+- ./src/pages/TimeClock.jsx:75:      const response = await fetch('/api/timeclock/clock-out', {
+- ./src/components/HealthCheck.jsx:9:        const response = await fetch('http://127.0.0.1:5001/health');
+- ./src/components/TimeclockHistory.jsx:16:      const response = await fetch(`/api/timeclock/entries?${params}`, {
+- ./src/contexts/SettingsContext.jsx:66:      const res = await fetch("/api/settings", {
+- ./src/contexts/SettingsContext.jsx:92:        const res = await fetch("/api/settings", {
+- ./src/components_backup_20250818_064444/HealthCheck.jsx:9:        const response = await fetch('http://127.0.0.1:5001/health');
+- ./src/components_backup_20250818_064444/TimeclockHistory.jsx:16:      const response = await fetch(`/api/timeclock/entries?${params}`, {
+- ./src/components_backup_20250818_064444/TimeClockWidget.jsx:13:      const res = await fetch("/api/timeclock/me");
+- ./src/components_backup_20250818_064444/TimeClockWidget.jsx:26:      const res = await fetch(`/api/timeclock/${status.clockedIn ? "clockout" : "clockin"}`, { method: "POST" });
+
+## Axios API Calls
+- ./src/components/ai/AIProvider.js:12:    const openAIResp = await axios.post(
+- ./src/components/ai/AIProvider.js:30:      const openRouterResp = await axios.post(
+- ./src/components/ai/AIProvider.js:45:        const hfResp = await axios.post(
+- ./src/components/dashboards/Dashboard.tsx:11:      const response = await axios.get('/api/v1/dashboard/stats');
+- ./src/components/diagnostics/VehicleDiagnostics.tsx:15:      const response = await axios.get('/api/v1/vehicles');
+- ./src/services/api.ts:9:    this.api = axios.create({
+- ./src/services/api.ts:65:    return axios.get('http://localhost:5000/api/health');
+- ./src/utils/api.js:9:const api = axios.create({
+- ./src/utils/api.js:54:const healthApi = axios.create({
+- ./src/utils/api_20250818_090712.js:11:const api = axios.create({
+- ./src/utils/api_20250818_090712.js:260:const timeclockservice = axios.create({
+- ./src/components_backup_20250818_064444/ai/AIProvider.js:12:    const openAIResp = await axios.post(
+- ./src/components_backup_20250818_064444/ai/AIProvider.js:30:      const openRouterResp = await axios.post(
+- ./src/components_backup_20250818_064444/ai/AIProvider.js:45:        const hfResp = await axios.post(
+
+## API Endpoints
+- ./src/pages/CustomerList.jsx:79:      const response = await fetch('/api/customers');
+- ./src/pages/CreateJob.jsx:56:        const customersResponse = await fetch('/api/customers');
+- ./src/pages/CreateJob.jsx:63:        const vehiclesResponse = await fetch('/api/vehicles');
+- ./src/pages/CreateJob.jsx:70:        const techniciansResponse = await fetch('/api/technicians');
+- ./src/pages/CreateJob.jsx:176:          const response = await fetch('/api/ai/openai-diagnosis', {
+- ./src/pages/CreateJob.jsx:200:          const response = await fetch('/api/ai/openrouter-diagnosis', {
+- ./src/pages/CreateJob.jsx:228:          const response = await fetch('/api/ai/huggingface-diagnosis', {
+- ./src/pages/CreateJob.jsx:324:      const response = await fetch('/api/carfax/report', {
+- ./src/pages/CreateJob.jsx:363:      const response = await fetch('/api/obd2/lookup', {
+- ./src/pages/CreateJob.jsx:397:      const response = await fetch('/api/wiring-diagrams', {
+- ./src/pages/CreateJob.jsx:450:      const response = await fetch('/api/jobs', {
+- ./src/pages/Landing.jsx:94:      const response = await fetch('/api/appointments', {
+- ./src/pages/VehicleForm.jsx:29:      const response = await fetch('/api/customers', {
+- ./src/pages/VehicleForm.jsx:345:      const response = await fetch('/api/vehicles', {
+- ./src/pages/Settings.jsx:79:        const res = await fetch('/api/settings', {
+- ./src/pages/Settings.jsx:142:      const res = await fetch('/api/settings', {
+- ./src/pages/Landing_backup.jsx:93:      const response = await fetch('/api/appointments', {
+- ./src/pages/Customers.jsx:79:      const response = await fetch('/api/customers');
+- ./src/pages/TimeClock.jsx:20:      const response = await fetch('/api/timeclock/status', {
+- ./src/pages/TimeClock.jsx:35:      const response = await fetch('/api/timeclock/history', {
+- ./src/pages/TimeClock.jsx:51:      const response = await fetch('/api/timeclock/clock-in', {
+- ./src/pages/TimeClock.jsx:75:      const response = await fetch('/api/timeclock/clock-out', {
+- ./src/components/dashboards/Dashboard.tsx:11:      const response = await axios.get('/api/v1/dashboard/stats');
+- ./src/components/diagnostics/VehicleDiagnostics.tsx:15:      const response = await axios.get('/api/v1/vehicles');
+- ./src/utils/aiDiagnosticsService.js:17:      const response = await api.post('/api/ai/diagnostics/comprehensive', diagnosticData);
+- ./src/utils/aiDiagnosticsService.js:34:      const response = await api.post('/api/ai/diagnostics/quick-diagnosis', data);
+- ./src/utils/aiDiagnosticsService.js:49:      const response = await api.post('/api/ai/diagnostics/obd-lookup', { codes });
+- ./src/utils/aiDiagnosticsService.js:133:      const response = await api.post('/api/customers/diagnosis', diagnosisData);
+- ./src/utils/aiDiagnosticsService.js:162:      const response = await api.post('/api/estimates', estimateData);

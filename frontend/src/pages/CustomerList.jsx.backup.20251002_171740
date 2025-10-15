@@ -1,0 +1,581 @@
+// src/pages/CustomerList.jsx - FIXED VERSION using customerService
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import {
+  PlusIcon,
+  MagnifyingGlassIcon,
+  FunnelIcon,
+  ArrowDownTrayIcon,
+  EyeIcon,
+  PencilIcon,
+  TrashIcon,
+  PhoneIcon,
+  EnvelopeIcon,
+  MapPinIcon,
+  UserGroupIcon,
+  StarIcon,
+  CalendarIcon,
+  ChevronUpDownIcon,
+  CheckIcon,
+  XMarkIcon
+} from '@heroicons/react/24/outline';
+import { useEnhancedNavigation } from "../hooks";
+import SmartBreadcrumb from "../components/SmartBreadcrumb";
+import * as customerService from '../utils/services/customerService'; // Import all named exports
+
+const CustomerList = () => {
+  const { navigateTo, savePageState, getPageState, currentPath } = useEnhancedNavigation();
+
+  // Enhanced States
+  const [customers, setCustomers] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  // Enhanced search and filtering
+  const [searchTerm, setSearchTerm] = useState('');
+  const [selectedCustomers, setSelectedCustomers] = useState([]);
+  const [sortBy, setSortBy] = useState('name');
+  const [sortOrder, setSortOrder] = useState('asc');
+  const [filterStatus, setFilterStatus] = useState('all');
+  const [showFilters, setShowFilters] = useState(false);
+  const [viewMode, setViewMode] = useState('list');
+
+  // Advanced filters
+  const [dateRange, setDateRange] = useState({ start: '', end: '' });
+  const [vehicleCount, setVehicleCount] = useState('all');
+  const [totalSpentRange, setTotalSpentRange] = useState({ min: '', max: '' });
+
+  // FIXED: Restore page state only on mount
+  useEffect(() => {
+    const savedState = getPageState(currentPath) || {};
+    if (savedState.searchTerm) setSearchTerm(savedState.searchTerm);
+    if (savedState.selectedCustomers) setSelectedCustomers(savedState.selectedCustomers);
+    if (savedState.sortBy) setSortBy(savedState.sortBy);
+    if (savedState.sortOrder) setSortOrder(savedState.sortOrder);
+    if (savedState.filterStatus) setFilterStatus(savedState.filterStatus);
+    if (savedState.viewMode) setViewMode(savedState.viewMode);
+  }, []);
+
+  // FIXED: Memoized save state function
+  const saveCurrentState = useCallback(() => {
+    if (savePageState && currentPath) {
+      savePageState(currentPath, {
+        searchTerm,
+        selectedCustomers,
+        sortBy,
+        sortOrder,
+        filterStatus,
+        viewMode
+      });
+    }
+  }, [searchTerm, selectedCustomers, sortBy, sortOrder, filterStatus, viewMode, savePageState, currentPath]);
+
+  // FIXED: Debounced state saving
+  useEffect(() => {
+    const timeoutId = setTimeout(saveCurrentState, 300);
+    return () => clearTimeout(timeoutId);
+  }, [saveCurrentState]);
+
+  // FIXED: Fetch customers using service
+  useEffect(() => {
+    fetchCustomers();
+  }, []);
+
+  const fetchCustomers = useCallback(async () => {
+    try {
+      setLoading(true);
+      setError(null);
+
+      // Use customerService.getAll() for authenticated requests
+      const data = await customerService.getAll();
+
+      // Enhanced customer data processing
+      const processedCustomers = Array.isArray(data)
+        ? data.filter(c => c.id != null).map(customer => ({
+            ...customer,
+            // Ensure required fields
+            name: customer.name || `${customer.first_name || ''} ${customer.last_name || ''}`.trim() || 'Unknown Customer',
+            email: customer.email || '',
+            phone: customer.phone || '',
+            address: customer.address || '',
+            status: customer.status || 'active',
+            created_at: customer.created_at || new Date().toISOString(),
+            last_service: customer.last_service || null,
+            total_spent: customer.total_spent || 0,
+            vehicle_count: customer.vehicles?.length || 0,
+            average_rating: customer.average_rating || 0,
+            // Add computed fields
+            initials: getInitials(customer.name || `${customer.first_name || ''} ${customer.last_name || ''}`),
+            membershipDuration: getMembershipDuration(customer.created_at),
+            isVIP: (customer.total_spent || 0) > 5000
+          }))
+        : [];
+
+      setCustomers(processedCustomers);
+    } catch (err) {
+      console.error('Error fetching customers:', err);
+      setError(`Failed to load customers: ${err.message}`);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  // Utility functions
+  const getInitials = (name) => {
+    if (!name) return '?';
+    return name.split(' ')
+      .map(n => n[0])
+      .join('')
+      .toUpperCase()
+      .slice(0, 2);
+  };
+
+  const getMembershipDuration = (createdAt) => {
+    if (!createdAt) return 'New';
+    const created = new Date(createdAt);
+    const now = new Date();
+    const diffTime = Math.abs(now - created);
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+    if (diffDays < 30) return 'New';
+    if (diffDays < 365) return `${Math.floor(diffDays / 30)}m`;
+    return `${Math.floor(diffDays / 365)}y`;
+  };
+
+  // Enhanced filtering and sorting
+  const filteredCustomers = useMemo(() => {
+    let filtered = [...customers];
+
+    // Text search
+    if (searchTerm) {
+      const searchLower = searchTerm.toLowerCase();
+      filtered = filtered.filter(customer =>
+        customer.name?.toLowerCase().includes(searchLower) ||
+        customer.email?.toLowerCase().includes(searchLower) ||
+        customer.phone?.includes(searchTerm) ||
+        customer.address?.toLowerCase().includes(searchLower) ||
+        customer.id?.toString().includes(searchTerm)
+      );
+    }
+
+    // Status filter
+    if (filterStatus !== 'all') {
+      filtered = filtered.filter(customer => customer.status === filterStatus);
+    }
+
+    // Date range filter
+    if (dateRange.start) {
+      filtered = filtered.filter(customer =>
+        new Date(customer.created_at) >= new Date(dateRange.start)
+      );
+    }
+    if (dateRange.end) {
+      filtered = filtered.filter(customer =>
+        new Date(customer.created_at) <= new Date(dateRange.end)
+      );
+    }
+
+    // Vehicle count filter
+    if (vehicleCount !== 'all') {
+      filtered = filtered.filter(customer => {
+        if (vehicleCount === '0') return customer.vehicle_count === 0;
+        if (vehicleCount === '1') return customer.vehicle_count === 1;
+        if (vehicleCount === '2+') return customer.vehicle_count >= 2;
+        return true;
+      });
+    }
+
+    // Total spent range filter
+    if (totalSpentRange.min) {
+      filtered = filtered.filter(customer =>
+        customer.total_spent >= parseFloat(totalSpentRange.min)
+      );
+    }
+    if (totalSpentRange.max) {
+      filtered = filtered.filter(customer =>
+        customer.total_spent <= parseFloat(totalSpentRange.max)
+      );
+    }
+
+    // Enhanced sorting
+    filtered.sort((a, b) => {
+      let aVal, bVal;
+
+      switch (sortBy) {
+        case 'name':
+          aVal = (a.name || '').toLowerCase();
+          bVal = (b.name || '').toLowerCase();
+          break;
+        case 'date':
+          aVal = new Date(a.created_at || 0);
+          bVal = new Date(b.created_at || 0);
+          break;
+        case 'spent':
+          aVal = a.total_spent || 0;
+          bVal = b.total_spent || 0;
+          break;
+        case 'vehicles':
+          aVal = a.vehicle_count || 0;
+          bVal = b.vehicle_count || 0;
+          break;
+        case 'rating':
+          aVal = a.average_rating || 0;
+          bVal = b.average_rating || 0;
+          break;
+        default:
+          aVal = (a.name || '').toLowerCase();
+          bVal = (b.name || '').toLowerCase();
+      }
+      if (aVal < bVal) return sortOrder === 'asc' ? -1 : 1;
+      if (aVal > bVal) return sortOrder === 'asc' ? 1 : -1;
+      return 0;
+    });
+
+    return filtered;
+  }, [customers, searchTerm, filterStatus, dateRange, vehicleCount, totalSpentRange, sortBy, sortOrder]);
+
+  // Enhanced navigation handlers
+  const handleCustomerClick = useCallback((customer) => {
+    if (!customer.id) {
+      alert('Customer ID missing. Cannot proceed.');
+      return;
+    }
+    navigateTo(`/customers/${customer.id}`, {
+      state: {
+        customer,
+        returnTo: '/customers',
+        listContext: { searchTerm, sortBy, sortOrder, filterStatus, viewMode }
+      }
+    });
+  }, [navigateTo, searchTerm, sortBy, sortOrder, filterStatus, viewMode]);
+
+  const handleAddCustomer = useCallback(() => {
+    navigateTo('/customers/add', { state: { returnTo: '/customers' } });
+  }, [navigateTo]);
+
+  const handleEditCustomer = useCallback((customer, e) => {
+    e?.stopPropagation();
+    if (!customer.id) {
+      alert('Customer ID missing. Cannot edit.');
+      return;
+    }
+    navigateTo(`/customers/${customer.id}/edit`, {
+      state: { customer, returnTo: '/customers', isEditing: true }
+    });
+  }, [navigateTo]);
+
+  const handleDeleteCustomer = useCallback(async (customer, e) => {
+    e?.stopPropagation();
+    if (!customer.id) return;
+
+    const confirmed = window.confirm(
+      `Are you sure you want to delete ${customer.name}? This action cannot be undone.`
+    );
+    if (!confirmed) return;
+
+    try {
+      // Use customerService.deleteCustomer() for authenticated deletion
+      await customerService.deleteCustomer(customer.id);
+      setCustomers(prev => prev.filter(c => c.id !== customer.id));
+      alert('Customer deleted successfully');
+    } catch (err) {
+      console.error('Error deleting customer:', err);
+      alert(`Error deleting customer: ${err.message}`);
+    }
+  }, []);
+
+  // Bulk operations
+  const handleSelectCustomer = useCallback((customerId, checked) => {
+    if (checked) {
+      setSelectedCustomers(prev => [...prev, customerId]);
+    } else {
+      setSelectedCustomers(prev => prev.filter(id => id !== customerId));
+    }
+  }, []);
+
+  const handleSelectAll = useCallback((checked) => {
+    if (checked) {
+      setSelectedCustomers(filteredCustomers.map(c => c.id));
+    } else {
+      setSelectedCustomers([]);
+    }
+  }, [filteredCustomers]);
+
+  const handleBulkDelete = useCallback(async () => {
+    if (selectedCustomers.length === 0) return;
+
+    const confirmed = window.confirm(
+      `Delete ${selectedCustomers.length} selected customers? This action cannot be undone.`
+    );
+    if (!confirmed) return;
+
+    try {
+      // Use customerService for bulk deletion with proper method name
+      await Promise.all(
+        selectedCustomers.map(id => customerService.deleteCustomer(id))
+      );
+
+      setCustomers(prev => prev.filter(c => !selectedCustomers.includes(c.id)));
+      setSelectedCustomers([]);
+      alert(`${selectedCustomers.length} customers deleted successfully`);
+    } catch (err) {
+      console.error('Error deleting customers:', err);
+      alert(`Error deleting customers: ${err.message}`);
+    }
+  }, [selectedCustomers]);
+
+  const handleExportCustomers = useCallback(() => {
+    const csvContent = [
+      ['Name', 'Email', 'Phone', 'Address', 'Status', 'Vehicles', 'Total Spent', 'Member Since'],
+      ...filteredCustomers.map(c => [
+        c.name,
+        c.email,
+        c.phone,
+        c.address,
+        c.status,
+        c.vehicle_count,
+        c.total_spent,
+        new Date(c.created_at).toLocaleDateString()
+      ])
+    ].map(row => row.join(',')).join('\n');
+
+    const blob = new Blob([csvContent], { type: 'text/csv' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `customers-${new Date().toISOString().split('T')[0]}.csv`;
+    a.click();
+    window.URL.revokeObjectURL(url);
+  }, [filteredCustomers]);
+
+  // Enhanced breadcrumb actions
+  const breadcrumbActions = [
+    {
+      icon: ArrowDownTrayIcon,
+      onClick: handleExportCustomers,
+      title: 'Export CSV',
+      className: 'text-gray-700 bg-white hover:bg-gray-50 border border-gray-300'
+    },
+    {
+      icon: PlusIcon,
+      onClick: handleAddCustomer,
+      title: 'Add Customer',
+      className: 'text-white bg-blue-600 hover:bg-blue-700'
+    }
+  ];
+
+  // Loading state
+  if (loading) {
+    return (
+      <div className="p-6">
+        <div className="animate-pulse space-y-6">
+          <div className="h-8 bg-gray-200 rounded w-1/4"></div>
+          <div className="space-y-4">
+            {[...Array(5)].map((_, i) => (
+              <div key={i} className="h-20 bg-gray-200 rounded"></div>
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Error state with retry
+  if (error) {
+    return (
+      <div className="p-6">
+        <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+          <div className="flex items-center">
+            <XMarkIcon className="h-6 w-6 text-red-400 mr-3" />
+            <div>
+              <h3 className="text-lg font-medium text-red-800">Error Loading Customers</h3>
+              <p className="text-red-600 mt-1">{error}</p>
+              <div className="mt-3 space-x-3">
+                <button
+                  onClick={fetchCustomers}
+                  className="bg-red-100 text-red-800 px-4 py-2 rounded hover:bg-red-200 transition-colors"
+                >
+                  Try Again
+                </button>
+                <button
+                  onClick={() => setError(null)}
+                  className="bg-gray-100 text-gray-800 px-4 py-2 rounded hover:bg-gray-200 transition-colors"
+                >
+                  Dismiss
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="p-6 max-w-7xl mx-auto">
+      <SmartBreadcrumb path="/customers" actions={breadcrumbActions} />
+
+      {/* Enhanced Header with Stats */}
+      <div className="mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
+          <div className="bg-white rounded-lg shadow-sm p-6 border border-gray-200">
+            <div className="flex items-center">
+              <UserGroupIcon className="h-8 w-8 text-blue-600" />
+              <div className="ml-4">
+                <p className="text-2xl font-bold text-gray-900">{customers.length}</p>
+                <p className="text-sm text-gray-600">Total Customers</p>
+              </div>
+            </div>
+          </div>
+          <div className="bg-white rounded-lg shadow-sm p-6 border border-gray-200">
+            <div className="flex items-center">
+              <CheckIcon className="h-8 w-8 text-green-600" />
+              <div className="ml-4">
+                <p className="text-2xl font-bold text-gray-900">
+                  {customers.filter(c => c.status === 'active').length}
+                </p>
+                <p className="text-sm text-gray-600">Active Customers</p>
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-white rounded-lg shadow-sm p-6 border border-gray-200">
+            <div className="flex items-center">
+              <StarIcon className="h-8 w-8 text-yellow-500" />
+              <div className="ml-4">
+                <p className="text-2xl font-bold text-gray-900">
+                  {customers.filter(c => c.isVIP).length}
+                </p>
+                <p className="text-sm text-gray-600">VIP Customers</p>
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-white rounded-lg shadow-sm p-6 border border-gray-200">
+            <div className="flex items-center">
+              <CalendarIcon className="h-8 w-8 text-purple-600" />
+              <div className="ml-4">
+                <p className="text-2xl font-bold text-gray-900">
+                  {customers.filter(c => getMembershipDuration(c.created_at) === 'New').length}
+                </p>
+                <p className="text-sm text-gray-600">New This Month</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Search and Filters Section */}
+      <div className="bg-white rounded-lg shadow-sm border border-gray-200 mb-6">
+        <div className="p-6">
+          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-4">
+            {/* Search Bar */}
+            <div className="flex-1 max-w-md">
+              <div className="relative">
+                <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+                <input
+                  type="text"
+                  placeholder="Search customers..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="pl-10 pr-4 py-3 w-full border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                />
+              </div>
+            </div>
+
+            {/* View Toggle and Filter Button */}
+            <div className="flex items-center space-x-3">
+              <div className="bg-gray-100 rounded-lg p-1">
+                <button
+                  onClick={() => setViewMode('list')}
+                  className={`px-3 py-2 rounded text-sm font-medium transition-all ${
+                    viewMode === 'list'
+                      ? 'bg-white text-gray-900 shadow-sm'
+                      : 'text-gray-600 hover:text-gray-900'
+                  }`}
+                >
+                  List
+                </button>
+                <button
+                  onClick={() => setViewMode('grid')}
+                  className={`px-3 py-2 rounded text-sm font-medium transition-all ${
+                    viewMode === 'grid'
+                      ? 'bg-white text-gray-900 shadow-sm'
+                      : 'text-gray-600 hover:text-gray-900'
+                  }`}
+                >
+                  Grid
+                </button>
+              </div>
+
+              <button
+                onClick={() => setShowFilters(!showFilters)}
+                className={`flex items-center space-x-2 px-4 py-2 border rounded-lg transition-all ${
+                  showFilters
+                    ? 'border-blue-500 bg-blue-50 text-blue-700'
+                    : 'border-gray-300 text-gray-700 hover:bg-gray-50'
+                }`}
+              >
+                <FunnelIcon className="h-4 w-4" />
+                <span>Filters</span>
+              </button>
+            </div>
+          </div>
+
+          {/* Results Count */}
+          <div className="text-sm text-gray-600">
+            Showing {filteredCustomers.length} of {customers.length} customers
+          </div>
+        </div>
+      </div>
+
+      {/* Customer List/Grid - Simplified for now */}
+      <div className="bg-white rounded-lg shadow-sm border border-gray-200">
+        {filteredCustomers.length === 0 ? (
+          <div className="px-6 py-12 text-center">
+            <UserGroupIcon className="mx-auto h-16 w-16 text-gray-300 mb-4" />
+            <h3 className="text-lg font-medium text-gray-900 mb-2">No customers found</h3>
+            <p className="text-gray-600 mb-6">
+              {searchTerm ? 'Try adjusting your search.' : 'Get started by adding your first customer.'}
+            </p>
+            <button
+              onClick={handleAddCustomer}
+              className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors"
+            >
+              Add Customer
+            </button>
+          </div>
+        ) : (
+          <div className="divide-y divide-gray-200">
+            {filteredCustomers.map(customer => (
+              <div
+                key={customer.id}
+                className="px-6 py-4 hover:bg-gray-50 transition-colors cursor-pointer"
+                onClick={() => handleCustomerClick(customer)}
+              >
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-4">
+                    <div className={`w-12 h-12 rounded-full flex items-center justify-center text-white font-semibold ${
+                      customer.isVIP ? 'bg-gradient-to-r from-yellow-400 to-yellow-600' : 'bg-gradient-to-r from-blue-500 to-blue-600'
+                    }`}>
+                      {customer.initials}
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-semibold text-gray-900">{customer.name}</h3>
+                      <p className="text-sm text-gray-600">{customer.email}</p>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-sm font-medium text-gray-900">{customer.vehicle_count} vehicles</p>
+                    <p className="text-sm text-gray-600">${customer.total_spent.toLocaleString()}</p>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
+export default CustomerList;

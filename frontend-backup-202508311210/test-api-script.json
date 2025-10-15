@@ -1,0 +1,5 @@
+{
+  "scripts": {
+    "test-api": "node -e \"import('./src/utils/testApi.js').then(m => m.testApiConnections().then(console.log))\""
+  }
+}

@@ -1,0 +1,377 @@
+// src/components/Navbar.jsx - Updated with Essential Tools
+import React, { useState } from 'react';
+import SearchSystem, { useGlobalSearch, SearchButton } from "./SearchSystem";
+import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext';
+import AIEstimateModal from './AIEstimateModal'; // Add this import
+import {
+  Bars3Icon,
+  XMarkIcon,
+  ChevronDownIcon,
+  UserIcon,
+  Cog6ToothIcon,
+  ArrowLeftOnRectangleIcon,
+  BellIcon,
+  ChartBarIcon,
+  UserGroupIcon,
+  TruckIcon,
+  WrenchScrewdriverIcon,
+  ClipboardDocumentListIcon,
+  ChartPieIcon,
+  MagnifyingGlassIcon,
+  CpuChipIcon,
+  SparklesIcon,
+  CircleStackIcon,
+  CurrencyDollarIcon,
+  CalendarIcon,
+  PlusIcon
+} from '@heroicons/react/24/outline';
+
+export default function Navbar() {
+  const { isSearchOpen, openSearch, closeSearch } = useGlobalSearch();
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const [notificationsOpen, setNotificationsOpen] = useState(false);
+  const [showAIEstimateModal, setShowAIEstimateModal] = useState(false); // Add this state
+  const [estimates, setEstimates] = useState([]); // Add this state
+  const navigate = useNavigate();
+  const location = useLocation();
+  const { user, logout } = useAuth();
+
+  const handleLogout = () => {
+    logout();
+  };
+
+  // Add estimate handler
+  const handleEstimateGenerated = (newEstimate) => {
+    console.log('New estimate generated:', newEstimate);
+    setEstimates(prev => [newEstimate, ...prev]);
+    alert(`AI Estimate Created!\nCustomer: ${newEstimate.customer}\nTotal: $${newEstimate.total}`);
+  };
+
+  // Updated navigation links with correct paths
+  const navLinks = [
+    { to: '/dashboard', label: 'Dashboard', icon: ChartBarIcon },
+    { to: '/customers', label: 'Customers', icon: UserGroupIcon },
+    { to: '/vehicles', label: 'Vehicles', icon: TruckIcon },
+    { to: '/jobs', label: 'Jobs', icon: WrenchScrewdriverIcon },
+    { to: '/estimates', label: 'Estimates', icon: ClipboardDocumentListIcon },
+    { to: '/ai-diagnostics', label: 'AI Diagnostics', icon: CpuChipIcon },
+    { to: '/reports', label: 'Reports', icon: ChartPieIcon }
+  ];
+
+  // Essential Tools - These will be in the navbar
+  const essentialTools = [
+    { 
+      name: 'AI Estimate', 
+      action: 'modal', 
+      icon: SparklesIcon, 
+      color: 'text-purple-600 hover:text-purple-700',
+      description: 'Quick AI-powered estimates'
+    },
+    { 
+      name: 'Data Migration', 
+      to: '/data', 
+      icon: CircleStackIcon, 
+      color: 'text-teal-600 hover:text-teal-700',
+      description: 'Import from Mitchell 1'
+    },
+    { 
+      name: 'Quick Invoice', 
+      to: '/invoices/create', 
+      icon: CurrencyDollarIcon, 
+      color: 'text-orange-600 hover:text-orange-700',
+      description: 'Bill customer fast'
+    }
+  ];
+
+  const handleToolAction = (tool) => {
+    if (tool.action === 'modal' && tool.name === 'AI Estimate') {
+      setShowAIEstimateModal(true);
+      return;
+    }
+    if (tool.to) {
+      navigate(tool.to);
+    }
+  };
+
+  const notifications = [
+    { id: 1, message: 'New job created: JOB-2025-006', time: '5 min ago', type: 'success' },
+    { id: 2, message: 'Invoice INV-2025-005 paid - $245.00', time: '15 min ago', type: 'success' },
+    { id: 3, message: 'Parts order delivered', time: '1 hour ago', type: 'info' },
+    { id: 4, message: 'Customer Sarah Wilson called', time: '2 hours ago', type: 'info' }
+  ];
+
+  const closeMobileMenu = () => setMobileMenuOpen(false);
+
+  return (
+    <>
+      <nav className="bg-white shadow-lg border-b sticky top-0 z-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center h-16">
+            {/* Logo */}
+            <div className="flex items-center">
+              <Link to="/dashboard" className="flex items-center space-x-3">
+                <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-purple-600 rounded-lg flex items-center justify-center text-white font-bold shadow-lg">
+                  🔧
+                </div>
+                <div className="hidden sm:block">
+                  <h1 className="text-xl font-bold text-gray-900">Eddie's Automotive</h1>
+                  <p className="text-xs text-gray-500">Management System</p>
+                </div>
+              </Link>
+            </div>
+
+            {/* Desktop Navigation - Core Pages */}
+            <div className="hidden lg:flex items-center space-x-4">
+              {navLinks.map(link => {
+                const Icon = link.icon;
+                const isActive = location.pathname === link.to;
+                return (
+                  <Link
+                    key={link.to}
+                    to={link.to}
+                    className={`flex items-center space-x-2 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                      isActive
+                        ? 'bg-blue-100 text-blue-700'
+                        : 'text-gray-600 hover:text-blue-600 hover:bg-gray-50'
+                    }`}
+                  >
+                    <Icon className="w-4 h-4" />
+                    <span>{link.label}</span>
+                  </Link>
+                );
+              })}
+            </div>
+
+            {/* Essential Tools & User Menu */}
+            <div className="flex items-center space-x-2">
+              {/* Essential Tools - Desktop */}
+              <div className="hidden md:flex items-center space-x-1 mr-2 border-r border-gray-200 pr-4">
+      <SearchButton onClick={openSearch} />
+                {essentialTools.map((tool) => {
+<SearchButton onClick={openSearch} />
+                  const Icon = tool.icon;
+                  return (
+                    <button
+                      key={tool.name}
+                      onClick={() => handleToolAction(tool)}
+                      className={`flex items-center px-3 py-2 rounded-lg text-sm font-medium transition-colors ${tool.color} hover:bg-gray-50`}
+                      title={tool.description}
+                    >
+                      <Icon className="w-4 h-4 mr-1" />
+                      <span className="hidden xl:block">{tool.name}</span>
+                    </button>
+                  );
+                })}
+              </div>
+
+              {/* Quick Add Button */}
+              <div className="hidden md:block">
+                <button
+                  onClick={() => navigate('/customers/add')}
+                  className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-4 py-2 rounded-lg hover:shadow-lg transition-all duration-300 font-medium flex items-center space-x-2 hover:scale-105"
+                >
+                  <PlusIcon className="w-4 h-4" />
+                  <span>Add</span>
+                </button>
+              </div>
+
+              {/* Notifications */}
+              <div className="relative">
+                <button
+                  onClick={() => setNotificationsOpen(!notificationsOpen)}
+                  className="p-2 text-gray-600 hover:text-blue-600 hover:bg-gray-50 rounded-lg relative"
+                >
+                  <BellIcon className="w-6 h-6" />
+                  <span className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full animate-pulse"></span>
+                </button>
+
+                {notificationsOpen && (
+                  <div className="absolute right-0 mt-2 w-80 bg-white rounded-lg shadow-xl border z-50">
+                    <div className="p-4 border-b bg-gray-50">
+                      <div className="flex items-center justify-between">
+                        <h3 className="font-semibold text-gray-900">Notifications</h3>
+                        <span className="text-xs text-gray-500 bg-gray-200 px-2 py-1 rounded-full">
+                          {notifications.length} new
+                        </span>
+                      </div>
+                    </div>
+                    <div className="max-h-80 overflow-y-auto">
+                      {notifications.map(notification => (
+                        <div
+                          key={notification.id}
+                          className="p-4 hover:bg-gray-50 border-b last:border-b-0 cursor-pointer"
+                        >
+                          <div className="flex items-start space-x-3">
+                            <div
+                              className={`w-2 h-2 rounded-full mt-2 flex-shrink-0 ${
+                                notification.type === 'success' ? 'bg-green-500' : 'bg-blue-500'
+                              }`}
+                            ></div>
+                            <div className="flex-1">
+                              <p className="text-sm text-gray-900 font-medium">{notification.message}</p>
+                              <p className="text-xs text-gray-500 mt-1">{notification.time}</p>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                    <div className="p-3 bg-gray-50 text-center border-t">
+                      <button className="text-blue-600 text-sm hover:text-blue-800 font-medium">
+                        View all notifications
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* User Menu */}
+              <div className="relative">
+                <button
+                  onClick={() => setUserMenuOpen(!userMenuOpen)}
+                  className="flex items-center space-x-2 p-2 rounded-lg hover:bg-gray-50 transition-colors"
+                >
+                  <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white text-sm font-bold shadow-md">
+                    {user?.email?.charAt(0).toUpperCase() || 'E'}
+                  </div>
+                  <div className="hidden md:block text-left">
+                    <p className="text-sm font-medium text-gray-700">{user?.email?.split('@')[0] || 'Eddie'}</p>
+                    <p className="text-xs text-gray-500">{user?.role || 'Admin'}</p>
+                  </div>
+                  <ChevronDownIcon className="w-4 h-4 text-gray-400" />
+                </button>
+                {userMenuOpen && (
+                  <div className="absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-xl border z-50">
+                    <div className="p-4 border-b bg-gray-50">
+                      <p className="text-sm font-semibold text-gray-900">{user?.email?.split('@')[0] || 'Eddie'}</p>
+                      <p className="text-xs text-gray-500">{user?.email || 'eddie@eddiesautomotive.com'}</p>
+                      <p className="text-xs text-green-600 font-medium mt-1">● Online</p>
+                    </div>
+                    <div className="py-2">
+                      <button
+                        onClick={() => {
+                          setUserMenuOpen(false);
+                          navigate('/profile');
+                        }}
+                        className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                      >
+                        <UserIcon className="w-4 h-4 mr-3 text-gray-400" />
+                        View Profile
+                      </button>
+
+                      <button
+                        onClick={() => {
+                          setUserMenuOpen(false);
+                          navigate('/settings');
+                        }}
+                        className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                      >
+                        <Cog6ToothIcon className="w-4 h-4 mr-3 text-gray-400" />
+                        Settings
+                      </button>
+
+                      <hr className="my-2" />
+
+                      <button
+                        onClick={handleLogout}
+                        className="flex items-center w-full px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors"
+                      >
+                        <ArrowLeftOnRectangleIcon className="w-4 h-4 mr-3" />
+                        Sign Out
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Mobile menu button */}
+              <button
+                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                className="lg:hidden p-2 text-gray-600 hover:text-blue-600 hover:bg-gray-50 rounded-lg ml-2"
+              >
+                {mobileMenuOpen ? (
+                  <XMarkIcon className="w-6 h-6" />
+                ) : (
+                  <Bars3Icon className="w-6 h-6" />
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Mobile Menu */}
+        {mobileMenuOpen && (
+          <div className="lg:hidden border-t bg-white">
+            <div className="px-4 py-3 space-y-2">
+              {/* Core Navigation Links */}
+              {navLinks.map(link => {
+                const Icon = link.icon;
+                const isActive = location.pathname === link.to;
+                return (
+                  <Link
+                    key={link.to}
+                    to={link.to}
+                    onClick={closeMobileMenu}
+                    className={`flex items-center space-x-3 px-3 py-3 rounded-lg text-base font-medium transition-colors ${
+                      isActive
+                        ? 'bg-blue-100 text-blue-700'
+                        : 'text-gray-600 hover:text-blue-600 hover:bg-gray-50'
+                    }`}
+                  >
+                    <Icon className="w-5 h-5" />
+                    <span>{link.label}</span>
+                  </Link>
+                );
+              })}
+              
+              {/* Mobile Essential Tools */}
+              <div className="pt-3 border-t">
+                <p className="px-3 text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Quick Tools</p>
+                {essentialTools.map((tool) => {
+                  const Icon = tool.icon;
+                  return (
+                    <button
+                      key={tool.name}
+                      onClick={() => {
+                        handleToolAction(tool);
+                        closeMobileMenu();
+                      }}
+                      className={`w-full flex items-center space-x-3 px-3 py-3 rounded-lg text-base font-medium transition-colors ${tool.color} hover:bg-gray-50`}
+                    >
+                      <Icon className="w-5 h-5" />
+                      <span>{tool.name}</span>
+                    </button>
+                  );
+                })}
+              </div>
+
+              {/* Mobile Quick Actions */}
+              <div className="pt-3 border-t">
+                <button
+                  onClick={() => {
+                    closeMobileMenu();
+                    navigate('/customers/add');
+                  }}
+                  className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white px-4 py-3 rounded-lg font-medium flex items-center justify-center space-x-2"
+                >
+                  <PlusIcon className="w-5 h-5" />
+                  <span>Add Customer</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+      </nav>
+
+      {/* AI Estimate Modal */}
+      <AIEstimateModal
+        isOpen={showAIEstimateModal}
+        onClose={() => setShowAIEstimateModal(false)}
+        onEstimateGenerated={handleEstimateGenerated}
+        initialData={null}
+      />
+  <SearchSystem isOpen={isSearchOpen} onClose={closeSearch} />
+    </>
+  );
+}

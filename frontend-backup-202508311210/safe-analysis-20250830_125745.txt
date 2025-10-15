@@ -1,0 +1,102 @@
+=== CURRENT STATE ANALYSIS ===
+Timestamp: 20250830_125745
+Path: /data/data/com.termux/files/home/eddies-asian-automotive/frontend
+
+=== API IMPLEMENTATIONS FOUND ===
+1. utils/api.js:
+   Lines: 265
+   Exports: 18
+   Services: 7
+   Has axios config: YES
+
+2. utils/apiEndpoints.js:
+   Lines: 398
+   Exports: 21
+   Services: 14
+   Has axios config: YES
+
+3. Individual service files in utils/services/:
+   Service files found: 9
+   - src/utils/services/customerService.js (64 lines)
+   - src/utils/services/vehicleService.js (64 lines)
+   - src/utils/services/jobService.js (74 lines)
+   - src/utils/services/estimateService.js (64 lines)
+   - src/utils/services/invoiceService.js (64 lines)
+   - src/utils/services/appointmentService.js (64 lines)
+   - src/utils/services/timeclockService.js (44 lines)
+   - src/utils/services/reportService.js (47 lines)
+   - src/utils/services/diagnosticsService.js (37 lines)
+
+=== CONTEXT PROVIDERS ANALYSIS ===
+AuthContext.jsx:
+   Has useAuth: YES
+   Has AuthProvider: YES
+DataContext.jsx:
+   Has useData: YES
+   Has DataProvider: YES
+DUPLICATE useAuth found in hooks/useAuth.js
+
+=== COMPONENT DEPENDENCY ANALYSIS ===
+Components importing from '../utils':
+20
+
+Components importing specific API services:
+src/components/SearchSystem.jsx:import { customerService, vehicleService, jobService } from "../utils";
+src/components/SearchSystem.jsx:          customerService.search(searchTerm)
+src/contexts/DataContext.jsx:  customerService,
+src/contexts/DataContext.jsx:  vehicleService,
+src/contexts/DataContext.jsx:  jobService,
+
+=== MOST CRITICAL CONFLICTS ===
+Files that will break with current setup:
+
+CRITICAL: src/pages/Reports.jsx
+   Generic imports: 2
+   Specific imports: 0
+   Uses services: 4
+   Import lines:
+     17:import { reportsService, dashboardService } from '../utils';
+     18:import { showError, showSuccess } from '../utils';
+
+CRITICAL: src/components/SearchSystem.jsx
+   Generic imports: 2
+   Specific imports: 0
+   Uses services: 2
+   Import lines:
+     6:import { customerService, vehicleService, jobService } from "../utils";
+     7:import { showError } from "../utils";
+
+CRITICAL: src/pages/CreateEditEstimate.jsx
+   Generic imports: 2
+   Specific imports: 0
+   Uses services: 0
+   Import lines:
+     7:import { computeTotals } from "../utils";
+     8:import { showMessage } from "../utils";
+
+CRITICAL: src/pages/EstimatesList.jsx
+   Generic imports: 2
+   Specific imports: 0
+   Uses services: 1
+   Import lines:
+     9:import { apiEndpoints } from "../utils";
+     11:import { showMessage } from "../utils";
+
+=== RECOMMENDED STRATEGY ===
+
+API file sizes:
+   utils/api.js: 265 lines
+   utils/apiEndpoints.js: 398 lines
+   utils/services/: 9 service files
+
+RECOMMENDATION: Keep apiEndpoints.js (most comprehensive)
+ACTION: Remove utils/api.js and consolidate services/
+
+=== SAFE MINIMAL FIX STRATEGY ===
+1. Choose ONE API implementation
+2. Update ONLY utils/index.js exports
+3. Test immediately
+4. Fix remaining imports individually
+
+DO NOT delete multiple files at once
+DO NOT run automated scripts on this complex setup

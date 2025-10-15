@@ -1,0 +1,309 @@
+import axios from 'axios';
+
+// Base URL
+const API_BASE_URL = import.meta.env?.VITE_API_BASE_URL || "http://localhost:5000";
+
+// Axios instance
+const api = axios.create({
+  baseURL: API_BASE_URL,
+  headers: { 'Content-Type': 'application/json' },
+  timeout: 30000,
+});
+
+// JWT request interceptor
+api.interceptors.request.use(
+  (config) => {
+    const token = localStorage.getItem('token');
+    if (token) config.headers.Authorization = `Bearer ${token}`;
+    return config;
+  },
+  (error) => Promise.reject(error)
+);
+
+// Response interceptor for 401
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response?.status === 401) {
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+      if (window.location.pathname !== '/login') {
+        window.location.href = '/login';
+      }
+    }
+    return Promise.reject(error);
+  }
+);
+
+// Health API (no auth)
+const healthApi = axios.create({ baseURL: API_BASE_URL, timeout: 5000 });
+
+// API ENDPOINTS - MATCHING YOUR BACKEND EXACTLY
+const apiEndpoints = {
+  // Health
+  healthCheck: () => healthApi.get('/api/health'),
+  testEndpoint: () => api.get('/api/test'),
+
+  // Auth
+  auth: {
+    register: (data) => api.post('/api/auth/register', data),
+    login: (data) => api.post('/api/auth/login', data),
+    registerWithCode: (data) => api.post('/api/auth/register-with-code', data),
+    me: () => api.get('/api/auth/me'),
+    changePassword: (data) => api.put('/api/auth/change-password', data),
+    logout: () => api.post('/api/auth/logout'),
+    refresh: () => api.post('/api/auth/refresh'),
+  },
+
+  // Customers
+  customers: {
+    getAll: (params) => api.get('/api/auth/customers', { params }),
+    create: (data) => api.post('/api/auth/customers', data),
+    getById: (customer_id) => api.get(`/api/auth/customers/${customer_id}`),
+    update: (customer_id, data) => api.put(`/api/auth/customers/${customer_id}`, data),
+    delete: (customer_id) => api.delete(`/api/auth/customers/${customer_id}`),
+    getVehicles: (customer_id) => api.get(`/api/auth/customers/${customer_id}/vehicles`),
+    search: (query) => api.get('/api/auth/customers/search', { params: { q: query } }),
+  },
+
+  // Vehicles
+  vehicles: {
+    getAll: (params) => api.get('/api/auth/vehicles', { params }),
+    create: (data) => api.post('/api/auth/vehicles', data),
+    getById: (vehicle_id) => api.get(`/api/auth/vehicles/${vehicle_id}`),
+    update: (vehicle_id, data) => api.put(`/api/auth/vehicles/${vehicle_id}`, data),
+    delete: (vehicle_id) => api.delete(`/api/auth/vehicles/${vehicle_id}`),
+    vinLookup: (vin) => api.get(`/api/auth/vehicles/vin-lookup/${vin}`),
+  },
+
+  // Jobs
+  jobs: {
+    getAll: (params) => api.get('/api/auth/jobs', { params }),
+    create: (data) => api.post('/api/auth/jobs', data),
+    getById: (job_id) => api.get(`/api/auth/jobs/${job_id}`),
+    updateStatus: (job_id, data) => api.patch(`/api/auth/jobs/${job_id}/status`, data),
+    addParts: (job_id, data) => api.post(`/api/auth/jobs/${job_id}/parts`, data),
+    addLabor: (job_id, data) => api.post(`/api/auth/jobs/${job_id}/labor`, data),
+  },
+
+  // Timeclock - FIXED ENDPOINTS
+  timeclock: {
+    clockIn: () => api.post('/api/auth/timeclock/clock-in'),
+    clockOut: () => api.post('/api/auth/timeclock/clock-out'),
+    status: () => api.get('/api/auth/timeclock/status'), // Fixed: was pointing to wrong endpoint
+    history: (params) => api.get('/api/auth/timeclock/history', { params }),
+  },
+
+  // Parts & Inventory
+  parts: {
+    getAll: (params) => api.get('/api/auth/parts', { params }),
+    create: (data) => api.post('/api/auth/parts', data),
+  },
+  inventory: {
+    lowStock: () => api.get('/api/auth/inventory/low-stock'),
+  },
+
+  // Estimates
+  estimates: {
+    getAll: (params) => api.get('/api/auth/estimates', { params }),
+    create: (data) => api.post('/api/auth/estimates', data),
+    getById: (estimate_id) => api.get(`/api/auth/estimates/${estimate_id}`),
+    update: (estimate_id, data) => api.put(`/api/auth/estimates/${estimate_id}`, data),
+    convertToJob: (estimate_id) => api.post(`/api/auth/estimates/${estimate_id}/convert-to-job`),
+  },
+
+  // Invoices
+  invoices: {
+    getAll: (params) => api.get('/api/auth/invoices', { params }),
+    create: (data) => api.post('/api/auth/invoices', data),
+    getById: (invoice_id) => api.get(`/api/auth/invoices/${invoice_id}`),
+    update: (invoice_id, data) => api.put(`/api/auth/invoices/${invoice_id}`, data),
+    markPaid: (invoice_id, data) => api.post(`/api/auth/invoices/${invoice_id}/mark-paid`, data),
+  },
+
+  // Appointments - NEEDS TO BE IMPLEMENTED IN BACKEND
+  appointments: {
+    getAll: (params = {}) => api.get('/api/auth/appointments', { params }),
+    create: (data) => api.post('/api/auth/appointments', data),
+    getById: (id) => api.get(`/api/auth/appointments/${id}`),
+    update: (id, data) => api.put(`/api/auth/appointments/${id}`, data),
+    delete: (id) => api.delete(`/api/auth/appointments/${id}`),
+  },
+
+  // Dashboard & Reports - FIXED ENDPOINTS
+  dashboard: {
+    stats: () => api.get('/api/auth/dashboard/stats'),
+    recentActivity: () => api.get('/api/auth/dashboard/recent-activity'),
+  },
+  reports: {
+    sales: (params) => api.get('/api/auth/reports/sales', { params }), // Fixed endpoint
+  },
+
+  // Settings - FIXED ENDPOINTS
+  settings: {
+    get: () => api.get('/api/auth/settings'),
+    shop: {
+      get: () => api.get('/api/auth/settings/shop'), // Fixed endpoint
+      update: (data) => api.put('/api/auth/settings/shop', data), // Fixed endpoint
+    },
+  },
+
+  // AI Services
+  ai: {
+    diagnostics: (data) => api.post('/api/ai/diagnostics', data),
+    estimate: (data) => api.post('/api/ai/estimate', data),
+    chat: (data) => api.post('/api/ai/chat', data),
+    status: () => api.get('/api/ai/status'),
+  },
+
+  // OBD2
+  obd2: {
+    lookup: (code) => api.get(`/api/obd2/lookup/${code}`),
+  },
+};
+
+// Migration Service
+const migrationService = {
+  analyzeMigrationFile: (formData) => api.post('/api/migration/analyze', formData, {
+    headers: { 'Content-Type': 'multipart/form-data' }
+  }),
+  importMigrationData: (data) => api.post('/api/migration/import', data)
+};
+
+// LEGACY FUNCTION EXPORTS - Updated to match backend
+export const register_post = (data) => apiEndpoints.auth.register(data);
+export const login_post = (data) => apiEndpoints.auth.login(data);
+export const register_with_code_post = (data) => apiEndpoints.auth.registerWithCode(data);
+export const me_get = () => apiEndpoints.auth.me();
+export const change_password_put = (data) => apiEndpoints.auth.changePassword(data);
+export const logout_post = () => apiEndpoints.auth.logout();
+export const refresh_post = () => apiEndpoints.auth.refresh();
+
+// Customers
+export const customers_get = (params) => apiEndpoints.customers.getAll(params);
+export const customers_post = (data) => apiEndpoints.customers.create(data);
+export const customers_int_customer_id_get = (customer_id) => apiEndpoints.customers.getById(customer_id);
+export const customers_int_customer_id_put = (customer_id, data) => apiEndpoints.customers.update(customer_id, data);
+export const customers_int_customer_id_delete = (customer_id) => apiEndpoints.customers.delete(customer_id);
+export const customers_int_customer_id_vehicles_get = (customer_id) => apiEndpoints.customers.getVehicles(customer_id);
+export const customers_search_get = (query) => apiEndpoints.customers.search(query);
+
+// Vehicles
+export const vehicles_get = (params) => apiEndpoints.vehicles.getAll(params);
+export const vehicles_post = (data) => apiEndpoints.vehicles.create(data);
+export const vehicles_int_vehicle_id_get = (vehicle_id) => apiEndpoints.vehicles.getById(vehicle_id);
+export const vehicles_int_vehicle_id_put = (vehicle_id, data) => apiEndpoints.vehicles.update(vehicle_id, data);
+export const vehicles_int_vehicle_id_delete = (vehicle_id) => apiEndpoints.vehicles.delete(vehicle_id);
+export const vehicles_vin_lookup_vin_get = (vin) => apiEndpoints.vehicles.vinLookup(vin);
+
+// Jobs
+export const jobs_get = (params) => apiEndpoints.jobs.getAll(params);
+export const jobs_post = (data) => apiEndpoints.jobs.create(data);
+export const jobs_int_job_id_get = (job_id) => apiEndpoints.jobs.getById(job_id);
+export const jobs_int_job_id_status_patch = (job_id, data) => apiEndpoints.jobs.updateStatus(job_id, data);
+export const jobs_int_job_id_parts_post = (job_id, data) => apiEndpoints.jobs.addParts(job_id, data);
+export const jobs_int_job_id_labor_post = (job_id, data) => apiEndpoints.jobs.addLabor(job_id, data);
+
+// Timeclock
+export const timeclock_clock_in_post = () => apiEndpoints.timeclock.clockIn();
+export const timeclock_clock_out_post = () => apiEndpoints.timeclock.clockOut();
+export const timeclock_status_get = () => apiEndpoints.timeclock.status();
+export const timeclock_history_get = (params) => apiEndpoints.timeclock.history(params);
+
+// Parts & Inventory
+export const parts_get = (params) => apiEndpoints.parts.getAll(params);
+export const parts_post = (data) => apiEndpoints.parts.create(data);
+export const inventory_low_stock_get = () => apiEndpoints.inventory.lowStock();
+
+// Estimates
+export const estimates_get = (params) => apiEndpoints.estimates.getAll(params);
+export const estimates_post = (data) => apiEndpoints.estimates.create(data);
+export const estimates_int_estimate_id_get = (estimate_id) => apiEndpoints.estimates.getById(estimate_id);
+export const estimates_int_estimate_id_put = (estimate_id, data) => apiEndpoints.estimates.update(estimate_id, data);
+export const estimates_int_estimate_id_convert_to_job_post = (estimate_id) =>
+  apiEndpoints.estimates.convertToJob(estimate_id);
+
+// Invoices
+export const invoices_get = (params) => apiEndpoints.invoices.getAll(params);
+export const invoices_post = (data) => apiEndpoints.invoices.create(data);
+export const invoices_int_invoice_id_get = (invoice_id) => apiEndpoints.invoices.getById(invoice_id);
+export const invoices_int_invoice_id_put = (invoice_id, data) => apiEndpoints.invoices.update(invoice_id, data);
+export const invoices_int_invoice_id_mark_paid_post = (invoice_id, data) =>
+  apiEndpoints.invoices.markPaid(invoice_id, data);
+
+// Appointments
+export const appointments_get = (params) => apiEndpoints.appointments.getAll(params);
+export const appointments_post = (data) => apiEndpoints.appointments.create(data);
+export const appointments_int_id_get = (id) => apiEndpoints.appointments.getById(id);
+export const appointments_int_id_put = (id, data) => apiEndpoints.appointments.update(id, data);
+export const appointments_int_id_delete = (id) => apiEndpoints.appointments.delete(id);
+
+// Dashboard & Reports
+export const dashboard_stats_get = () => apiEndpoints.dashboard.stats();
+export const dashboard_recent_activity_get = () => apiEndpoints.dashboard.recentActivity();
+export const reports_sales_get = (params) => apiEndpoints.reports.sales(params);
+
+// Settings
+export const settings_get = () => apiEndpoints.settings.get();
+export const settings_shop_get = () => apiEndpoints.settings.shop.get();
+export const settings_shop_put = (data) => apiEndpoints.settings.shop.update(data);
+
+// AI Services
+export const ai_diagnostics_post = (data) => apiEndpoints.ai.diagnostics(data);
+export const ai_estimate_post = (data) => apiEndpoints.ai.estimate(data);
+export const ai_chat_post = (data) => apiEndpoints.ai.chat(data);
+export const ai_status_get = () => apiEndpoints.ai.status();
+
+// OBD2
+export const obd2_lookup_get = (code) => apiEndpoints.obd2.lookup(code);
+
+// Service objects for context providers
+export const customerService = apiEndpoints.customers;
+export const vehicleService = apiEndpoints.vehicles;
+export const jobService = apiEndpoints.jobs;
+export const estimateService = apiEndpoints.estimates;
+export const invoiceService = apiEndpoints.invoices;
+export const dashboardService = apiEndpoints.dashboard;
+export const settingsService = apiEndpoints.settings;
+export const partsService = apiEndpoints.parts;
+export const inventoryService = apiEndpoints.inventory;
+export const timeclockService = apiEndpoints.timeclock;
+export const reportsService = apiEndpoints.reports;
+export const appointmentService = apiEndpoints.appointments;
+export const aiService = apiEndpoints.ai;
+
+// Export default
+export default api;
+export { API_BASE_URL, apiEndpoints, migrationService };
+
+// API Utilities
+export const apiUtils = {
+  requireAuth: () => {
+    const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+    return !!token;
+  },
+
+  formatError: (error) => {
+    if (error?.response?.data?.message) {
+      return error.response.data.message;
+    }
+    if (error?.message) {
+      return error.message;
+    }
+    return 'An unexpected error occurred';
+  },
+
+  // Token validation utility
+  isTokenExpired: () => {
+    const token = localStorage.getItem('token');
+    if (!token) return true;
+
+    try {
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      const currentTime = Date.now() / 1000;
+      return payload.exp < currentTime;
+    } catch (error) {
+      return false; // If token is not a valid JWT, assume it's not expired
+    }
+  }
+};

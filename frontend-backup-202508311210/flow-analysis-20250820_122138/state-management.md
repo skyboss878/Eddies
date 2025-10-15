@@ -1,0 +1,664 @@
+# State Management Analysis
+Generated on: Wed Aug 20 12:21:41 PDT 2025
+
+## useState Hooks
+- ./src/pages/Invoice.jsx:3:import React, { useEffect, useState, useRef } from "react";
+- ./src/pages/Invoice.jsx:10:  const [invoiceData, setInvoiceData] = useState(null);
+- ./src/pages/Invoice.jsx:11:  const [loading, setLoading] = useState(true);
+- ./src/pages/Invoice.jsx:12:  const [message, setMessage] = useState({ text: '', type: '' });
+- ./src/pages/Invoice.jsx:13:  const [showConfirm, setShowConfirm] = useState(false);
+- ./src/pages/Invoice.jsx:14:  const [confirmAction, setConfirmAction] = useState(null);
+- ./src/pages/CustomerList.jsx:2:import React, { useState, useEffect, useMemo, useCallback } from 'react';
+- ./src/pages/CustomerList.jsx:28:  const [customers, setCustomers] = useState([]);
+- ./src/pages/CustomerList.jsx:29:  const [loading, setLoading] = useState(true);
+- ./src/pages/CustomerList.jsx:30:  const [error, setError] = useState(null);
+- ./src/pages/CustomerList.jsx:33:  const [searchTerm, setSearchTerm] = useState('');
+- ./src/pages/CustomerList.jsx:34:  const [selectedCustomers, setSelectedCustomers] = useState([]);
+- ./src/pages/CustomerList.jsx:35:  const [sortBy, setSortBy] = useState('name');
+- ./src/pages/CustomerList.jsx:36:  const [sortOrder, setSortOrder] = useState('asc');
+- ./src/pages/CustomerList.jsx:37:  const [filterStatus, setFilterStatus] = useState('all');
+- ./src/pages/CustomerList.jsx:38:  const [showFilters, setShowFilters] = useState(false);
+- ./src/pages/CustomerList.jsx:39:  const [viewMode, setViewMode] = useState('list'); // 'list', 'grid'
+- ./src/pages/CustomerList.jsx:42:  const [dateRange, setDateRange] = useState({ start: '', end: '' });
+- ./src/pages/CustomerList.jsx:43:  const [vehicleCount, setVehicleCount] = useState('all');
+- ./src/pages/CustomerList.jsx:44:  const [totalSpentRange, setTotalSpentRange] = useState({ min: '', max: '' });
+- ./src/pages/AddVehicle.jsx:2:import React, { useState, useEffect } from "react";
+- ./src/pages/AddVehicle.jsx:17:  const [customerSearch, setCustomerSearch] = useState('');
+- ./src/pages/AddVehicle.jsx:18:  const [filteredCustomers, setFilteredCustomers] = useState([]);
+- ./src/pages/AddVehicle.jsx:19:  const [showCustomerDropdown, setShowCustomerDropdown] = useState(false);
+- ./src/pages/AddVehicle.jsx:21:  const [form, setForm] = useState({
+- ./src/pages/AddVehicle.jsx:33:  const [loading, setLoading] = useState(true);
+- ./src/pages/AddVehicle.jsx:34:  const [submitting, setSubmitting] = useState(false);
+- ./src/pages/AddVehicle.jsx:35:  const [errors, setErrors] = useState({});
+- ./src/pages/CreateJob.jsx:1:import React, { useState, useEffect, useRef } from 'react';
+- ./src/pages/CreateJob.jsx:12:  const [selectedCustomer, setSelectedCustomer] = useState(null);
+- ./src/pages/CreateJob.jsx:13:  const [selectedVehicle, setSelectedVehicle] = useState(null);
+- ./src/pages/CreateJob.jsx:14:  const [customerSearch, setCustomerSearch] = useState('');
+- ./src/pages/CreateJob.jsx:15:  const [vehicleSearch, setVehicleSearch] = useState('');
+- ./src/pages/CreateJob.jsx:16:  const [problemDescription, setProblemDescription] = useState('');
+- ./src/pages/CreateJob.jsx:17:  const [parts, setParts] = useState([]);
+- ./src/pages/CreateJob.jsx:18:  const [laborCost, setLaborCost] = useState('');
+- ./src/pages/CreateJob.jsx:19:  const [showCustomerDropdown, setShowCustomerDropdown] = useState(false);
+- ./src/pages/CreateJob.jsx:20:  const [showVehicleDropdown, setShowVehicleDropdown] = useState(false);
+- ./src/pages/CreateJob.jsx:21:  const [jobPriority, setJobPriority] = useState('medium');
+- ./src/pages/CreateJob.jsx:22:  const [estimatedHours, setEstimatedHours] = useState('');
+- ./src/pages/CreateJob.jsx:23:  const [dueDate, setDueDate] = useState('');
+- ./src/pages/CreateJob.jsx:26:  const [aiDiagnosing, setAiDiagnosing] = useState(false);
+- ./src/pages/CreateJob.jsx:27:  const [aiResults, setAiResults] = useState(null);
+- ./src/pages/CreateJob.jsx:28:  const [carfaxData, setCarfaxData] = useState(null);
+- ./src/pages/CreateJob.jsx:29:  const [obd2Codes, setObd2Codes] = useState([]);
+- ./src/pages/CreateJob.jsx:30:  const [wiringDiagrams, setWiringDiagrams] = useState([]);
+- ./src/pages/CreateJob.jsx:31:  const [loadingCarfax, setLoadingCarfax] = useState(false);
+- ./src/pages/CreateJob.jsx:32:  const [loadingObd2, setLoadingObd2] = useState(false);
+- ./src/pages/CreateJob.jsx:33:  const [loadingWiring, setLoadingWiring] = useState(false);
+- ./src/pages/CreateJob.jsx:34:  const [obd2CodesInput, setObd2CodesInput] = useState('');
+- ./src/pages/CreateJob.jsx:35:  const [jobNotes, setJobNotes] = useState('');
+- ./src/pages/CreateJob.jsx:36:  const [customerApproval, setCustomerApproval] = useState('pending');
+- ./src/pages/CreateJob.jsx:37:  const [technicianAssigned, setTechnicianAssigned] = useState('');
+- ./src/pages/CreateJob.jsx:38:  const [aiProvider, setAiProvider] = useState('openai'); // openai, openrouter, or huggingface
+- ./src/pages/CreateJob.jsx:41:  const [customers, setCustomers] = useState([]);
+- ./src/pages/CreateJob.jsx:42:  const [vehicles, setVehicles] = useState([]);
+- ./src/pages/CreateJob.jsx:43:  const [technicians, setTechnicians] = useState([]);
+- ./src/pages/CreateJob.jsx:44:  const [loadingData, setLoadingData] = useState(true);
+- ./src/pages/ViewJobs.jsx:2:import React, { useState, useMemo } from 'react';
+- ./src/pages/ViewJobs.jsx:17:  const [selectedJob, setSelectedJob] = useState(null);
+- ./src/pages/ViewJobs.jsx:18:  const [currentPage, setCurrentPage] = useState(1);
+- ./src/pages/Login.jsx:1:import React, { useState } from 'react';
+- ./src/pages/Login.jsx:9:  const [formData, setFormData] = useState({
+- ./src/pages/Login.jsx:13:  const [showPassword, setShowPassword] = useState(false);
+- ./src/pages/Login.jsx:14:  const [errors, setErrors] = useState({});
+- ./src/pages/Login.jsx:15:  const [isSubmitting, setIsSubmitting] = useState(false);
+- ./src/pages/Dashboard.jsx:1:import React, { useEffect, useState } from 'react';
+- ./src/pages/Dashboard.jsx:28:  const [dashboardStats, setDashboardStats] = useState({
+- ./src/pages/VehicleList.jsx:2:import React, { useState, useMemo } from "react";
+- ./src/pages/VehicleList.jsx:15:  const [vehicleToDelete, setVehicleToDelete] = useState(null);
+- ./src/pages/Landing.jsx:3:import React, { useState, useEffect } from 'react';
+- ./src/pages/Landing.jsx:10:  const [showStaffModal, setShowStaffModal] = useState(false);
+- ./src/pages/Landing.jsx:11:  const [showCustomerModal, setShowCustomerModal] = useState(false);
+- ./src/pages/Landing.jsx:12:  const [showSuccessModal, setShowSuccessModal] = useState(false);
+- ./src/pages/Landing.jsx:13:  const [successMessage, setSuccessMessage] = useState('');
+- ./src/pages/Register.jsx:1:import React, { useState } from 'react';
+- ./src/pages/Register.jsx:9:  const [formData, setFormData] = useState({ 
+- ./src/pages/Register.jsx:18:  const [showPassword, setShowPassword] = useState(false);
+- ./src/pages/Register.jsx:19:  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+- ./src/pages/Register.jsx:20:  const [errors, setErrors] = useState({});
+- ./src/pages/Register.jsx:21:  const [isSubmitting, setIsSubmitting] = useState(false);
+- ./src/pages/VehicleForm.jsx:2:import React, { useState, useEffect } from 'react';
+- ./src/pages/VehicleForm.jsx:6:  const [searchTerm, setSearchTerm] = useState(value || '');
+- ./src/pages/VehicleForm.jsx:7:  const [customers, setCustomers] = useState([]);
+- ./src/pages/VehicleForm.jsx:8:  const [filteredCustomers, setFilteredCustomers] = useState([]);
+- ./src/pages/VehicleForm.jsx:9:  const [isOpen, setIsOpen] = useState(false);
+- ./src/pages/VehicleForm.jsx:10:  const [loading, setLoading] = useState(false);
+- ./src/pages/VehicleForm.jsx:11:  const [error, setError] = useState('');
+- ./src/pages/VehicleForm.jsx:258:  const [selectedCustomer, setSelectedCustomer] = useState(null);
+- ./src/pages/VehicleForm.jsx:259:  const [customerSearchValue, setCustomerSearchValue] = useState('');
+- ./src/pages/VehicleForm.jsx:260:  const [vehicleData, setVehicleData] = useState({
+- ./src/pages/VehicleForm.jsx:269:  const [isSubmitting, setIsSubmitting] = useState(false);
+- ./src/pages/VehicleForm.jsx:270:  const [submitError, setSubmitError] = useState('');
+- ./src/pages/Reports.jsx:2:import React, { useState } from 'react';
+- ./src/pages/Reports.jsx:78:  const [reportType, setReportType] = useState("daily");
+- ./src/pages/Reports.jsx:79:  const [dateRange, setDateRange] = useState({
+- ./src/pages/Reports.jsx:83:  const [reportData, setReportData] = useState(null);
+- ./src/pages/AppointmentCalendar.jsx:2:import React, { useState, useEffect } from 'react';
+- ./src/pages/AppointmentCalendar.jsx:28:  const [appointments, setAppointments] = useState([]);
+- ./src/pages/AppointmentCalendar.jsx:29:  const [filteredAppointments, setFilteredAppointments] = useState([]);
+- ./src/pages/AppointmentCalendar.jsx:30:  const [currentDate, setCurrentDate] = useState(new Date());
+- ./src/pages/AppointmentCalendar.jsx:31:  const [viewMode, setViewMode] = useState('month'); // 'day', 'week', 'month'
+- ./src/pages/AppointmentCalendar.jsx:32:  const [showAddModal, setShowAddModal] = useState(false);
+- ./src/pages/AppointmentCalendar.jsx:33:  const [selectedAppointment, setSelectedAppointment] = useState(null);
+- ./src/pages/AppointmentCalendar.jsx:34:  const [loading, setLoading] = useState(true);
+- ./src/pages/AppointmentCalendar.jsx:35:  const [searchTerm, setSearchTerm] = useState('');
+- ./src/pages/AppointmentCalendar.jsx:36:  const [statusFilter, setStatusFilter] = useState('all');
+- ./src/pages/AppointmentCalendar.jsx:37:  const [serviceFilter, setServiceFilter] = useState('all');
+- ./src/pages/AppointmentCalendar.jsx:438:  const [formData, setFormData] = useState({
+- ./src/pages/CreateEditEstimate.jsx:2:import React, { useEffect, useState } from "react";
+- ./src/pages/CreateEditEstimate.jsx:15:  const [estimate, setEstimate] = useState({
+- ./src/pages/CreateEditEstimate.jsx:24:  const [saving, setSaving] = useState(false);
+- ./src/pages/Diagnosis.jsx:2:import React, { useState } from 'react';
+- ./src/pages/Diagnosis.jsx:13:  const [selectedVehicleId, setSelectedVehicleId] = useState('');
+- ./src/pages/Diagnosis.jsx:14:  const [issueDescription, setIssueDescription] = useState('');
+- ./src/pages/Diagnosis.jsx:15:  const [latestDiagnosis, setLatestDiagnosis] = useState(null);
+- ./src/pages/EstimatesList.jsx:1:import React, { useState, useEffect } from "react";
+- ./src/pages/EstimatesList.jsx:16:  const [estimates, setEstimates] = useState([]);
+- ./src/pages/EstimatesList.jsx:17:  const [loading, setLoading] = useState(true);
+- ./src/pages/EstimatesList.jsx:18:  const [error, setError] = useState('');
+- ./src/pages/EstimatesList.jsx:19:  const [showConfirm, setShowConfirm] = useState(false);
+- ./src/pages/EstimatesList.jsx:20:  const [confirmMessage, setConfirmMessage] = useState('');
+- ./src/pages/EstimatesList.jsx:21:  const [confirmAction, setConfirmAction] = useState(null);
+- ./src/pages/Settings.jsx:2:import React, { useEffect, useState } from 'react';
+- ./src/pages/Settings.jsx:7:  const [activeTab, setActiveTab] = useState('business');
+- ./src/pages/Settings.jsx:8:  const [settings, setSettings] = useState({
+- ./src/pages/Settings.jsx:61:  const [loading, setLoading] = useState(true);
+- ./src/pages/Settings.jsx:62:  const [saving, setSaving] = useState(false);
+- ./src/pages/Settings.jsx:63:  const [error, setError] = useState(null);
+- ./src/pages/Settings.jsx:64:  const [success, setSuccess] = useState(false);
+- ./src/pages/Settings.jsx:65:  const [previewMode, setPreviewMode] = useState(false);
+- ./src/pages/PartsLaborManagement.jsx:2:import React, { useState, useEffect } from 'react';
+- ./src/pages/PartsLaborManagement.jsx:12:  const [activeTab, setActiveTab] = useState('parts');
+- ./src/pages/PartsLaborManagement.jsx:13:  const [parts, setParts] = useState([]);
+- ./src/pages/PartsLaborManagement.jsx:14:  const [laborRates, setLaborRates] = useState([]);
+- ./src/pages/PartsLaborManagement.jsx:15:  const [loading, setLoading] = useState(false);
+- ./src/pages/PartsLaborManagement.jsx:16:  const [showModal, setShowModal] = useState(false);
+- ./src/pages/PartsLaborManagement.jsx:17:  const [editingItem, setEditingItem] = useState(null);
+- ./src/pages/PartsLaborManagement.jsx:18:  const [lowStockParts, setLowStockParts] = useState([]);
+- ./src/pages/PartsLaborManagement.jsx:19:  const [showConfirm, setShowConfirm] = useState(false);
+- ./src/pages/PartsLaborManagement.jsx:20:  const [confirmAction, setConfirmAction] = useState(null);
+- ./src/pages/PartsLaborManagement.jsx:23:  const [partForm, setPartForm] = useState({ name: '', partNumber: '', cost: '', stockQuantity: '', minStockLevel: '' });
+- ./src/pages/PartsLaborManagement.jsx:24:  const [laborForm, setLaborForm] = useState({ serviceName: '', description: '', rate: '' });
+- ./src/pages/AddAndEditCustomer.jsx:2:import React, { useState, useEffect, useRef } from 'react';
+- ./src/pages/AddAndEditCustomer.jsx:31:  const [error, setError] = useState(null);
+- ./src/pages/AddAndEditCustomer.jsx:32:  const [loading, setLoading] = useState(false);
+- ./src/pages/AddAndEditCustomer.jsx:33:  const [form, setForm] = useState({
+- ./src/pages/AddAndEditCustomer.jsx:40:  const [isConfirmModalOpen, setConfirmModalOpen] = useState(false);
+- ./src/pages/AddAndEditCustomer.jsx:41:  const [emailError, setEmailError] = useState('');
+- ./src/pages/AddAndEditCustomer.jsx:42:  const [customerVehicles, setCustomerVehicles] = useState([]);
+- ./src/pages/DataMigration.jsx:2:import React, { useState, useMemo } from 'react';
+- ./src/pages/DataMigration.jsx:270:  const [step, setStep] = useState(1);
+- ./src/pages/DataMigration.jsx:271:  const [results, setResults] = useState(null);
+- ./src/pages/DataMigration.jsx:272:  const [file, setFile] = useState(null);
+- ./src/pages/DataMigration.jsx:273:  const [analysis, setAnalysis] = useState(null);
+- ./src/pages/DataMigration.jsx:274:  const [mapping, setMapping] = useState({});
+- ./src/pages/Dashboard_2025-08-17.jsx:2:import React, { useState, useEffect } from 'react';
+- ./src/pages/Dashboard_2025-08-17.jsx:27:  const [error, setError] = useState(null);
+- ./src/pages/Dashboard_2025-08-17.jsx:28:  const [refreshing, setRefreshing] = useState(false);
+- ./src/pages/Dashboard_2025-08-17.jsx:29:  const [showAIPanel, setShowAIPanel] = useState(false);
+- ./src/pages/Dashboard_2025-08-17.jsx:30:  const [currentTime, setCurrentTime] = useState(new Date());
+- ./src/pages/Landing_backup.jsx:2:import React, { useState, useEffect } from 'react';
+- ./src/pages/Landing_backup.jsx:10:  const [showStaffModal, setShowStaffModal] = useState(false);
+- ./src/pages/Landing_backup.jsx:11:  const [showCustomerModal, setShowCustomerModal] = useState(false);
+- ./src/pages/Landing_backup.jsx:12:  const [showSuccessModal, setShowSuccessModal] = useState(false);
+- ./src/pages/Landing_backup.jsx:13:  const [successMessage, setSuccessMessage] = useState('');
+- ./src/pages/EstimateAI.jsx:2:import React, { useState } from 'react';
+- ./src/pages/EstimateAI.jsx:26:  const [prompt, setPrompt] = useState(defaultPrompt);
+- ./src/pages/EstimateAI.jsx:27:  const [inputData, setInputData] = useState('');
+- ./src/pages/EstimateAI.jsx:28:  const [aiResponse, setAIResponse] = useState('');
+- ./src/pages/EstimateAI.jsx:29:  const [loading, setLoading] = useState(false);
+- ./src/pages/EstimateAI.jsx:30:  const [error, setError] = useState(null);
+- ./src/pages/CustomerDetail.jsx:2:import React, { useState, useEffect } from 'react';
+- ./src/pages/CustomerDetail.jsx:33:  const [activeTab, setActiveTab] = useState('vehicles');
+- ./src/pages/CustomerDetail.jsx:34:  const [showDeleteConfirm, setShowDeleteConfirm] = useState(null);
+- ./src/pages/VehicleDetail.jsx:2:import React, { useState, useEffect } from 'react';
+- ./src/pages/Customers.jsx:2:import React, { useState, useEffect, useMemo, useCallback } from 'react';
+- ./src/pages/Customers.jsx:28:  const [customers, setCustomers] = useState([]);
+- ./src/pages/Customers.jsx:29:  const [loading, setLoading] = useState(true);
+- ./src/pages/Customers.jsx:30:  const [error, setError] = useState(null);
+- ./src/pages/Customers.jsx:33:  const [searchTerm, setSearchTerm] = useState('');
+- ./src/pages/Customers.jsx:34:  const [selectedCustomers, setSelectedCustomers] = useState([]);
+- ./src/pages/Customers.jsx:35:  const [sortBy, setSortBy] = useState('name');
+- ./src/pages/Customers.jsx:36:  const [sortOrder, setSortOrder] = useState('asc');
+- ./src/pages/Customers.jsx:37:  const [filterStatus, setFilterStatus] = useState('all');
+- ./src/pages/Customers.jsx:38:  const [showFilters, setShowFilters] = useState(false);
+- ./src/pages/Customers.jsx:39:  const [viewMode, setViewMode] = useState('list'); // 'list', 'grid'
+- ./src/pages/Customers.jsx:42:  const [dateRange, setDateRange] = useState({ start: '', end: '' });
+- ./src/pages/Customers.jsx:43:  const [vehicleCount, setVehicleCount] = useState('all');
+- ./src/pages/Customers.jsx:44:  const [totalSpentRange, setTotalSpentRange] = useState({ min: '', max: '' });
+- ./src/pages/Vehicles.jsx:2:import React, { useState, useMemo } from "react";
+- ./src/pages/Vehicles.jsx:15:  const [vehicleToDelete, setVehicleToDelete] = useState(null);
+- ./src/pages/Jobs.jsx:2:import React, { useState, useMemo } from 'react';
+- ./src/pages/Jobs.jsx:17:  const [selectedJob, setSelectedJob] = useState(null);
+- ./src/pages/Jobs.jsx:18:  const [currentPage, setCurrentPage] = useState(1);
+- ./src/pages/Estimates.jsx:1:import React, { useState, useEffect } from "react";
+- ./src/pages/Estimates.jsx:16:  const [estimates, setEstimates] = useState([]);
+- ./src/pages/Estimates.jsx:17:  const [loading, setLoading] = useState(true);
+- ./src/pages/Estimates.jsx:18:  const [error, setError] = useState('');
+- ./src/pages/Estimates.jsx:19:  const [showConfirm, setShowConfirm] = useState(false);
+- ./src/pages/Estimates.jsx:20:  const [confirmMessage, setConfirmMessage] = useState('');
+- ./src/pages/Estimates.jsx:21:  const [confirmAction, setConfirmAction] = useState(null);
+- ./src/pages/Invoices.jsx:3:import React, { useEffect, useState, useRef } from "react";
+- ./src/pages/Invoices.jsx:10:  const [invoiceData, setInvoiceData] = useState(null);
+- ./src/pages/Invoices.jsx:11:  const [loading, setLoading] = useState(true);
+- ./src/pages/Invoices.jsx:12:  const [message, setMessage] = useState({ text: '', type: '' });
+- ./src/pages/Invoices.jsx:13:  const [showConfirm, setShowConfirm] = useState(false);
+- ./src/pages/Invoices.jsx:14:  const [confirmAction, setConfirmAction] = useState(null);
+- ./src/pages/TimeClock.jsx:1:import React, { useState, useEffect } from 'react';
+- ./src/pages/TimeClock.jsx:8:  const [clockedIn, setClockedIn] = useState(false);
+- ./src/pages/TimeClock.jsx:9:  const [currentSession, setCurrentSession] = useState(null);
+- ./src/pages/TimeClock.jsx:10:  const [timeEntries, setTimeEntries] = useState([]);
+- ./src/pages/TimeClock.jsx:11:  const [loading, setLoading] = useState(true);
+- ./src/pages/AIDiagnostics.jsx:2:import React, { useState, useEffect } from 'react';
+- ./src/pages/AIDiagnostics.jsx:8:  const [activeTab, setActiveTab] = useState('quick');
+- ./src/pages/AIDiagnostics.jsx:9:  const [loading, setLoading] = useState(false);
+- ./src/pages/AIDiagnostics.jsx:10:  const [results, setResults] = useState(null);
+- ./src/pages/AIDiagnostics.jsx:11:  const [error, setError] = useState(null);
+- ./src/pages/AIDiagnostics.jsx:14:  const [symptoms, setSymptoms] = useState([]);
+- ./src/pages/AIDiagnostics.jsx:15:  const [newSymptom, setNewSymptom] = useState('');
+- ./src/pages/AIDiagnostics.jsx:16:  const [vehicleInfo, setVehicleInfo] = useState({
+- ./src/pages/AIDiagnostics.jsx:25:  const [obdCode, setObdCode] = useState('');
+- ./src/pages/AIDiagnostics.jsx:26:  const [obdResults, setObdResults] = useState(null);
+- ./src/components/Navbar.jsx:1:import React, { useState } from 'react';
+- ./src/components/Navbar.jsx:21:  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+- ./src/components/modals/PromptModal.jsx:3:import React, { useState, useEffect } from 'react';
+- ./src/components/modals/PromptModal.jsx:16:  const [internalInputValue, setInternalInputValue] = useState(inputValue || '');
+- ./src/components/modals/AIEstimateModal.jsx:2:import React, { useState, useEffect } from 'react';
+- ./src/components/modals/AIEstimateModal.jsx:8:  const [formData, setFormData] = useState({
+- ./src/components/modals/AIEstimateModal.jsx:17:  const [loading, setLoading] = useState(false);
+- ./src/components/modals/AIEstimateModal.jsx:18:  const [estimate, setEstimate] = useState(null);
+- ./src/components/modals/AIEstimateModal.jsx:19:  const [error, setError] = useState(null);
+- ./src/components/modals/AIEstimateModal.jsx:20:  const [success, setSuccess] = useState('');
+- ./src/components/modals/AIEstimateModal.jsx:21:  const [editMode, setEditMode] = useState(false);
+- ./src/components/HealthCheck.jsx:1:import React, { useState, useEffect } from 'react';
+- ./src/components/HealthCheck.jsx:4:  const [backendStatus, setBackendStatus] = useState('checking');
+- ./src/components/SearchSystem.jsx:2:import React, { useState, useEffect, useCallback, useRef } from 'react';
+- ./src/components/SearchSystem.jsx:10:  const [isSearchOpen, setIsSearchOpen] = useState(false);
+- ./src/components/SearchSystem.jsx:28:  const [query, setQuery] = useState('');
+- ./src/components/SearchSystem.jsx:29:  const [results, setResults] = useState(null);
+- ./src/components/SearchSystem.jsx:30:  const [loading, setLoading] = useState(false);
+- ./src/components/ShareableActions.jsx:2:import React, { useState } from 'react';
+- ./src/components/ShareableActions.jsx:21:  const [showShareMenu, setShowShareMenu] = useState(false);
+- ./src/components/ShareableActions.jsx:22:  const [copied, setCopied] = useState(false);
+- ./src/components/AIEstimateModal.jsx:2:import React, { useState, useEffect } from 'react';
+- ./src/components/AIEstimateModal.jsx:20:  const [step, setStep] = useState(1);
+- ./src/components/AIEstimateModal.jsx:21:  const [loading, setLoading] = useState(false);
+- ./src/components/AIEstimateModal.jsx:22:  const [formData, setFormData] = useState({
+- ./src/components/AIEstimateModal.jsx:34:  const [estimate, setEstimate] = useState(null);
+- ./src/components/TechnicianTimeClockCard.jsx:1:import React, { useState, useEffect, useRef } from 'react';
+- ./src/components/TechnicianTimeClockCard.jsx:19:  const [isRunning, setIsRunning] = useState(false);
+- ./src/components/TechnicianTimeClockCard.jsx:20:  const [secondsElapsed, setSecondsElapsed] = useState(0);
+- ./src/components/AppointmentCard.jsx:2:import React, { useState, useEffect } from 'react';
+- ./src/components/AppointmentCard.jsx:14:  const [appointments, setAppointments] = useState([]);
+- ./src/components/AppointmentCard.jsx:15:  const [loading, setLoading] = useState(true);
+- ./src/components/JobCard.jsx:3:import React, { useState, useEffect } from 'react';
+- ./src/components/JobCard.jsx:15:  const [jobs, setJobs] = useState([]);
+- ./src/components/JobCard.jsx:16:  const [loading, setLoading] = useState(true);
+- ./src/components/TechnicianCard.jsx:2:import React, { useState, useEffect } from 'react';
+- ./src/components/TechnicianCard.jsx:14:  const [technicians, setTechnicians] = useState([]);
+- ./src/components/TechnicianCard.jsx:15:  const [loading, setLoading] = useState(true);
+- ./src/components/CompleteNavigationMenu.jsx:1:import { useState } from "react";
+- ./src/components/CompleteNavigationMenu.jsx:5:  const [customersOpen, setCustomersOpen] = useState(false);
+- ./src/components/CompleteNavigationMenu.jsx:6:  const [jobsOpen, setJobsOpen] = useState(false);
+- ./src/components/CompleteNavigationMenu.jsx:7:  const [adminOpen, setAdminOpen] = useState(false);
+- ./src/components/EnhancedJobCreation.jsx:1:import React, { useState, useEffect, useRef } from 'react';
+- ./src/components/EnhancedJobCreation.jsx:5:  const [selectedCustomer, setSelectedCustomer] = useState(null);
+- ./src/components/EnhancedJobCreation.jsx:6:  const [selectedVehicle, setSelectedVehicle] = useState(null);
+- ./src/components/EnhancedJobCreation.jsx:7:  const [customerSearch, setCustomerSearch] = useState('');
+- ./src/components/EnhancedJobCreation.jsx:8:  const [vehicleSearch, setVehicleSearch] = useState('');
+- ./src/components/EnhancedJobCreation.jsx:9:  const [problemDescription, setProblemDescription] = useState('');
+- ./src/components/EnhancedJobCreation.jsx:10:  const [parts, setParts] = useState([]);
+- ./src/components/EnhancedJobCreation.jsx:11:  const [laborCost, setLaborCost] = useState('');
+- ./src/components/EnhancedJobCreation.jsx:12:  const [showCustomerDropdown, setShowCustomerDropdown] = useState(false);
+- ./src/components/EnhancedJobCreation.jsx:13:  const [showVehicleDropdown, setShowVehicleDropdown] = useState(false);
+- ./src/components/EnhancedJobCreation.jsx:14:  const [aiDiagnosing, setAiDiagnosing] = useState(false);
+- ./src/components/EnhancedJobCreation.jsx:15:  const [aiResults, setAiResults] = useState(null);
+- ./src/components/EnhancedJobCreation.jsx:21:  const [customers, setCustomers] = useState([
+- ./src/components/EnhancedJobCreation.jsx:28:  const [vehicles, setVehicles] = useState([
+- ./src/components/TimeClockNavbar.jsx:2:import React, { useState, useEffect } from 'react';
+- ./src/components/TimeClockNavbar.jsx:23:  const [timeStatus, setTimeStatus] = useState({
+- ./src/components/TimeClockNavbar.jsx:31:  const [currentTime, setCurrentTime] = useState(new Date());
+- ./src/components/TimeClockNavbar.jsx:32:  const [showMenu, setShowMenu] = useState(false);
+- ./src/components/TimeClockNavbar.jsx:33:  const [isLoading, setIsLoading] = useState(false);
+- ./src/components/TimeClockNavbar.jsx:34:  const [error, setError] = useState(null);
+- ./src/components/TimeClockNavbar.jsx:35:  const [connectionStatus, setConnectionStatus] = useState('checking');
+- ./src/components/TimeclockHistory.jsx:1:import React, { useState, useEffect } from 'react';
+- ./src/components/TimeclockHistory.jsx:5:  const [entries, setEntries] = useState([]);
+- ./src/components/TimeclockHistory.jsx:6:  const [loading, setLoading] = useState(true);
+- ./src/components/TimeclockHistory.jsx:7:  const [dateRange, setDateRange] = useState({
+- ./src/components/RealTimeNotifications.jsx:1:import React, { useState, useEffect } from 'react';
+- ./src/components/RealTimeNotifications.jsx:4:  const [notifications, setNotifications] = useState([]);
+- ./src/components/MobileNavigation.jsx:1:import React, { useState } from 'react';
+- ./src/components/MobileNavigation.jsx:5:  const [isOpen, setIsOpen] = useState(false);
+- ./src/components/CustomerPortal.jsx:1:import React, { useState, useEffect } from 'react';
+- ./src/components/CustomerPortal.jsx:4:  const [customerData, setCustomerData] = useState(null);
+- ./src/components/CustomerPortal.jsx:5:  const [activeJobs, setActiveJobs] = useState([]);
+- ./src/components/AIDiagnosticHelper.jsx:1:import React, { useState } from 'react';
+- ./src/components/AIDiagnosticHelper.jsx:4:  const [symptoms, setSymptoms] = useState('');
+- ./src/components/AIDiagnosticHelper.jsx:5:  const [isAnalyzing, setIsAnalyzing] = useState(false);
+- ./src/components/AIDiagnosticHelper.jsx:6:  const [diagnosis, setDiagnosis] = useState(null);
+- ./src/components/ui/RealTimeNotifications.jsx:1:import React, { useEffect, useState } from 'react';
+- ./src/components/ui/RealTimeNotifications.jsx:9:  const [notifications, setNotifications] = useState([]);
+- ./src/components/mobile/MobileNavigation.jsx:1:import React, { useState } from 'react';
+- ./src/components/mobile/MobileNavigation.jsx:5:  const [isOpen, setIsOpen] = useState(false);
+- ./src/components/mobile/MobileTechApp.tsx:1:import React, { useState, useEffect } from 'react'
+- ./src/components/mobile/MobileTechApp.tsx:6:  const [activeJob, setActiveJob] = useState<any>(null)
+- ./src/components/mobile/MobileTechApp.tsx:7:  const [currentTime, setCurrentTime] = useState(new Date())
+- ./src/components/Dashboard.jsx:2:import React, { useState, useEffect } from 'react';
+- ./src/components/Dashboard.jsx:24:  const [stats, setStats] = useState({
+- ./src/components/Dashboard.jsx:33:  const [recentJobs, setRecentJobs] = useState([]);
+- ./src/components/Dashboard.jsx:34:  const [upcomingAppointments, setUpcomingAppointments] = useState([]);
+- ./src/components/Dashboard.jsx:35:  const [loading, setLoading] = useState(true);
+- ./src/components/Dashboard.jsx:36:  const [error, setError] = useState(null);
+- ./src/components/Dashboard.jsx:37:  const [refreshing, setRefreshing] = useState(false);
+- ./src/components/ai/AIDiagnosticHelper.jsx:1:import React, { useState } from 'react';
+- ./src/components/ai/AIDiagnosticHelper.jsx:5:  const [symptoms, setSymptoms] = useState('');
+- ./src/components/ai/AIDiagnosticHelper.jsx:6:  const [isAnalyzing, setIsAnalyzing] = useState(false);
+- ./src/components/ai/AIDiagnosticHelper.jsx:7:  const [diagnosis, setDiagnosis] = useState(null);
+- ./src/components/ai/AIDashboard.jsx:1:import React, { useState, useEffect } from 'react';
+- ./src/components/ai/AIDashboard.jsx:4:  const [aiData, setAiData] = useState({
+- ./src/components/ai/AIDashboard.jsx:10:  const [loading, setLoading] = useState(true);
+- ./src/components/ApiTest.jsx:1:import React, { useState, useEffect } from 'react';
+- ./src/components/ApiTest.jsx:5:  const [status, setStatus] = useState('checking');
+- ./src/components/ApiTest.jsx:6:  const [error, setError] = useState(null);
+- ./src/components/CustomerAuthorization.jsx:2:import React, { useRef, useState } from "react";
+- ./src/components/CustomerAuthorization.jsx:10:  const [log, setLog] = useState(initialLog);
+- ./src/components/CustomerAuthorization.jsx:11:  const [form, setForm] = useState({
+- ./src/components/CustomerAuthorization.jsx:20:  const [drawing, setDrawing] = useState(false);
+- ./src/components/TimeClockWidget.jsx:2:import React, { useState, useEffect } from 'react';
+- ./src/components/TimeClockWidget.jsx:16:  const [timeStatus, setTimeStatus] = useState({
+- ./src/components/TimeClockWidget.jsx:22:  const [loading, setLoading] = useState(false);
+- ./src/components/TimeClockWidget.jsx:23:  const [error, setError] = useState(null);
+- ./src/components/TimeClockWidget.jsx:24:  const [currentTime, setCurrentTime] = useState(new Date());
+- ./src/components/Layout.jsx:2:import React, { useState, useEffect } from 'react';
+- ./src/components/Layout.jsx:14:  const [isLoading, setIsLoading] = useState(true);
+- ./src/components/Layout.jsx:15:  const [sidebarOpen, setSidebarOpen] = useState(false);
+- ./src/components/diagnostics/VehicleDiagnostics.tsx:1:import React, { useState } from 'react';
+- ./src/components/diagnostics/VehicleDiagnostics.tsx:9:  const [selectedVehicle, setSelectedVehicle] = useState<any>(null);
+- ./src/components/diagnostics/VehicleDiagnostics.tsx:10:  const [connectionStatus, setConnectionStatus] = useState<string>('disconnected');
+- ./src/hooks/useSearchFilter.js:2:import { useState, useMemo } from 'react';
+- ./src/hooks/useSearchFilter.js:11:  const [searchTerm, setSearchTerm] = useState('');
+- ./src/hooks/useSearchFilter.js:12:  const [statusFilter, setStatusFilter] = useState('');
+- ./src/hooks/useSearchFilter.js:13:  const [dateRange, setDateRange] = useState({ start: '', end: '' });
+- ./src/hooks/useSearchFilter.js:14:  const [customFilters, setCustomFilters] = useState({});
+- ./src/hooks/useDataOperations.js:2:import { useState, useEffect, useCallback, useMemo } from 'react';
+- ./src/hooks/useDataOperations.js:7:  const [customersMap, setCustomersMap] = useState(new Map());
+- ./src/hooks/useDataOperations.js:8:  const [vehicles, setVehicles] = useState([]);
+- ./src/hooks/useDataOperations.js:9:  const [vehiclesMap, setVehiclesMap] = useState(new Map());
+- ./src/hooks/useDataOperations.js:10:  const [estimates, setEstimates] = useState([]);
+- ./src/hooks/useDataOperations.js:11:  const [jobs, setJobs] = useState([]);
+- ./src/hooks/useDataOperations.js:12:  const [loadingStates, setLoadingStates] = useState({});
+- ./src/hooks/useDataOperations.js:13:  const [error, setError] = useState(null);
+- ./src/hooks/useDataOperations.js:14:  const [lastFetch, setLastFetch] = useState(null);
+- ./src/hooks/useLocalStorage.js:2:import { useState, useEffect } from 'react';
+- ./src/hooks/useLocalStorage.js:25:  const [value, setValue] = useState(() => getStorageValue(key, defaultValue));
+- ./src/hooks/useApi.js:2:import { useState, useEffect, useCallback, useRef } from 'react';
+- ./src/hooks/useApi.js:7:  const [data, setData] = useState(options.initialData || null);
+- ./src/hooks/useApi.js:8:  const [loading, setLoading] = useState(false);
+- ./src/hooks/useApi.js:9:  const [error, setError] = useState(null);
+- ./src/hooks/useApi.js:10:  const [success, setSuccess] = useState(false);
+- ./src/hooks/useAuth.js:1:import { useState, useEffect } from 'react';
+- ./src/hooks/useAuth.js:5:  const [user, setUser] = useState(null);
+- ./src/hooks/useAuth.js:6:  const [loading, setLoading] = useState(true);
+- ./src/hooks/useAuth.js:7:  const [isAuthenticated, setIsAuthenticated] = useState(false);
+- ./src/hooks/useEnhancedNavigation.js:2:import { useState, useEffect, useCallback } from 'react';
+- ./src/hooks/useEnhancedNavigation.js:9:  const [navigationHistory, setNavigationHistory] = useState([]);
+- ./src/hooks/useEnhancedNavigation.js:10:  const [pageState, setPageState] = useState({});
+- ./src/contexts/AuthContext.jsx:2:import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
+- ./src/contexts/AuthContext.jsx:8:  const [token, setToken] = useState(null);
+- ./src/contexts/AuthContext.jsx:9:  const [user, setUser] = useState(null);
+- ./src/contexts/AuthContext.jsx:10:  const [loading, setLoading] = useState(true);
+- ./src/contexts/AuthContext.jsx:11:  const [isRefreshing, setIsRefreshing] = useState(false);
+- ./src/contexts/DataContext.jsx:2:import React, { createContext, useContext, useState, useEffect, useMemo, useCallback, useRef } from 'react';
+- ./src/contexts/DataContext.jsx:22:  const [state, setState] = useState({
+- ./src/contexts/ShopContext.jsx:2:import React, { createContext, useContext, useState, useEffect, useMemo, useCallback, useRef } from 'react';
+- ./src/contexts/ShopContext.jsx:21:  const [shopData, setShopData] = useState({
+- ./src/contexts/SettingsContext.jsx:2:import React, { createContext, useContext, useEffect, useMemo, useState, useCallback } from "react";
+- ./src/contexts/SettingsContext.jsx:58:  const [settings, setSettings] = useState(defaultSettings);
+- ./src/contexts/SettingsContext.jsx:59:  const [loading, setLoading] = useState(true);
+- ./src/contexts/SettingsContext.jsx:60:  const [error, setError] = useState(null);
+- ./src/contexts/SettingsProvider.jsx:1:import React, { createContext, useContext, useState, useEffect } from 'react';
+- ./src/contexts/SettingsProvider.jsx:14:  const [settings, setSettings] = useState({
+- ./src/components_backup_20250818_064444/Navbar.jsx:2:import React, { useState } from 'react';
+- ./src/components_backup_20250818_064444/Navbar.jsx:32:  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+- ./src/components_backup_20250818_064444/Navbar.jsx:33:  const [userMenuOpen, setUserMenuOpen] = useState(false);
+- ./src/components_backup_20250818_064444/Navbar.jsx:34:  const [notificationsOpen, setNotificationsOpen] = useState(false);
+- ./src/components_backup_20250818_064444/Navbar.jsx:35:  const [showAIEstimateModal, setShowAIEstimateModal] = useState(false); // Add this state
+- ./src/components_backup_20250818_064444/Navbar.jsx:36:  const [estimates, setEstimates] = useState([]); // Add this state
+- ./src/components_backup_20250818_064444/modals/PromptModal.jsx:3:import React, { useState, useEffect } from 'react';
+- ./src/components_backup_20250818_064444/modals/PromptModal.jsx:16:  const [internalInputValue, setInternalInputValue] = useState(inputValue || '');
+- ./src/components_backup_20250818_064444/modals/AIEstimateModal.jsx:2:import React, { useState, useEffect } from 'react';
+- ./src/components_backup_20250818_064444/modals/AIEstimateModal.jsx:8:  const [formData, setFormData] = useState({
+- ./src/components_backup_20250818_064444/modals/AIEstimateModal.jsx:17:  const [loading, setLoading] = useState(false);
+- ./src/components_backup_20250818_064444/modals/AIEstimateModal.jsx:18:  const [estimate, setEstimate] = useState(null);
+- ./src/components_backup_20250818_064444/modals/AIEstimateModal.jsx:19:  const [error, setError] = useState(null);
+- ./src/components_backup_20250818_064444/modals/AIEstimateModal.jsx:20:  const [success, setSuccess] = useState('');
+- ./src/components_backup_20250818_064444/modals/AIEstimateModal.jsx:21:  const [editMode, setEditMode] = useState(false);
+- ./src/components_backup_20250818_064444/HealthCheck.jsx:1:import React, { useState, useEffect } from 'react';
+- ./src/components_backup_20250818_064444/HealthCheck.jsx:4:  const [backendStatus, setBackendStatus] = useState('checking');
+- ./src/components_backup_20250818_064444/SearchSystem.jsx:2:import React, { useState, useEffect, useCallback, useRef } from 'react';
+- ./src/components_backup_20250818_064444/SearchSystem.jsx:10:  const [isSearchOpen, setIsSearchOpen] = useState(false);
+- ./src/components_backup_20250818_064444/SearchSystem.jsx:28:  const [query, setQuery] = useState('');
+- ./src/components_backup_20250818_064444/SearchSystem.jsx:29:  const [results, setResults] = useState(null);
+- ./src/components_backup_20250818_064444/SearchSystem.jsx:30:  const [loading, setLoading] = useState(false);
+- ./src/components_backup_20250818_064444/ShareableActions.jsx:2:import React, { useState } from 'react';
+- ./src/components_backup_20250818_064444/ShareableActions.jsx:21:  const [showShareMenu, setShowShareMenu] = useState(false);
+- ./src/components_backup_20250818_064444/ShareableActions.jsx:22:  const [copied, setCopied] = useState(false);
+- ./src/components_backup_20250818_064444/AIEstimateModal.jsx:2:import React, { useState, useEffect } from 'react';
+- ./src/components_backup_20250818_064444/AIEstimateModal.jsx:20:  const [step, setStep] = useState(1);
+- ./src/components_backup_20250818_064444/AIEstimateModal.jsx:21:  const [loading, setLoading] = useState(false);
+- ./src/components_backup_20250818_064444/AIEstimateModal.jsx:22:  const [formData, setFormData] = useState({
+- ./src/components_backup_20250818_064444/AIEstimateModal.jsx:34:  const [estimate, setEstimate] = useState(null);
+- ./src/components_backup_20250818_064444/TechnicianTimeClockCard.jsx:1:import React, { useState, useEffect, useRef } from 'react';
+- ./src/components_backup_20250818_064444/TechnicianTimeClockCard.jsx:19:  const [isRunning, setIsRunning] = useState(false);
+- ./src/components_backup_20250818_064444/TechnicianTimeClockCard.jsx:20:  const [secondsElapsed, setSecondsElapsed] = useState(0);
+- ./src/components_backup_20250818_064444/CompleteNavigationMenu.jsx:1:import { useState } from "react";
+- ./src/components_backup_20250818_064444/CompleteNavigationMenu.jsx:5:  const [customersOpen, setCustomersOpen] = useState(false);
+- ./src/components_backup_20250818_064444/CompleteNavigationMenu.jsx:6:  const [jobsOpen, setJobsOpen] = useState(false);
+- ./src/components_backup_20250818_064444/CompleteNavigationMenu.jsx:7:  const [adminOpen, setAdminOpen] = useState(false);
+- ./src/components_backup_20250818_064444/EnhancedJobCreation.jsx:1:import React, { useState, useEffect, useRef } from 'react';
+- ./src/components_backup_20250818_064444/EnhancedJobCreation.jsx:5:  const [selectedCustomer, setSelectedCustomer] = useState(null);
+- ./src/components_backup_20250818_064444/EnhancedJobCreation.jsx:6:  const [selectedVehicle, setSelectedVehicle] = useState(null);
+- ./src/components_backup_20250818_064444/EnhancedJobCreation.jsx:7:  const [customerSearch, setCustomerSearch] = useState('');
+- ./src/components_backup_20250818_064444/EnhancedJobCreation.jsx:8:  const [vehicleSearch, setVehicleSearch] = useState('');
+- ./src/components_backup_20250818_064444/EnhancedJobCreation.jsx:9:  const [problemDescription, setProblemDescription] = useState('');
+- ./src/components_backup_20250818_064444/EnhancedJobCreation.jsx:10:  const [parts, setParts] = useState([]);
+- ./src/components_backup_20250818_064444/EnhancedJobCreation.jsx:11:  const [laborCost, setLaborCost] = useState('');
+- ./src/components_backup_20250818_064444/EnhancedJobCreation.jsx:12:  const [showCustomerDropdown, setShowCustomerDropdown] = useState(false);
+- ./src/components_backup_20250818_064444/EnhancedJobCreation.jsx:13:  const [showVehicleDropdown, setShowVehicleDropdown] = useState(false);
+- ./src/components_backup_20250818_064444/EnhancedJobCreation.jsx:14:  const [aiDiagnosing, setAiDiagnosing] = useState(false);
+- ./src/components_backup_20250818_064444/EnhancedJobCreation.jsx:15:  const [aiResults, setAiResults] = useState(null);
+- ./src/components_backup_20250818_064444/EnhancedJobCreation.jsx:21:  const [customers, setCustomers] = useState([
+- ./src/components_backup_20250818_064444/EnhancedJobCreation.jsx:28:  const [vehicles, setVehicles] = useState([
+- ./src/components_backup_20250818_064444/TimeClockNavbar.jsx:2:import React, { useState, useEffect } from 'react';
+- ./src/components_backup_20250818_064444/TimeClockNavbar.jsx:23:  const [timeStatus, setTimeStatus] = useState({
+- ./src/components_backup_20250818_064444/TimeClockNavbar.jsx:31:  const [currentTime, setCurrentTime] = useState(new Date());
+- ./src/components_backup_20250818_064444/TimeClockNavbar.jsx:32:  const [showMenu, setShowMenu] = useState(false);
+- ./src/components_backup_20250818_064444/TimeClockNavbar.jsx:33:  const [isLoading, setIsLoading] = useState(false);
+- ./src/components_backup_20250818_064444/TimeClockNavbar.jsx:34:  const [error, setError] = useState(null);
+- ./src/components_backup_20250818_064444/TimeClockNavbar.jsx:35:  const [connectionStatus, setConnectionStatus] = useState('checking');
+- ./src/components_backup_20250818_064444/TimeclockHistory.jsx:1:import React, { useState, useEffect } from 'react';
+- ./src/components_backup_20250818_064444/TimeclockHistory.jsx:5:  const [entries, setEntries] = useState([]);
+- ./src/components_backup_20250818_064444/TimeclockHistory.jsx:6:  const [loading, setLoading] = useState(true);
+- ./src/components_backup_20250818_064444/TimeclockHistory.jsx:7:  const [dateRange, setDateRange] = useState({
+- ./src/components_backup_20250818_064444/RealTimeNotifications.jsx:1:import React, { useState, useEffect } from 'react';
+- ./src/components_backup_20250818_064444/RealTimeNotifications.jsx:4:  const [notifications, setNotifications] = useState([]);
+- ./src/components_backup_20250818_064444/MobileNavigation.jsx:1:import React, { useState } from 'react';
+- ./src/components_backup_20250818_064444/MobileNavigation.jsx:5:  const [isOpen, setIsOpen] = useState(false);
+- ./src/components_backup_20250818_064444/CustomerPortal.jsx:1:import React, { useState, useEffect } from 'react';
+- ./src/components_backup_20250818_064444/CustomerPortal.jsx:4:  const [customerData, setCustomerData] = useState(null);
+- ./src/components_backup_20250818_064444/CustomerPortal.jsx:5:  const [activeJobs, setActiveJobs] = useState([]);
+- ./src/components_backup_20250818_064444/AIDiagnosticHelper.jsx:1:import React, { useState } from 'react';
+- ./src/components_backup_20250818_064444/AIDiagnosticHelper.jsx:4:  const [symptoms, setSymptoms] = useState('');
+- ./src/components_backup_20250818_064444/AIDiagnosticHelper.jsx:5:  const [isAnalyzing, setIsAnalyzing] = useState(false);
+- ./src/components_backup_20250818_064444/AIDiagnosticHelper.jsx:6:  const [diagnosis, setDiagnosis] = useState(null);
+- ./src/components_backup_20250818_064444/mobile/MobileNavigation.jsx:1:import React, { useState } from 'react';
+- ./src/components_backup_20250818_064444/mobile/MobileNavigation.jsx:5:  const [isOpen, setIsOpen] = useState(false);
+- ./src/components_backup_20250818_064444/Dashboard.jsx:2:import React, { useState, useEffect } from 'react';
+- ./src/components_backup_20250818_064444/Dashboard.jsx:24:  const [stats, setStats] = useState({
+- ./src/components_backup_20250818_064444/Dashboard.jsx:33:  const [recentJobs, setRecentJobs] = useState([]);
+- ./src/components_backup_20250818_064444/Dashboard.jsx:34:  const [upcomingAppointments, setUpcomingAppointments] = useState([]);
+- ./src/components_backup_20250818_064444/Dashboard.jsx:35:  const [loading, setLoading] = useState(true);
+- ./src/components_backup_20250818_064444/Dashboard.jsx:36:  const [error, setError] = useState(null);
+- ./src/components_backup_20250818_064444/Dashboard.jsx:37:  const [refreshing, setRefreshing] = useState(false);
+- ./src/components_backup_20250818_064444/ai/AIDiagnosticHelper.jsx:1:import React, { useState } from 'react';
+- ./src/components_backup_20250818_064444/ai/AIDiagnosticHelper.jsx:5:  const [symptoms, setSymptoms] = useState('');
+- ./src/components_backup_20250818_064444/ai/AIDiagnosticHelper.jsx:6:  const [isAnalyzing, setIsAnalyzing] = useState(false);
+- ./src/components_backup_20250818_064444/ai/AIDiagnosticHelper.jsx:7:  const [diagnosis, setDiagnosis] = useState(null);
+- ./src/components_backup_20250818_064444/ApiTest.jsx:1:import React, { useState, useEffect } from 'react';
+- ./src/components_backup_20250818_064444/ApiTest.jsx:5:  const [status, setStatus] = useState('checking');
+- ./src/components_backup_20250818_064444/ApiTest.jsx:6:  const [error, setError] = useState(null);
+- ./src/components_backup_20250818_064444/CustomerAuthorization.jsx:2:import React, { useRef, useState } from "react";
+- ./src/components_backup_20250818_064444/CustomerAuthorization.jsx:10:  const [log, setLog] = useState(initialLog);
+- ./src/components_backup_20250818_064444/CustomerAuthorization.jsx:11:  const [form, setForm] = useState({
+- ./src/components_backup_20250818_064444/CustomerAuthorization.jsx:20:  const [drawing, setDrawing] = useState(false);
+- ./src/components_backup_20250818_064444/TimeClockWidget.jsx:2:import React, { useEffect, useState } from "react";
+- ./src/components_backup_20250818_064444/TimeClockWidget.jsx:8:  const [status, setStatus] = useState({ clockedIn: false, since: null });
+- ./src/components_backup_20250818_064444/TimeClockWidget.jsx:9:  const [history, setHistory] = useState([]);
+- ./src/components_backup_20250818_064444/Layout.jsx:2:import React, { useState } from 'react';
+- ./src/components_backup_20250818_064444/Layout.jsx:11:  const [aiEstimateOpen, setAiEstimateOpen] = useState(false);
+- ./src/components_backup_20250818_064444/Layout.jsx:12:  const [diagnosticResult, setDiagnosticResult] = useState(null);
+- ./src/App.tsx:45:  const [customers, setCustomers] = React.useState([])
+- ./src/App.tsx:46:  const [vehicles, setVehicles] = React.useState([])
+- ./src/App.tsx:47:  const [jobs, setJobs] = React.useState([])
+
+## useEffect Hooks
+- ./src/App.jsx:2:import React, { Suspense, lazy, useEffect } from 'react';
+- ./src/App.jsx:43:  useEffect(() => {
+- ./src/pages/Invoice.jsx:3:import React, { useEffect, useState, useRef } from "react";
+- ./src/pages/Invoice.jsx:60:  useEffect(() => {
+- ./src/pages/CustomerList.jsx:2:import React, { useState, useEffect, useMemo, useCallback } from 'react';
+- ./src/pages/CustomerList.jsx:47:  useEffect(() => {
+- ./src/pages/CustomerList.jsx:58:  useEffect(() => {
+- ./src/pages/CustomerList.jsx:70:  useEffect(() => {
+- ./src/pages/AddVehicle.jsx:2:import React, { useState, useEffect } from "react";
+- ./src/pages/AddVehicle.jsx:38:  useEffect(() => {
+- ./src/pages/AddVehicle.jsx:85:  useEffect(() => {
+- ./src/pages/CreateJob.jsx:1:import React, { useState, useEffect, useRef } from 'react';
+- ./src/pages/CreateJob.jsx:50:  useEffect(() => {
+- ./src/pages/Dashboard.jsx:1:import React, { useEffect, useState } from 'react';
+- ./src/pages/Dashboard.jsx:37:  useEffect(() => {
+- ./src/pages/Dashboard.jsx:41:  useEffect(() => {
+- ./src/pages/Landing.jsx:3:import React, { useState, useEffect } from 'react';
+- ./src/pages/Landing.jsx:30:  useEffect(() => {
+- ./src/pages/VehicleForm.jsx:2:import React, { useState, useEffect } from 'react';
+- ./src/pages/VehicleForm.jsx:14:  useEffect(() => {
+- ./src/pages/VehicleForm.jsx:19:  useEffect(() => {
+- ./src/pages/VehicleForm.jsx:71:  useEffect(() => {
+- ./src/pages/AppointmentCalendar.jsx:2:import React, { useState, useEffect } from 'react';
+- ./src/pages/AppointmentCalendar.jsx:40:  useEffect(() => {
+- ./src/pages/AppointmentCalendar.jsx:103:  useEffect(() => {
+- ./src/pages/CreateEditEstimate.jsx:2:import React, { useEffect, useState } from "react";
+- ./src/pages/CreateEditEstimate.jsx:26:  useEffect(() => {
+- ./src/pages/EstimatesList.jsx:1:import React, { useState, useEffect } from "react";
+- ./src/pages/EstimatesList.jsx:31:  useEffect(() => {
+- ./src/pages/Settings.jsx:2:import React, { useEffect, useState } from 'react';
+- ./src/pages/Settings.jsx:69:  useEffect(() => {
+- ./src/pages/PartsLaborManagement.jsx:2:import React, { useState, useEffect } from 'react';
+- ./src/pages/PartsLaborManagement.jsx:34:  useEffect(() => {
+- ./src/pages/PartsLaborManagement.jsx:38:  useEffect(() => {
+- ./src/pages/AddAndEditCustomer.jsx:2:import React, { useState, useEffect, useRef } from 'react';
+- ./src/pages/AddAndEditCustomer.jsx:45:  useEffect(() => {
+- ./src/pages/AddAndEditCustomer.jsx:50:  useEffect(() => {
+- ./src/pages/Dashboard_2025-08-17.jsx:2:import React, { useState, useEffect } from 'react';
+- ./src/pages/Dashboard_2025-08-17.jsx:33:  useEffect(() => {
+- ./src/pages/Landing_backup.jsx:2:import React, { useState, useEffect } from 'react';
+- ./src/pages/Landing_backup.jsx:30:  useEffect(() => {
+- ./src/pages/CustomerDetail.jsx:2:import React, { useState, useEffect } from 'react';
+- ./src/pages/VehicleDetail.jsx:2:import React, { useState, useEffect } from 'react';
+- ./src/pages/Customers.jsx:2:import React, { useState, useEffect, useMemo, useCallback } from 'react';
+- ./src/pages/Customers.jsx:47:  useEffect(() => {
+- ./src/pages/Customers.jsx:58:  useEffect(() => {
+- ./src/pages/Customers.jsx:70:  useEffect(() => {
+- ./src/pages/Estimates.jsx:1:import React, { useState, useEffect } from "react";
+- ./src/pages/Estimates.jsx:31:  useEffect(() => {
+- ./src/pages/Invoices.jsx:3:import React, { useEffect, useState, useRef } from "react";
+- ./src/pages/Invoices.jsx:60:  useEffect(() => {
+- ./src/pages/TimeClock.jsx:1:import React, { useState, useEffect } from 'react';
+- ./src/pages/TimeClock.jsx:13:  useEffect(() => {
+- ./src/pages/AIDiagnostics.jsx:2:import React, { useState, useEffect } from 'react';
+- ./src/components/modals/PromptModal.jsx:3:import React, { useState, useEffect } from 'react';
+- ./src/components/modals/PromptModal.jsx:29:  useEffect(() => {
+- ./src/components/modals/AIEstimateModal.jsx:2:import React, { useState, useEffect } from 'react';
+- ./src/components/HealthCheck.jsx:1:import React, { useState, useEffect } from 'react';
+- ./src/components/HealthCheck.jsx:6:  useEffect(() => {
+- ./src/components/SearchSystem.jsx:2:import React, { useState, useEffect, useCallback, useRef } from 'react';
+- ./src/components/SearchSystem.jsx:100:  useEffect(() => {
+- ./src/components/SearchSystem.jsx:111:  useEffect(() => {
+- ./src/components/ShareableActions.jsx:143:import { useEffect } from 'react';
+- ./src/components/ShareableActions.jsx:146:  useEffect(() => {
+- ./src/components/AIEstimateModal.jsx:2:import React, { useState, useEffect } from 'react';
+- ./src/components/AIEstimateModal.jsx:55:  useEffect(() => {
+- ./src/components/TechnicianTimeClockCard.jsx:1:import React, { useState, useEffect, useRef } from 'react';
+- ./src/components/TechnicianTimeClockCard.jsx:23:  useEffect(() => {
+- ./src/components/AppointmentCard.jsx:2:import React, { useState, useEffect } from 'react';
+- ./src/components/AppointmentCard.jsx:17:  useEffect(() => {
+- ./src/components/JobCard.jsx:3:import React, { useState, useEffect } from 'react';
+- ./src/components/JobCard.jsx:18:  useEffect(() => {
+- ./src/components/TechnicianCard.jsx:2:import React, { useState, useEffect } from 'react';
+- ./src/components/TechnicianCard.jsx:17:  useEffect(() => {
+- ./src/components/EnhancedJobCreation.jsx:1:import React, { useState, useEffect, useRef } from 'react';
+- ./src/components/TimeClockNavbar.jsx:2:import React, { useState, useEffect } from 'react';
+- ./src/components/TimeClockNavbar.jsx:38:  useEffect(() => {
+- ./src/components/TimeClockNavbar.jsx:46:  useEffect(() => {
+- ./src/components/TimeclockHistory.jsx:1:import React, { useState, useEffect } from 'react';
+- ./src/components/TimeclockHistory.jsx:28:  useEffect(() => {
+- ./src/components/RealTimeNotifications.jsx:1:import React, { useState, useEffect } from 'react';
+- ./src/components/RealTimeNotifications.jsx:6:  useEffect(() => {
+- ./src/components/CustomerPortal.jsx:1:import React, { useState, useEffect } from 'react';
+- ./src/components/CustomerPortal.jsx:7:  useEffect(() => {
+- ./src/components/ui/RealTimeNotifications.jsx:1:import React, { useEffect, useState } from 'react';
+- ./src/components/ui/RealTimeNotifications.jsx:11:  useEffect(() => {
+- ./src/components/mobile/MobileTechApp.tsx:1:import React, { useState, useEffect } from 'react'
+- ./src/components/mobile/MobileTechApp.tsx:9:  useEffect(() => {
+- ./src/components/Dashboard.jsx:2:import React, { useState, useEffect } from 'react';
+- ./src/components/Dashboard.jsx:39:  useEffect(() => {
+- ./src/components/ai/AIDashboard.jsx:1:import React, { useState, useEffect } from 'react';
+- ./src/components/ai/AIDashboard.jsx:12:  useEffect(() => {
+- ./src/components/ApiTest.jsx:1:import React, { useState, useEffect } from 'react';
+- ./src/components/ApiTest.jsx:8:  useEffect(() => {
+- ./src/components/TimeClockWidget.jsx:2:import React, { useState, useEffect } from 'react';
+- ./src/components/TimeClockWidget.jsx:27:  useEffect(() => {
+- ./src/components/TimeClockWidget.jsx:35:  useEffect(() => {
+- ./src/components/Layout.jsx:2:import React, { useState, useEffect } from 'react';
+- ./src/components/Layout.jsx:17:  useEffect(() => {
+- ./src/components/Layout.jsx:29:  useEffect(() => {
+- ./src/hooks/useDataOperations.js:2:import { useState, useEffect, useCallback, useMemo } from 'react';
+- ./src/hooks/useDataOperations.js:99:  useEffect(() => {
+- ./src/hooks/useLocalStorage.js:2:import { useState, useEffect } from 'react';
+- ./src/hooks/useLocalStorage.js:27:  useEffect(() => {
+- ./src/hooks/useApi.js:2:import { useState, useEffect, useCallback, useRef } from 'react';
+- ./src/hooks/useAuth.js:1:import { useState, useEffect } from 'react';
+- ./src/hooks/useAuth.js:9:  useEffect(() => {
+- ./src/hooks/useEnhancedNavigation.js:2:import { useState, useEffect, useCallback } from 'react';
+- ./src/contexts/AuthContext.jsx:2:import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
+- ./src/contexts/AuthContext.jsx:151:  useEffect(() => {
+- ./src/contexts/DataContext.jsx:2:import React, { createContext, useContext, useState, useEffect, useMemo, useCallback, useRef } from 'react';
+- ./src/contexts/DataContext.jsx:44:  useEffect(() => {
+- ./src/contexts/DataContext.jsx:152:  useEffect(() => {
+- ./src/contexts/ShopContext.jsx:2:import React, { createContext, useContext, useState, useEffect, useMemo, useCallback, useRef } from 'react';
+- ./src/contexts/ShopContext.jsx:353:  useEffect(() => {
+- ./src/contexts/SettingsContext.jsx:2:import React, { createContext, useContext, useEffect, useMemo, useState, useCallback } from "react";
+- ./src/contexts/SettingsContext.jsx:115:  useEffect(() => {
+- ./src/contexts/SettingsProvider.jsx:1:import React, { createContext, useContext, useState, useEffect } from 'react';
+- ./src/contexts/SettingsProvider.jsx:22:  useEffect(() => {
+- ./src/contexts/SettingsProvider.jsx:34:  useEffect(() => {
+- ./src/layouts/Layout.jsx:2:import React, { useEffect } from 'react';
+- ./src/layouts/Layout.jsx:11:  useEffect(() => {
+- ./src/layouts/Layout.jsx:13:    // This useEffect is now optional, but kept for manual refresh capability
+- ./src/components_backup_20250818_064444/modals/PromptModal.jsx:3:import React, { useState, useEffect } from 'react';
+- ./src/components_backup_20250818_064444/modals/PromptModal.jsx:29:  useEffect(() => {
+- ./src/components_backup_20250818_064444/modals/AIEstimateModal.jsx:2:import React, { useState, useEffect } from 'react';
+- ./src/components_backup_20250818_064444/HealthCheck.jsx:1:import React, { useState, useEffect } from 'react';
+- ./src/components_backup_20250818_064444/HealthCheck.jsx:6:  useEffect(() => {
+- ./src/components_backup_20250818_064444/SearchSystem.jsx:2:import React, { useState, useEffect, useCallback, useRef } from 'react';
+- ./src/components_backup_20250818_064444/SearchSystem.jsx:100:  useEffect(() => {
+- ./src/components_backup_20250818_064444/SearchSystem.jsx:111:  useEffect(() => {
+- ./src/components_backup_20250818_064444/ShareableActions.jsx:143:import { useEffect } from 'react';
+- ./src/components_backup_20250818_064444/ShareableActions.jsx:146:  useEffect(() => {
+- ./src/components_backup_20250818_064444/AIEstimateModal.jsx:2:import React, { useState, useEffect } from 'react';
+- ./src/components_backup_20250818_064444/AIEstimateModal.jsx:55:  useEffect(() => {
+- ./src/components_backup_20250818_064444/TechnicianTimeClockCard.jsx:1:import React, { useState, useEffect, useRef } from 'react';
+- ./src/components_backup_20250818_064444/TechnicianTimeClockCard.jsx:23:  useEffect(() => {
+- ./src/components_backup_20250818_064444/EnhancedJobCreation.jsx:1:import React, { useState, useEffect, useRef } from 'react';
+- ./src/components_backup_20250818_064444/TimeClockNavbar.jsx:2:import React, { useState, useEffect } from 'react';
+- ./src/components_backup_20250818_064444/TimeClockNavbar.jsx:38:  useEffect(() => {
+- ./src/components_backup_20250818_064444/TimeClockNavbar.jsx:46:  useEffect(() => {
+- ./src/components_backup_20250818_064444/TimeclockHistory.jsx:1:import React, { useState, useEffect } from 'react';
+- ./src/components_backup_20250818_064444/TimeclockHistory.jsx:28:  useEffect(() => {
+- ./src/components_backup_20250818_064444/RealTimeNotifications.jsx:1:import React, { useState, useEffect } from 'react';
+- ./src/components_backup_20250818_064444/RealTimeNotifications.jsx:6:  useEffect(() => {
+- ./src/components_backup_20250818_064444/CustomerPortal.jsx:1:import React, { useState, useEffect } from 'react';
+- ./src/components_backup_20250818_064444/CustomerPortal.jsx:7:  useEffect(() => {
+- ./src/components_backup_20250818_064444/Dashboard.jsx:2:import React, { useState, useEffect } from 'react';
+- ./src/components_backup_20250818_064444/Dashboard.jsx:39:  useEffect(() => {
+- ./src/components_backup_20250818_064444/ApiTest.jsx:1:import React, { useState, useEffect } from 'react';
+- ./src/components_backup_20250818_064444/ApiTest.jsx:8:  useEffect(() => {
+- ./src/components_backup_20250818_064444/TimeClockWidget.jsx:2:import React, { useEffect, useState } from "react";
+- ./src/components_backup_20250818_064444/TimeClockWidget.jsx:33:  useEffect(() => {
+- ./src/App.tsx:1:import React, { Suspense, lazy, useEffect } from 'react'
+
+## Context Usage
+- ./src/contexts/AuthContext.jsx:2:import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
+- ./src/contexts/AuthContext.jsx:5:const AuthContext = createContext();
+- ./src/contexts/AuthContext.jsx:177:  const context = useContext(AuthContext);
+- ./src/contexts/DataContext.jsx:2:import React, { createContext, useContext, useState, useEffect, useMemo, useCallback, useRef } from 'react';
+- ./src/contexts/DataContext.jsx:15:const DataContext = createContext();
+- ./src/contexts/DataContext.jsx:342:  const context = useContext(DataContext);
+- ./src/contexts/ShopContext.jsx:2:import React, { createContext, useContext, useState, useEffect, useMemo, useCallback, useRef } from 'react';
+- ./src/contexts/ShopContext.jsx:17:const ShopContext = createContext();
+- ./src/contexts/ShopContext.jsx:455:  const context = useContext(ShopContext);
+- ./src/contexts/SettingsContext.jsx:2:import React, { createContext, useContext, useEffect, useMemo, useState, useCallback } from "react";
+- ./src/contexts/SettingsContext.jsx:49:const SettingsContext = createContext({
+- ./src/contexts/SettingsContext.jsx:135:export const useSettings = () => useContext(SettingsContext);  
+- ./src/contexts/SettingsProvider.jsx:1:import React, { createContext, useContext, useState, useEffect } from 'react';
+- ./src/contexts/SettingsProvider.jsx:3:const SettingsContext = createContext();
+- ./src/contexts/SettingsProvider.jsx:6:  const context = useContext(SettingsContext);
+- ./src/App.tsx:34:const DataContext = React.createContext<any>(null)
+- ./src/App.tsx:37:  const context = React.useContext(DataContext)

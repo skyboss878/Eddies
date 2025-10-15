@@ -1,0 +1,281 @@
+import React, { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext';
+import { useData } from '../contexts/DataContext';
+import {
+  BanknotesIcon,
+  TruckIcon,
+  UsersIcon,
+  WrenchScrewdriverIcon,
+  DocumentTextIcon,
+  ChartBarIcon,
+  ClockIcon,
+  ExclamationTriangleIcon
+} from '@heroicons/react/24/outline';
+
+const EnhancedDashboard = () => {
+  const { user } = useAuth();
+  const { 
+    customers, 
+    vehicles, 
+    jobs, 
+    estimates, 
+    invoices, 
+    loading, 
+    refreshData 
+  } = useData();
+  
+  const [dashboardStats, setDashboardStats] = useState({
+    totalCustomers: 0,
+    totalVehicles: 0,
+    activeJobs: 0,
+    pendingEstimates: 0,
+    unpaidInvoices: 0,
+    totalRevenue: 0
+  });
+
+  useEffect(() => {
+    refreshData();
+  }, []);
+
+  useEffect(() => {
+    if (customers && vehicles && jobs && estimates && invoices) {
+      setDashboardStats({
+        totalCustomers: customers.length,
+        totalVehicles: vehicles.length,
+        activeJobs: jobs.filter(job => job.status === 'in_progress').length,
+        pendingEstimates: estimates.filter(est => est.status === 'pending').length,
+        unpaidInvoices: invoices.filter(inv => inv.status !== 'paid').length,
+        totalRevenue: invoices
+          .filter(inv => inv.status === 'paid')
+          .reduce((sum, inv) => sum + parseFloat(inv.total_amount || 0), 0)
+      });
+    }
+  }, [customers, vehicles, jobs, estimates, invoices]);
+
+  const stats = [
+    {
+      name: 'Total Customers',
+      value: dashboardStats.totalCustomers,
+      icon: UsersIcon,
+      color: 'bg-blue-500',
+      href: '/customers'
+    },
+    {
+      name: 'Total Vehicles',
+      value: dashboardStats.totalVehicles,
+      icon: TruckIcon,
+      color: 'bg-green-500',
+      href: '/vehicles'
+    },
+    {
+      name: 'Active Jobs',
+      value: dashboardStats.activeJobs,
+      icon: WrenchScrewdriverIcon,
+      color: 'bg-yellow-500',
+      href: '/jobs'
+    },
+    {
+      name: 'Pending Estimates',
+      value: dashboardStats.pendingEstimates,
+      icon: DocumentTextIcon,
+      color: 'bg-purple-500',
+      href: '/estimates'
+    },
+    {
+      name: 'Unpaid Invoices',
+      value: dashboardStats.unpaidInvoices,
+      icon: ExclamationTriangleIcon,
+      color: 'bg-red-500',
+      href: '/invoices'
+    },
+    {
+      name: 'Total Revenue',
+      value: `$${dashboardStats.totalRevenue.toLocaleString()}`,
+      icon: BanknotesIcon,
+      color: 'bg-indigo-500',
+      href: '/reports'
+    }
+  ];
+
+  // Recent invoices for quick access
+  const recentInvoices = invoices
+    ?.sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
+    ?.slice(0, 5) || [];
+
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center h-64">
+        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600"></div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-6">
+      {/* Welcome Section */}
+      <div className="bg-white shadow rounded-lg p-6">
+        <h1 className="text-3xl font-bold text-gray-900 mb-2">
+          Welcome back, {user?.name || 'User'}!
+        </h1>
+        <p className="text-gray-600">
+          Here's what's happening with your automotive business today.
+        </p>
+      </div>
+
+      {/* Stats Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {stats.map((stat) => {
+          const Icon = stat.icon;
+          return (
+            <Link
+              key={stat.name}
+              to={stat.href}
+              className="bg-white overflow-hidden shadow rounded-lg hover:shadow-lg transition-shadow duration-300"
+            >
+              <div className="p-5">
+                <div className="flex items-center">
+                  <div className="flex-shrink-0">
+                    <div className={`${stat.color} rounded-md p-3`}>
+                      <Icon className="h-6 w-6 text-white" />
+                    </div>
+                  </div>
+                  <div className="ml-5 w-0 flex-1">
+                    <dl>
+                      <dt className="text-sm font-medium text-gray-500 truncate">
+                        {stat.name}
+                      </dt>
+                      <dd className="text-lg font-medium text-gray-900">
+                        {stat.value}
+                      </dd>
+                    </dl>
+                  </div>
+                </div>
+              </div>
+            </Link>
+          );
+        })}
+      </div>
+
+      {/* Recent Invoices Section */}
+      <div className="bg-white shadow rounded-lg">
+        <div className="px-4 py-5 sm:p-6">
+          <div className="flex justify-between items-center mb-4">
+            <h3 className="text-lg leading-6 font-medium text-gray-900">
+              Recent Invoices
+            </h3>
+            <Link
+              to="/invoices"
+              className="text-sm font-medium text-blue-600 hover:text-blue-500"
+            >
+              View all invoices →
+            </Link>
+          </div>
+          
+          {recentInvoices.length > 0 ? (
+            <div className="overflow-hidden">
+              <div className="space-y-3">
+                {recentInvoices.map((invoice) => (
+                  <div key={invoice.id} className="border rounded-lg p-4 hover:bg-gray-50 transition-colors">
+                    <div className="flex justify-between items-start">
+                      <div>
+                        <h4 className="font-medium text-gray-900">
+                          Invoice #{invoice.id}
+                        </h4>
+                        <p className="text-sm text-gray-600">
+                          Customer: {invoice.customer_name}
+                        </p>
+                        <p className="text-xs text-gray-500">
+                          {new Date(invoice.created_at).toLocaleDateString()}
+                        </p>
+                      </div>
+                      <div className="text-right">
+                        <p className="font-medium text-green-600">
+                          ${parseFloat(invoice.total_amount || 0).toLocaleString()}
+                        </p>
+                        <span className={`inline-flex px-2 py-1 text-xs rounded-full ${
+                          invoice.status === 'paid' 
+                            ? 'bg-green-100 text-green-800'
+                            : invoice.status === 'pending'
+                            ? 'bg-yellow-100 text-yellow-800'
+                            : 'bg-red-100 text-red-800'
+                        }`}>
+                          {invoice.status?.toUpperCase()}
+                        </span>
+                      </div>
+                    </div>
+                    <div className="mt-3">
+                      <Link
+                        to={`/invoices/${invoice.id}`}
+                        className="text-sm text-blue-600 hover:text-blue-800"
+                      >
+                        View Details →
+                      </Link>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ) : (
+            <div className="text-center py-12">
+              <BanknotesIcon className="mx-auto h-12 w-12 text-gray-400" />
+              <h3 className="mt-2 text-sm font-medium text-gray-900">No invoices</h3>
+              <p className="mt-1 text-sm text-gray-500">
+                Get started by creating your first invoice.
+              </p>
+              <div className="mt-6">
+                <Link
+                  to="/invoices/create"
+                  className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
+                >
+                  Create Invoice
+                </Link>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Quick Actions */}
+      <div className="bg-white shadow rounded-lg">
+        <div className="px-4 py-5 sm:p-6">
+          <h3 className="text-lg leading-6 font-medium text-gray-900 mb-4">
+            Quick Actions
+          </h3>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <Link
+              to="/customers/add"
+              className="bg-blue-50 hover:bg-blue-100 p-4 rounded-lg text-center transition-colors"
+            >
+              <UsersIcon className="h-8 w-8 mx-auto text-blue-600 mb-2" />
+              <p className="text-sm font-medium text-blue-600">Add Customer</p>
+            </Link>
+            <Link
+              to="/vehicles/add"
+              className="bg-green-50 hover:bg-green-100 p-4 rounded-lg text-center transition-colors"
+            >
+              <TruckIcon className="h-8 w-8 mx-auto text-green-600 mb-2" />
+              <p className="text-sm font-medium text-green-600">Add Vehicle</p>
+            </Link>
+            <Link
+              to="/jobs/create"
+              className="bg-yellow-50 hover:bg-yellow-100 p-4 rounded-lg text-center transition-colors"
+            >
+              <WrenchScrewdriverIcon className="h-8 w-8 mx-auto text-yellow-600 mb-2" />
+              <p className="text-sm font-medium text-yellow-600">Create Job</p>
+            </Link>
+            <Link
+              to="/invoices/create"
+              className="bg-purple-50 hover:bg-purple-100 p-4 rounded-lg text-center transition-colors"
+            >
+              <BanknotesIcon className="h-8 w-8 mx-auto text-purple-600 mb-2" />
+              <p className="text-sm font-medium text-purple-600">Create Invoice</p>
+            </Link>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default EnhancedDashboard;

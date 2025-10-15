@@ -1,0 +1,348 @@
+// src/contexts/DataContext.jsx - FINAL VERSION, SYNCHRONIZED WITH ALL APP PAGES
+import React, { createContext, useContext, useState, useEffect, useMemo, useCallback, useRef } from 'react';
+import {
+  customerService,
+  vehicleService,
+  jobService,
+  estimateService,
+  settingsService,
+  partService,
+  laborService
+} from '../utils/api';
+import { useAuth } from './AuthContext';
+import { showMessage } from '../utils/toast';
+
+const DataContext = createContext();
+
+export const DataProvider = ({ children }) => {
+  const { isAuthenticated } = useAuth();
+  const isAuthenticatedRef = useRef(false);
+
+  // Consolidated state object
+  const [state, setState] = useState({
+    // Core entities
+    customers: [],
+    vehicles: [],
+    jobs: [],
+    estimates: [],
+    parts: [],
+    laborRates: [],
+    settings: {
+      shopName: "Eddie's Askan Automotive",
+      laborRate: 140.00,
+      taxRate: 0.0875,
+      address: "123 Main St, Bakersfield, CA 93301",
+      phone: "(661) 555-0123",
+      email: "admin@eddiesauto.com"
+    },
+    // UI State
+    loading: {},
+    error: null,
+    dataLoaded: false
+  });
+
+  useEffect(() => {
+    isAuthenticatedRef.current = isAuthenticated;
+  }, [isAuthenticated]);
+
+  // Stable update functions using useCallback
+  const setLoading = useCallback((key, value) => {
+    setState(prev => ({
+      ...prev,
+      loading: { ...prev.loading, [key]: value }
+    }));
+  }, []);
+
+  const isLoading = useCallback((key) => {
+    return !!state.loading[key];
+  }, [state.loading]);
+
+  const setError = useCallback((error) => {
+    setState(prev => ({ ...prev, error }));
+  }, []);
+
+  const clearError = useCallback(() => {
+    setState(prev => ({ ...prev, error: null }));
+  }, []);
+
+  // Memoized data fetching function
+  const fetchAllData = useCallback(async (force = false) => {
+    if (!force && (state.loading.initialData || state.dataLoaded)) {
+      return;
+    }
+
+    if (!isAuthenticated) {
+      return;
+    }
+
+    setLoading('initialData', true);
+    setError(null);
+
+    try {
+      const [
+        customersResult,
+        vehiclesResult,
+        jobsResult,
+        estimatesResult,
+        partsResult,
+        laborRatesResult,
+        settingsResult
+      ] = await Promise.allSettled([
+        customerService.getAll().catch(err => ({ error: err, data: [] })),
+        vehicleService.getAll().catch(err => ({ error: err, data: [] })),
+        jobService.getAll().catch(err => ({ error: err, data: [] })),
+        estimateService.getAll().catch(err => ({ error: err, data: [] })),
+        partService.getAll().catch(err => ({ error: err, data: [] })),
+        laborService.getAll().catch(err => ({ error: err, data: [] })),
+        settingsService.get().catch(err => ({ error: err, data: {} }))
+      ]);
+
+      setState(prev => ({
+        ...prev,
+        customers: customersResult.status === 'fulfilled' ? (customersResult.value?.data || []) : [],
+        vehicles: vehiclesResult.status === 'fulfilled' ? (vehiclesResult.value?.data || []) : [],
+        jobs: jobsResult.status === 'fulfilled' ? (jobsResult.value?.data || []) : [],
+        estimates: estimatesResult.status === 'fulfilled' ? (estimatesResult.value?.data || []) : [],
+        parts: partsResult.status === 'fulfilled' ? (partsResult.value?.data || []) : [],
+        laborRates: laborRatesResult.status === 'fulfilled' ? (laborRatesResult.value?.data || []) : [],
+        settings: settingsResult.status === 'fulfilled' ?
+          { ...prev.settings, ...(settingsResult.value?.data || {}) } : prev.settings,
+        dataLoaded: true
+      }));
+
+    } catch (error) {
+      const message = error.message || 'Failed to load shop data';
+      setError(message);
+      showMessage(message, 'error');
+    } finally {
+      setLoading('initialData', false);
+    }
+  }, [isAuthenticated, state.loading.initialData, state.dataLoaded, setLoading, setError]);
+
+  const clearAllData = useCallback(() => {
+    setState(prev => ({
+      ...prev,
+      customers: [],
+      vehicles: [],
+      jobs: [],
+      estimates: [],
+      parts: [],
+      laborRates: [],
+      loading: {},
+      error: null,
+      dataLoaded: false
+    }));
+  }, []);
+
+  useEffect(() => {
+    if (isAuthenticated && !state.dataLoaded) {
+      fetchAllData();
+    } else if (!isAuthenticated && state.dataLoaded) {
+      clearAllData();
+    }
+  }, [isAuthenticated, state.dataLoaded, fetchAllData, clearAllData]);
+// Debugging - add this before your useMemo
+console.log('=== DEBUGGING state.customers ===');
+console.log('Type:', typeof state.customers);
+console.log('Value:', state.customers);
+console.log('Is Array:', Array.isArray(state.customers));
+console.log('Is null:', state.customers === null);
+console.log('Is undefined:', state.customers === undefined);
+console.log('Constructor:', state.customers?.constructor?.name);
+console.log('Keys (if object):', typeof state.customers === 'object' ? Object.keys(state.customers || {}) : 'N/A');
+console.log('================================');
+
+  // Memoized computed values
+  const customersMap = useMemo(() => {
+    return new Map(Array.isArray(state.customers) ? state.customers.map(c => [c.id, c]) : []);
+  }, [state.customers]);
+  const vehiclesMap = useMemo(() => {
+
+  const vehiclesMap = useMemo(() => {
+    return new Map(Array.isArray(state.vehicles) ? state.vehicles.map(v => [v.id, v]) : []);
+
+
+
+  const enrichedJobs = useMemo(() => {
+      const vehicle = vehiclesMap.get(job.vehicleId);
+      return {
+    return Array.isArray(state.jobs) ? state.jobs.map(job => {
+      const vehicle = vehiclesMap.get(job.vehicleId);
+      const customer = vehicle ? customersMap.get(vehicle.customerId) : null;
+      return {
+        ...job,
+        customerName: customer?.name || "Unknown Customer",
+        vehicleInfo: vehicle ? `${vehicle.year} ${vehicle.make} ${vehicle.model}` : "Unknown Vehicle",
+        customerData: customer,
+        vehicleData: vehicle,
+      };
+    });
+  }, [state.jobs, vehiclesMap, customersMap]);
+
+  // Generic CRUD operations factory
+  const createCrudOperations = useCallback((entityName, service) => {
+    const entityKey = entityName.toLowerCase();
+    const entityKeySingular = entityKey.endsWith('s') ? entityKey.slice(0, -1) : entityKey;
+
+    return {
+      create: async (data) => {
+        const loadingKey = `create${entityKeySingular}`;
+        setLoading(loadingKey, true);
+        try {
+          const result = await service.create(data);
+          const newItem = result.data || result;
+          setState(prev => ({
+            ...prev,
+            [entityKey]: [...prev[entityKey], newItem]
+          }));
+          showMessage(`${entityKeySingular} created successfully!`, 'success');
+          return { success: true, data: newItem };
+        } catch (error) {
+          const message = error.response?.data?.message || `Failed to create ${entityKeySingular}`;
+          setError(message);
+          showMessage(message, 'error');
+          return { success: false, error: message };
+        } finally {
+          setLoading(loadingKey, false);
+        }
+      },
+      update: async (id, data) => {
+        const loadingKey = `update${entityKeySingular}_${id}`;
+        setLoading(loadingKey, true);
+        try {
+          const result = await service.update(id, data);
+          const updatedItem = result.data || result;
+          setState(prev => ({
+            ...prev,
+            [entityKey]: prev[entityKey].map(item => item.id === id ? updatedItem : item)
+          }));
+          showMessage(`${entityKeySingular} updated successfully!`, 'success');
+          return { success: true, data: updatedItem };
+        } catch (error) {
+          const message = error.response?.data?.message || `Failed to update ${entityKeySingular}`;
+          setError(message);
+          showMessage(message, 'error');
+          return { success: false, error: message };
+        } finally {
+          setLoading(loadingKey, false);
+        }
+      },
+      delete: async (id) => {
+        const loadingKey = `delete${entityKeySingular}_${id}`;
+        setLoading(loadingKey, true);
+        try {
+          await service.delete(id);
+          setState(prev => ({
+            ...prev,
+            [entityKey]: prev[entityKey].filter(item => item.id !== id)
+          }));
+          showMessage(`${entityKeySingular} deleted successfully!`, 'success');
+          return { success: true };
+        } catch (error) {
+          const message = error.response?.data?.message || `Failed to delete ${entityKeySingular}`;
+          setError(message);
+          showMessage(message, 'error');
+          return { success: false, error: message };
+        } finally {
+          setLoading(loadingKey, false);
+        }
+      }
+    };
+  }, [setLoading, setError]);
+
+  // Entity operations
+  const customerOps = useMemo(() => createCrudOperations('customers', customerService), [createCrudOperations]);
+  const vehicleOps = useMemo(() => createCrudOperations('vehicles', vehicleService), [createCrudOperations]);
+  const jobOps = useMemo(() => createCrudOperations('jobs', jobService), [createCrudOperations]);
+  const estimateOps = useMemo(() => createCrudOperations('estimates', estimateService), [createCrudOperations]);
+  const partOps = useMemo(() => createCrudOperations('parts', partService), [createCrudOperations]);
+  const laborOps = useMemo(() => createCrudOperations('laborRates', laborService), [createCrudOperations]);
+
+  // Settings operations
+  const updateSettings = useCallback(async (settingsData) => {
+    setLoading('updateSettings', true);
+    try {
+      const result = await settingsService.update(settingsData);
+      const updatedSettings = result.data || result;
+      setState(prev => ({
+        ...prev,
+        settings: { ...prev.settings, ...updatedSettings }
+      }));
+      showMessage('Settings updated successfully!', 'success');
+      return { success: true, data: updatedSettings };
+    } catch (error) {
+      const message = error.response?.data?.message || 'Failed to update settings';
+      setError(message);
+      showMessage(message, 'error');
+      return { success: false, error: message };
+    } finally {
+      setLoading('updateSettings', false);
+    }
+  }, [setLoading, setError]);
+
+  const refreshData = useCallback(() => { return fetchAllData(true); }, [fetchAllData]);
+
+  // Memoize context value to prevent unnecessary re-renders
+  const contextValue = useMemo(() => ({
+    // Raw data
+    customers: state.customers,
+    vehicles: state.vehicles,
+    jobs: state.jobs,
+    estimates: state.estimates,
+    parts: state.parts,
+    laborRates: state.laborRates,
+    settings: state.settings,
+
+    // Computed data
+    customersMap,
+    vehiclesMap,
+    enrichedJobs,
+
+    // UI state
+    loading: state.loading,
+    error: state.error,
+    dataLoaded: state.dataLoaded,
+    isLoading,
+
+    // Operations
+    updateSettings,
+    refreshData,
+    clearError,
+
+    // Entity operations
+    customerOps,
+    vehicleOps,
+    jobOps,
+    estimateOps,
+    partOps,
+    laborOps,
+
+  }), [
+    state.customers, state.vehicles, state.jobs, state.estimates, state.parts, state.laborRates,
+    state.settings, state.loading, state.error, state.dataLoaded, customersMap, vehiclesMap,
+    enrichedJobs, isLoading, updateSettings, refreshData, clearError, customerOps, vehicleOps,
+    jobOps, estimateOps, partOps, laborOps
+  ]);
+
+  return (
+    <DataContext.Provider value={contextValue}>
+      {children}
+    </DataContext.Provider>
+  );
+};
+
+export const useData = () => {
+  const context = useContext(DataContext);
+  if (!context) {
+    throw new Error('useData must be used within a DataProvider');
+  }
+  return context;
+};
+
+// Legacy hook for backward compatibility
+export const useShop = () => {
+  console.warn('useShop is deprecated, use useData instead');
+  return useData();
+};
+
+export default DataContext;

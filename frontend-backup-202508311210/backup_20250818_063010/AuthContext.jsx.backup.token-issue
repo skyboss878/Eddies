@@ -1,0 +1,418 @@
+// src/contexts/AuthContext.jsx - SUPER OPTIMIZED - No repeated API calls
+import React, { createContext, useState, useContext, useEffect, useCallback, useMemo, useRef } from 'react';
+import apiClient from '../utils/api';
+
+const AuthContext = createContext(null);
+
+export const AuthProvider = ({ children }) => {
+  const [user, setUser] = useState(null);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  // Use refs to prevent unnecessary re-renders and effect loops
+  const isAuthenticatedRef = useRef(false);
+  const userRef = useRef(null);
+  const autoRefreshIntervalRef = useRef(null);
+  const lastRefreshTimeRef = useRef(0);
+
+  // Update refs when state changes
+  useEffect(() => {
+    isAuthenticatedRef.current = isAuthenticated;
+    userRef.current = user;
+  }, [isAuthenticated, user]);
+
+  // Memoize clearAuthState to prevent recreations
+  const clearAuthState = useCallback(() => {
+    console.log('🧹 Clearing auth state');
+    localStorage.removeItem('token');
+    setUser(null);
+    setIsAuthenticated(false);
+    setError(null);
+    
+    // Clear auto-refresh interval
+    if (autoRefreshIntervalRef.current) {
+      clearInterval(autoRefreshIntervalRef.current);
+      autoRefreshIntervalRef.current = null;
+    }
+  }, []);
+
+  // Memoize token verification - STABLE function
+  const verifyTokenAndSetUser = useCallback(async (skipIfRecent = false) => {
+    // Skip if we refreshed recently (within 30 seconds)
+    if (skipIfRecent && (Date.now() - lastRefreshTimeRef.current) < 30000) {
+      console.log('⏸️ Skipping token verification - refreshed recently');
+      return;
+    }
+
+    const accessToken = localStorage.getItem('token');
+    if (!accessToken) {
+      console.log('❌ No token found');
+      setLoading(false);
+      return;
+    }
+
+    try {
+      setLoading(true);
+      setError(null);
+      console.log('🔍 Verifying token...');
+      
+      const response = await apiClient.get('/api/auth/me');
+      lastRefreshTimeRef.current = Date.now();
+
+      if (response.data && response.data.user) {
+        const userData = response.data.user;
+        
+        // Only update if data actually changed
+        setUser(prevUser => {
+          const prevUserStr = JSON.stringify(prevUser);
+          const newUserStr = JSON.stringify(userData);
+          
+          if (prevUserStr !== newUserStr) {
+            console.log('✅ User data updated:', userData.email || userData.name);
+            return userData;
+          }
+          return prevUser;
+        });
+        
+        setIsAuthenticated(prevAuth => {
+          if (!prevAuth) {
+            console.log('✅ Authentication set to true');
+            return true;
+          }
+          return prevAuth;
+        });
+        
+      } else {
+        console.warn('⚠️ Invalid user data in /auth/me response');
+        clearAuthState();
+      }
+    } catch (error) {
+      console.error('❌ Token verification failed:', error);
+      if (error.response?.status === 401 || error.response?.status === 403) {
+        console.log('🔄 Clearing invalid/expired token');
+        clearAuthState();
+      } else {
+        setIsAuthenticated(false);
+        setError('Unable to verify authentication. Please check your connection.');
+      }
+    } finally {
+      setLoading(false);
+    }
+  }, [clearAuthState]);
+
+  // Memoize login function
+  const login = useCallback(async (email, password) => {
+    try {
+      setLoading(true);
+      setError(null);
+      console.log('🔐 Attempting login for:', email);
+      
+      const response = await apiClient.post('/api/auth/login', {
+        email: email.trim().toLowerCase(),
+        password
+      });
+
+      if (response.data && response.data.access_token && response.data.user) {
+        const { access_token: token, user: userData } = response.data;
+        localStorage.setItem('token', token);
+        setUser(userData);
+        setIsAuthenticated(true);
+        setError(null);
+        lastRefreshTimeRef.current = Date.now();
+        console.log('✅ Login successful for:', userData.email || userData.name);
+        return { success: true, user: userData };
+      } else {
+        console.error('❌ Invalid login response format:', response.data);
+        throw new Error('Invalid response format from server');
+      }
+    } catch (error) {
+      console.error('❌ Login failed:', error);
+      let errorMessage = 'Login failed. Please try again.';
+      if (error.response?.data?.error) {
+        errorMessage = error.response.data.error;
+      } else if (error.response?.data?.message) {
+        errorMessage = error.response.data.message;
+      } else if (error.response?.status === 401) {
+        errorMessage = 'Invalid email or password.';
+      } else if (error.response?.status === 429) {
+        errorMessage = 'Too many login attempts. Please try again later.';
+      } else if (error.response?.status >= 500) {
+        errorMessage = 'Server error. Please try again later.';
+      } else if (!error.response) {
+        errorMessage = 'Network error. Please check your internet connection.';
+      }
+      setError(errorMessage);
+      return { success: false, error: errorMessage };
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  // Memoize register function
+  const register = useCallback(async (username, email, password) => {
+    try {
+      setLoading(true);
+      setError(null);
+      console.log('📝 Attempting registration for:', email);
+      
+      if (!username || !email || !password) throw new Error('All fields are required.');
+      if (username.length < 3) throw new Error('Username must be at least 3 characters long.');
+      if (password.length < 6) throw new Error('Password must be at least 6 characters long.');
+      
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(email)) throw new Error('Please enter a valid email address.');
+      
+      const response = await apiClient.post('/api/auth/register', {
+        username: username.trim(),
+        email: email.trim().toLowerCase(),
+        password
+      });
+
+      if (response.data && response.data.access_token && response.data.user) {
+        const { access_token: token, user: userData } = response.data;
+        localStorage.setItem('token', token);
+        setUser(userData);
+        setIsAuthenticated(true);
+        setError(null);
+        lastRefreshTimeRef.current = Date.now();
+        console.log('✅ Registration successful for:', userData.email || userData.name);
+        return { success: true, user: userData };
+      } else {
+        console.error('❌ Invalid registration response format:', response.data);
+        throw new Error('Invalid response format from server');
+      }
+    } catch (error) {
+      console.error('❌ Registration failed:', error);
+      let errorMessage = 'Registration failed. Please try again.';
+      if (error.message && !error.response) {
+        errorMessage = error.message;
+      } else if (error.response?.data?.error) {
+        errorMessage = error.response.data.error;
+      } else if (error.response?.data?.message) {
+        errorMessage = error.response.data.message;
+      } else if (error.response?.status === 404) {
+        errorMessage = 'Registration is not available yet. Please contact admin.';
+      } else if (error.response?.status === 409) {
+        errorMessage = 'An account with this email already exists.';
+      } else if (error.response?.status === 422) {
+        errorMessage = 'Invalid registration data. Please check your inputs.';
+      } else if (error.response?.status >= 500) {
+        errorMessage = 'Server error. Please try again later.';
+      } else if (!error.response) {
+        errorMessage = 'Network error. Please check your internet connection.';
+      }
+      setError(errorMessage);
+      return { success: false, error: errorMessage };
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  // Memoize logout function
+  const logout = useCallback(async () => {
+    try {
+      setLoading(true);
+      const token = localStorage.getItem('token');
+      if (token) {
+        try {
+          await apiClient.post('/api/auth/logout');
+          console.log('✅ Server logout successful');
+        } catch (error) {
+          console.warn('⚠️ Server logout failed, proceeding with local logout:', error);
+        }
+      }
+    } catch (error) {
+      console.warn('⚠️ Logout error:', error);
+    } finally {
+      clearAuthState();
+      setLoading(false);
+      console.log('🚪 User logged out');
+    }
+  }, [clearAuthState]);
+
+  // Memoize updateProfile function
+  const updateProfile = useCallback(async (profileData) => {
+    try {
+      setLoading(true);
+      setError(null);
+      const response = await apiClient.put('/api/auth/profile', profileData);
+
+      if (response.data && response.data.user) {
+        setUser(response.data.user);
+        console.log('✅ Profile updated successfully');
+        return { success: true, user: response.data.user };
+      } else {
+        throw new Error('Invalid response format');
+      }
+    } catch (error) {
+      console.error('❌ Profile update failed:', error);
+      let errorMessage = 'Failed to update profile';
+      if (error.response?.status === 404) {
+        errorMessage = 'Profile update not available yet';
+      } else if (error.response?.data?.error) {
+        errorMessage = error.response.data.error;
+      } else if (error.response?.data?.message) {
+        errorMessage = error.response.data.message;
+      }
+      setError(errorMessage);
+      return { success: false, error: errorMessage };
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  // Memoize utility functions
+  const clearError = useCallback(() => setError(null), []);
+  
+  const hasPermission = useCallback((permission) => {
+    return user?.permissions?.includes(permission) || user?.role === 'admin';
+  }, [user?.permissions, user?.role]);
+  
+  const hasRole = useCallback((role) => {
+    return user?.role === role;
+  }, [user?.role]);
+
+  // Memoize refreshUser function - LESS AGGRESSIVE
+  const refreshUser = useCallback(async () => {
+    if (!localStorage.getItem('token') || !isAuthenticatedRef.current) return;
+    
+    // Only refresh if it's been more than 5 minutes since last refresh
+    if ((Date.now() - lastRefreshTimeRef.current) < 300000) {
+      console.log('⏸️ Skipping refresh - recent refresh detected');
+      return;
+    }
+    
+    console.log('🔄 Refreshing user data...');
+    await verifyTokenAndSetUser(true);
+  }, [verifyTokenAndSetUser]);
+
+  // Initialize authentication - RUNS ONLY ONCE
+  useEffect(() => {
+    console.log('🔄 Initializing authentication...');
+    verifyTokenAndSetUser();
+  }, [verifyTokenAndSetUser]);
+
+  // Setup response interceptor - STABLE dependencies
+  useEffect(() => {
+    const responseInterceptor = apiClient.interceptors.response.use(
+      (response) => response,
+      (error) => {
+        if (error.response?.status === 401 && isAuthenticatedRef.current) {
+          console.log('🚨 Interceptor caught 401 (session expired). Logging out.');
+          logout();
+          setError("Your session has expired. Please log in again.");
+        }
+        return Promise.reject(error);
+      }
+    );
+
+    return () => {
+      apiClient.interceptors.response.eject(responseInterceptor);
+    };
+  }, [logout]);
+
+  // MUCH LESS AGGRESSIVE Auto-refresh - Only every 30 minutes, not 15
+  useEffect(() => {
+    if (!isAuthenticated) {
+      // Clear any existing interval when not authenticated
+      if (autoRefreshIntervalRef.current) {
+        clearInterval(autoRefreshIntervalRef.current);
+        autoRefreshIntervalRef.current = null;
+      }
+      return;
+    }
+
+    console.log('⏰ Setting up auto-refresh interval (30 minutes)');
+    
+    // Clear any existing interval
+    if (autoRefreshIntervalRef.current) {
+      clearInterval(autoRefreshIntervalRef.current);
+    }
+    
+    // Set up new interval - 30 minutes instead of 15
+    autoRefreshIntervalRef.current = setInterval(() => {
+      console.log('⏰ Auto-refresh triggered');
+      refreshUser();
+    }, 30 * 60 * 1000); // 30 minutes
+
+    return () => {
+      if (autoRefreshIntervalRef.current) {
+        clearInterval(autoRefreshIntervalRef.current);
+        autoRefreshIntervalRef.current = null;
+      }
+    };
+  }, [isAuthenticated, refreshUser]);
+
+  // Debug logging - ONLY log when values actually change
+  useEffect(() => {
+    console.log('🔐 Auth State Changed:', {
+      isAuthenticated,
+      userId: user?.id || null,
+      userEmail: user?.email || null,
+      userRole: user?.role || null,
+      loading,
+      hasError: !!error
+    });
+  }, [isAuthenticated, user?.id, user?.email, user?.role, loading, error]);
+
+  // Memoize context value to prevent unnecessary re-renders
+  const contextValue = useMemo(() => ({
+    // Core auth state
+    user,
+    isAuthenticated,
+    loading,
+    error,
+
+    // Auth actions
+    login,
+    register,
+    logout,
+    verifyTokenAndSetUser,
+    updateProfile,
+    clearError,
+
+    // Permission helpers
+    hasPermission,
+    hasRole,
+    
+    // User utilities
+    refreshUser,
+
+    // Convenient user properties
+    userName: user?.name || user?.username || 'User',
+    userEmail: user?.email || '',
+    userRole: user?.role || 'user',
+    userId: user?.id || null,
+  }), [
+    user, 
+    isAuthenticated, 
+    loading, 
+    error, 
+    login, 
+    register, 
+    logout, 
+    verifyTokenAndSetUser, 
+    updateProfile, 
+    clearError, 
+    hasPermission, 
+    hasRole, 
+    refreshUser
+  ]);
+
+  return (
+    <AuthContext.Provider value={contextValue}>
+      {children}
+    </AuthContext.Provider>
+  );
+};
+
+export const useAuth = () => {
+  const context = useContext(AuthContext);
+  if (!context) {
+    throw new Error('useAuth must be used within an AuthProvider');
+  }
+  return context;
+};
+
+export { AuthContext };

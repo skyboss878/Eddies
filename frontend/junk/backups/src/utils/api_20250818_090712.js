@@ -1,0 +1,264 @@
+// src/api.js
+import axios from "axios";
+
+// -------------------------
+// BASE SETUP
+// -------------------------
+const API_BASE = process.env.REACT_APP_API_URL || "http://127.0.0.1:5001/api";
+
+const getToken = () => localStorage.getItem("token");
+
+const api = axios.create({
+  baseURL: "http://192.168.1.26:5000",
+  baseURL: "http://192.168.1.26:5000"
+  headers: { "Content-Type": "application/json" },
+  timeout: 30000,
+});
+
+// -------------------------
+// INTERCEPTORS
+// -------------------------
+api.interceptors.request.use(
+  (config) => {
+    const token = getToken();
+    if (token) config.headers.Authorization = `Bearer ${token}`;
+    config.metadata = { startTime: new Date() };
+    return config;
+  },
+  (error) => Promise.reject(error)
+);
+
+api.interceptors.response.use(
+  (response) => {
+    if (process.env.NODE_ENV === "development" && response.config.metadata) {
+      const duration = new Date() - response.config.metadata.startTime;
+      console.log(`API ${response.config.method?.toUpperCase()} ${response.config.url} - ${duration}ms`);
+    }
+    return response;
+  },
+  (error) => {
+    if (error.response) {
+      const { status, data } = error.response;
+      if (status === 401 && !window.location.pathname.includes("/login")) {
+        localStorage.removeItem("token");
+        localStorage.removeItem("user");
+        window.location.href = "/login";
+      }
+      error.userMessage = data?.message || defaultMessages[status] || "An error occurred.";
+    } else if (error.request) {
+      error.userMessage = "Network error. Please check your connection.";
+    } else {
+      error.userMessage = "An unexpected error occurred.";
+    }
+    return Promise.reject(error);
+  }
+);
+
+const defaultMessages = {
+  400: "Invalid request.",
+  401: "Authentication required.",
+  403: "Access forbidden.",
+  404: "Resource not found.",
+  409: "Conflict detected.",
+  422: "Invalid data submitted.",
+  429: "Too many requests.",
+  500: "Server error.",
+  502: "Service unavailable.",
+  503: "Service unavailable.",
+  504: "Request timeout.",
+};
+
+// -------------------------
+// GENERIC HELPERS
+// -------------------------
+const createCrudApi = (resource) => ({
+  list: (params = {}) => api.get(`/${resource}`, { params }),
+  get: (id) => api.get(`/${resource}/${id}`),
+  create: (data) => api.post(`/${resource}`, data),
+  update: (id, data) => api.put(`/${resource}/${id}`, data),
+  patch: (id, data) => api.patch(`/${resource}/${id}`, data),
+  delete: (id) => api.delete(`/${resource}/${id}`),
+  bulkCreate: (dataArray) => api.post(`/${resource}/bulk`, { items: dataArray }),
+  bulkUpdate: (updates) => api.put(`/${resource}/bulk`, updates),
+  bulkDelete: (ids) => api.delete(`/${resource}/bulk`, { data: { ids } }),
+});
+
+// -------------------------
+// FILE UPLOAD HELPER
+// -------------------------
+const uploadFile = (url, file, extraData = {}) => {
+  const formData = new FormData();
+  formData.append("file", file);
+  Object.keys(extraData).forEach((k) => formData.append(k, extraData[k]));
+
+  return api.post(url, formData, {
+    headers: { "Content-Type": "multipart/form-data" },
+    onUploadProgress: (e) => {
+      const percent = Math.round((e.loaded * 100) / e.total);
+      console.log(`Upload Progress: ${percent}%`);
+    },
+  });
+};
+
+// -------------------------
+// AUTH
+// -------------------------
+export const auth = {
+  login: (email, password) => api.post("/api/auth/login", { email, password }),
+  register: (data) => api.post("/api/auth/register", data),
+  logout: () => api.post("/api/auth/logout"),
+  refresh: () => api.post("/api/auth/refresh"),
+  me: () => api.get("/api/auth/me"),
+  forgotPassword: (email) => api.post("/api/auth/forgot-password", { email }),
+  resetPassword: (token, password) => api.post("/api/auth/reset-password", { token, password }),
+  changePassword: (oldPassword, newPassword) => api.put("/api/auth/change-password", { oldPassword, newPassword }),
+  updateProfile: (data) => api.put("/api/auth/profile", data),
+  uploadAvatar: (file) => uploadFile("/api/auth/avatar", file),
+};
+
+// -------------------------
+// AUTO CRUD RESOURCES
+// -------------------------
+export const customers = createCrudApi("customers");
+export const vehicles = createCrudApi("vehicles");
+export const jobs = createCrudApi("jobs");
+export const estimates = createCrudApi("estimates");
+export const parts = createCrudApi("parts");
+export const labor = createCrudApi("labor");
+export const invoices = createCrudApi("invoices");
+export const appointments = createCrudApi("appointments");
+
+// -------------------------
+// SPECIAL ENDPOINTS
+// -------------------------
+
+// Customers
+customers.search = (q) => api.get(`/customers/search?q=${encodeURIComponent(q)}`);
+customers.getVehicles = (id) => api.get(`/customers/${id}/vehicles`);
+customers.getJobs = (id) => api.get(`/customers/${id}/jobs`);
+customers.getInvoices = (id) => api.get(`/customers/${id}/invoices`);
+customers.sendMessage = (id, message) => api.post(`/customers/${id}/messages`, message);
+customers.getMessages = (id) => api.get(`/customers/${id}/messages`);
+
+// Vehicles
+vehicles.vinLookup = (vin) => api.get(`/vehicles/vin-lookup/${vin}`);
+vehicles.getHistory = (id) => api.get(`/vehicles/${id}/history`);
+vehicles.getMaintenance = (id) => api.get(`/vehicles/${id}/maintenance`);
+vehicles.updateMaintenance = (id, data) => api.put(`/vehicles/${id}/maintenance`, data);
+
+// Jobs
+jobs.updateStatus = (id, status) => api.patch(`/jobs/${id}/status`, { status });
+jobs.startTimer = (id) => api.post(`/jobs/${id}/timer/start`);
+jobs.stopTimer = (id) => api.post(`/jobs/${id}/timer/stop`);
+jobs.getTimes = (id) => api.get(`/jobs/${id}/times`);
+jobs.addPart = (id, part) => api.post(`/jobs/${id}/parts`, part);
+jobs.addLabor = (id, labor) => api.post(`/jobs/${id}/labor`, labor);
+jobs.addNote = (id, note) => api.post(`/jobs/${id}/notes`, note);
+jobs.uploadPhoto = (id, file) => uploadFile(`/jobs/${id}/photos`, file);
+jobs.getPhotos = (id) => api.get(`/jobs/${id}/photos`);
+
+// Estimates
+estimates.convertToJob = (id) => api.post(`/estimates/${id}/convert-to-job`);
+estimates.sendToCustomer = (id, method = "email") => api.post(`/estimates/${id}/send`, { method });
+estimates.generatePdf = (id) => api.get(`/estimates/${id}/pdf`, { responseType: "blob" });
+
+// Invoices
+invoices.markPaid = (id, payment) => api.post(`/invoices/${id}/mark-paid`, payment);
+invoices.generatePdf = (id) => api.get(`/invoices/${id}/pdf`, { responseType: "blob" });
+invoices.send = (id, method = "email") => api.post(`/invoices/${id}/send`, { method });
+invoices.addPayment = (id, data) => api.post(`/invoices/${id}/payments`, data);
+invoices.getPayments = (id) => api.get(`/invoices/${id}/payments`);
+
+// Parts
+parts.search = (q) => api.get(`/parts/search?q=${encodeURIComponent(q)}`);
+parts.adjustStock = (id, adjustment, reason) => api.post(`/parts/${id}/adjust-stock`, { adjustment, reason });
+parts.getHistory = (id) => api.get(`/parts/${id}/history`);
+parts.getSuppliers = (id) => api.get(`/parts/${id}/suppliers`);
+parts.updateSupplier = (partId, supplierId, data) => api.put(`/parts/${partId}/suppliers/${supplierId}`, data);
+
+// Labor
+labor.getCategories = () => api.get("/labor/categories");
+labor.updateRates = (updates) => api.put("/labor/rates", updates);
+
+// Appointments
+appointments.getByDate = (date) => api.get(`/appointments/date/${date}`);
+appointments.getByRange = (start, end) => api.get(`/appointments/range?start=${start}&end=${end}`);
+appointments.checkAvailability = (date, duration) => api.get(`/appointments/availability?date=${date}&duration=${duration}`);
+appointments.sendReminder = (id) => api.post(`/appointments/${id}/reminder`);
+
+// Reports
+export const reports = {
+  sales: (start, end) => api.get(`/reports/sales?start=${start}&end=${end}`),
+  inventory: () => api.get("/reports/inventory"),
+  customers: (period = "30d") => api.get(`/reports/customers?period=${period}`),
+  jobs: (status, period = "30d") => api.get(`/reports/jobs?status=${status}&period=${period}`),
+  exportSales: (format = "pdf", start, end) => api.get(`/reports/sales/export?format=${format}&start=${start}&end=${end}`, { responseType: "blob" }),
+};
+
+// Settings
+export const settings = {
+  get: () => api.get("/settings"),
+  update: (data) => api.put("/settings", data),
+  backup: () => api.get("/settings/backup", { responseType: "blob" }),
+  restore: (file) => uploadFile("/settings/restore", file),
+};
+
+// AI
+export const aiDiagnostics = {
+  quickDiagnosis: (data) => api.post("/ai/diagnostics/quick-diagnosis", data),
+  obdLookup: (code) => api.get(`/ai/diagnostics/obd/${code}`),
+  symptomAnalysis: (symptoms) => api.post("/ai/diagnostics/symptoms", { symptoms }),
+  generateEstimate: (data) => api.post("/ai/estimates/generate", data),
+  feedback: (id, feedback) => api.post(`/ai/diagnostics/${id}/feedback`, feedback),
+};
+
+// File uploads
+export const uploads = {
+  upload: (file, category = "general") => uploadFile("/uploads", file, { category }),
+  delete: (id) => api.delete(`/uploads/${id}`),
+  get: (id) => api.get(`/uploads/${id}`),
+};
+
+// Dashboard
+export const dashboard = {
+  stats: () => api.get("/dashboard/stats"),
+  recentActivity: (limit = 10) => api.get(`/dashboard/recent-activity?limit=${limit}`),
+  charts: (period = "30d") => api.get(`/dashboard/charts?period=${period}`),
+  alerts: () => api.get("/dashboard/alerts"),
+};
+
+// Default export
+export default api;
+
+// Aliases for backward compatibility
+//export const customerService = customers;
+//export const vehicleService = vehicles;
+//export const estimateService = estimates;
+//export const jobService = jobs;
+//export const partService = parts;
+export const laborService = labor;
+//export const invoiceService = invoices;
+export const appointmentService = appointments;
+export const aiService = aiDiagnostics;
+
+// Alias for backward compatibility
+//export const settingsService = settings;
+
+// Alias for backward compatibility
+//export const dashboardService = dashboard;
+
+// Backward compatibility aliases
+export const settingsService = settings;
+export const dashboardService = dashboard;
+export const employeeService = employee;
+export const customerService = customer;
+export const vehicleService = vehicle;
+export const jobService = job;
+export const estimateService = estimate;
+export const invoiceService = invoice;
+export const partService = part;
+export const reportService = report;
+const timeclockservice = axios.create({
+  baseURL: "http://192.168.1.26:5000",
+  baseURL: "http://192.168.1.26:5000"
+});

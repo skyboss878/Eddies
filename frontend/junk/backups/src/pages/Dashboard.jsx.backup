@@ -1,0 +1,585 @@
+// src/pages/Dashboard.jsx - Fixed version with proper error handling
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext';
+import {
+  Users, Car, Wrench, FileText, Calendar, DollarSign, BarChart3,
+  Clock, Plus, RefreshCw, Download, Bell, Settings, MapPin, Phone, Mail,
+  TrendingUp, Edit3, Sparkles, Brain, Zap, Search,
+  AlertTriangle, CheckCircle, Eye, Filter, Archive, Star,
+  Clipboard, Gauge, Target, Trophy, Database, X
+} from 'lucide-react';
+
+const Dashboard = () => {
+  const { user } = useAuth();
+  const navigate = useNavigate();
+
+  // Add missing state variables
+  const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
+  const [currentTime, setCurrentTime] = useState(new Date());
+  const [showAIPanel, setShowAIPanel] = useState(false);
+
+  // Extract user properties with fallbacks
+  const userName = user?.name || user?.firstName || user?.username || 'User';
+  const userEmail = user?.email || 'user@example.com';
+  const userRole = user?.role || 'user';
+
+  // Add placeholder search functions (SearchSystem commented out)
+  const isSearchOpen = false;
+  const openSearch = () => {};
+  const closeSearch = () => {};
+
+  const safeHasPermission = (permission) => {
+    if (!user) return false;
+    return user.permissions?.includes(permission) || user.role === "admin" || false;
+  };
+
+  const safeHasRole = (role) => {
+    if (!user) return false;
+    return user.role?.toLowerCase() === role.toLowerCase() || false;
+  };
+
+  // Dashboard data
+  const [dashboardData] = useState({
+    totalCustomers: 247,
+    monthlyRevenue: 18500,
+    activeJobs: 12,
+    completedJobs: 8,
+    pendingEstimates: 5,
+    weeklyRevenue: 4250,
+    shopEfficiency: 94,
+    aiRecommendations: 3,
+    todayJobs: 6,
+    avgJobTime: 3.2
+  });
+
+  // Quick actions with safe permission checking
+  const getAllQuickActions = () => [
+    {
+      name: 'Add Customer',
+      path: '/customers/add',
+      icon: Users,
+      color: 'bg-blue-600 hover:bg-blue-700',
+      description: 'New customer record',
+      permission: 'customers'
+    },
+    {
+      name: 'New Job',
+      path: '/jobs/create',
+      icon: Wrench,
+      color: 'bg-green-600 hover:bg-green-700',
+      description: 'Create work order',
+      permission: 'jobs'
+    },
+    {
+      name: 'AI Estimate',
+      path: '/estimates/ai',
+      icon: Sparkles,
+      color: 'bg-purple-600 hover:bg-purple-700',
+      description: 'Smart pricing',
+      permission: 'estimates'
+    },
+    {
+      name: 'Add Vehicle',
+      path: '/vehicles/add',
+      icon: Car,
+      color: 'bg-orange-600 hover:bg-orange-700',
+      description: 'Register vehicle',
+      permission: 'vehicles'
+    },
+    {
+      name: 'Invoices',
+      path: '/invoices',
+      icon: DollarSign,
+      color: 'bg-indigo-600 hover:bg-indigo-700',
+      description: 'Bill customers',
+      permission: 'invoices'
+    },
+    {
+      name: 'AI Diagnostics',
+      path: '/ai-diagnostics',
+      icon: Brain,
+      color: 'bg-pink-600 hover:bg-pink-700',
+      description: 'Smart diagnosis',
+      permission: 'diagnostics'
+    }
+  ];
+
+  // Filter actions based on permissions with fallback
+  const quickActions = getAllQuickActions().filter(action =>
+    safeHasPermission(action.permission) || safeHasRole('admin') || userRole === 'admin'
+  );
+
+  // Recent jobs data
+  const recentJobs = [
+    {
+      id: 'JOB-001',
+      customer: 'John Smith',
+      phone: '(661) 555-0123',
+      vehicle: '2020 Honda Civic',
+      service: 'Oil Change + Filter',
+      status: 'Completed',
+      amount: 65.00,
+      timeSpent: '45 min',
+      technician: 'Mike',
+      aiAnalyzed: true,
+      priority: 'normal',
+      completedAt: '2 hours ago'
+    },
+    {
+      id: 'JOB-002',
+      customer: 'Sarah Wilson',
+      phone: '(661) 555-0456',
+      vehicle: '2018 Ford F-150',
+      service: 'Brake Service',
+      status: 'In Progress',
+      amount: 320.00,
+      timeSpent: '2.5 hours',
+      technician: userName || 'Eddie',
+      aiAnalyzed: false,
+      priority: 'high',
+      aiRecommendation: 'Check brake fluid levels - potential leak detected'
+    },
+    {
+      id: 'JOB-003',
+      customer: 'Mike Johnson',
+      phone: '(661) 555-0789',
+      vehicle: '2019 Toyota Camry',
+      service: 'AC Repair',
+      status: 'Waiting for Parts',
+      amount: 275.00,
+      timeSpent: '1 hour',
+      technician: 'Carlos',
+      aiAnalyzed: true,
+      priority: 'medium',
+      aiRecommendation: 'Compressor replacement recommended'
+    }
+  ];
+
+  // Utility functions
+  const formatCurrency = (amount) => `$${amount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+
+  const handleRefresh = async () => {
+    setRefreshing(true);
+    try {
+      // In real app, refresh user data and dashboard data
+      await new Promise(resolve => setTimeout(resolve, 1500));
+      console.log('Dashboard refreshed');
+    } catch (error) {
+      console.error('Failed to refresh dashboard:', error);
+      setError('Failed to refresh dashboard data');
+    } finally {
+      setRefreshing(false);
+    }
+  };
+
+  const handleNavigation = (path) => {
+    try {
+      navigate(path);
+    } catch (err) {
+      console.error('Navigation failed:', err);
+      setError(`Navigation failed: ${err.message}`);
+    }
+  };
+
+  const handleQuickAction = (action) => {
+    handleNavigation(action.path);
+  };
+
+  const getStatusColor = (status) => {
+    switch (status?.toLowerCase()) {
+      case 'completed': return 'bg-green-100 text-green-800 border-green-200';
+      case 'in progress': return 'bg-blue-100 text-blue-800 border-blue-200';
+      case 'waiting for parts': return 'bg-yellow-100 text-yellow-800 border-yellow-200';
+      case 'scheduled': return 'bg-purple-100 text-purple-800 border-purple-200';
+      default: return 'bg-gray-100 text-gray-800 border-gray-200';
+    }
+  };
+
+  const getPriorityIcon = (priority) => {
+    switch (priority?.toLowerCase()) {
+      case 'high': return <AlertTriangle className="w-4 h-4 text-red-600" />;
+      case 'medium': return <Clock className="w-4 h-4 text-yellow-600" />;
+      default: return <CheckCircle className="w-4 h-4 text-green-600" />;
+    }
+  };
+
+  const getRoleDisplayName = (role) => {
+    switch (role?.toLowerCase()) {
+      case 'admin': return 'Administrator';
+      case 'manager': return 'Manager';
+      case 'technician': return 'Technician';
+      case 'owner': return 'Owner';
+      default: return role || 'User';
+    }
+  };
+
+  // Update time every second
+  useEffect(() => {
+    const timer = setInterval(() => setCurrentTime(new Date()), 1000);
+    return () => clearInterval(timer);
+  }, []);
+
+  // Error handling
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center max-w-md">
+          <AlertTriangle className="w-16 h-16 text-red-600 mx-auto mb-4" />
+          <h1 className="text-xl font-bold text-gray-900 mb-2">Dashboard Error</h1>
+          <p className="text-gray-600 mb-4">{error}</p>
+          <div className="space-x-3">
+            <button
+              onClick={() => setError(null)}
+              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+            >
+              Retry
+            </button>
+            <button
+              onClick={() => window.location.reload()}
+              className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700"
+            >
+              Reload Page
+            </button>
+      </div>
+    );
+  }
+
+  // Loading state
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading Dashboard...</p>
+          <p className="text-sm text-gray-500 mt-2">
+            Please wait while we load your data...
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <>
+      <div className="p-6 max-w-7xl mx-auto">
+        {/* Enhanced Header */}
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 space-y-4 sm:space-y-0">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900">
+              Welcome back, {userName}! 👋
+            </h1>
+            <div className="flex flex-wrap items-center space-x-4 text-sm text-gray-600 mt-2">
+              <span className="flex items-center space-x-1">
+                <Calendar className="w-4 h-4" />
+                <span>{currentTime.toLocaleDateString()}</span>
+              </span>
+              <span className="flex items-center space-x-1">
+                <Clock className="w-4 h-4" />
+                <span>{currentTime.toLocaleTimeString()}</span>
+              </span>
+              <div className="flex items-center space-x-1">
+                <Sparkles className="w-4 h-4 text-purple-600" />
+                <span>AI Active</span>
+              <div className="flex items-center space-x-1">
+                <span className="px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-xs font-medium">
+                  {getRoleDisplayName(userRole)}
+                </span>
+
+          <div className="flex items-center space-x-3">
+            {dashboardData.aiRecommendations > 0 && (safeHasPermission('diagnostics') || safeHasRole('admin')) && (
+              <div className="flex items-center space-x-2 bg-purple-50 border border-purple-200 rounded-lg px-3 py-2">
+                <Brain className="w-5 h-5 text-purple-600" />
+                <span className="text-sm font-medium text-purple-800">
+                  {dashboardData.aiRecommendations} insights
+                </span>
+                <button
+                  onClick={() => handleNavigation('/ai-diagnostics')}
+                  className="text-purple-600 hover:text-purple-800"
+                >
+                  <Eye className="w-4 h-4" />
+                </button>
+            )}
+
+            <button
+              onClick={handleRefresh}
+              disabled={refreshing}
+              className={`flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors ${refreshing ? 'opacity-50 cursor-not-allowed' : ''}`}
+            >
+              <RefreshCw className={`w-4 h-4 ${refreshing ? 'animate-spin' : ''}`} />
+              <span>Refresh</span>
+            </button>
+
+        {/* User Profile Card */}
+        <div className="mb-6 bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg p-4 border border-blue-200">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-4">
+              <div className="p-3 bg-blue-100 rounded-full">
+                <Users className="w-6 h-6 text-blue-600" />
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900">{userName}</h3>
+                <p className="text-sm text-gray-600">{userEmail}</p>
+                <p className="text-xs text-blue-600 font-medium">{getRoleDisplayName(userRole)}</p>
+            <button
+              onClick={openSearch}
+              className="px-4 py-2 bg-white border border-blue-200 text-blue-700 rounded-lg hover:bg-blue-50 transition-colors text-sm font-medium"
+            >
+              Quick Search
+            </button>
+
+        {/* Quick Actions */}
+        {quickActions.length > 0 && (
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 mb-6">
+            {quickActions.map((action) => {
+              const Icon = action.icon;
+              return (
+                <button
+                  key={action.name}
+                  onClick={() => handleQuickAction(action)}
+                  className={`${action.color} text-white p-4 rounded-lg shadow-sm hover:shadow-lg transition-all text-center group relative transform hover:scale-105`}
+                >
+                  <Icon className="w-6 h-6 mx-auto mb-2 group-hover:scale-110 transition-transform" />
+                  <span className="text-sm font-medium">{action.name}</span>
+                  <p className="text-xs opacity-75 mt-1">{action.description}</p>
+                  {action.name.includes('AI') && (
+                    <div className="absolute -top-1 -right-1 w-3 h-3 bg-yellow-400 rounded-full animate-pulse"></div>
+                  )}
+                </button>
+              );
+            })}
+        )}
+
+        {/* Metrics Cards */}
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4 mb-6">
+          {(safeHasPermission('customers') || safeHasRole('admin')) && (
+            <div className="bg-white rounded-lg shadow-sm border p-4 hover:shadow-md transition-shadow cursor-pointer" onClick={() => handleNavigation('/customers')}>
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-gray-600">Customers</p>
+                  <p className="text-2xl font-bold text-gray-900">{dashboardData.totalCustomers}</p>
+                  <p className="text-xs text-green-600 flex items-center">
+                    <TrendingUp className="w-3 h-3 mr-1" />
+                    +12% this month
+                  </p>
+                <div className="p-2 bg-blue-100 rounded-lg">
+                  <Users className="w-6 h-6 text-blue-600" />
+          )}
+
+          {(safeHasPermission('reports') || safeHasRole('admin')) && (
+            <div className="bg-white rounded-lg shadow-sm border p-4 hover:shadow-md transition-shadow cursor-pointer" onClick={() => handleNavigation('/reports')}>
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-gray-600">Monthly Revenue</p>
+                  <p className="text-2xl font-bold text-gray-900">{formatCurrency(dashboardData.monthlyRevenue)}</p>
+                  <p className="text-xs text-green-600 flex items-center">
+                    <TrendingUp className="w-3 h-3 mr-1" />
+                    +18% vs last month
+                  </p>
+                <div className="p-2 bg-green-100 rounded-lg">
+                  <DollarSign className="w-6 h-6 text-green-600" />
+          )}
+
+          {(safeHasPermission('jobs') || safeHasRole('admin')) && (
+            <div className="bg-white rounded-lg shadow-sm border p-4 hover:shadow-md transition-shadow cursor-pointer" onClick={() => handleNavigation('/jobs')}>
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-gray-600">Active Jobs</p>
+                  <p className="text-2xl font-bold text-gray-900">{dashboardData.activeJobs}</p>
+                  <p className="text-xs text-gray-600">{dashboardData.completedJobs} completed today</p>
+                <div className="p-2 bg-purple-100 rounded-lg">
+                  <Wrench className="w-6 h-6 text-purple-600" />
+          )}
+
+          {(safeHasPermission('estimates') || safeHasRole('admin')) && (
+            <div className="bg-white rounded-lg shadow-sm border p-4 hover:shadow-md transition-shadow cursor-pointer" onClick={() => handleNavigation('/estimates')}>
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-gray-600">Pending Estimates</p>
+                  <p className="text-2xl font-bold text-gray-900">{dashboardData.pendingEstimates}</p>
+                  <p className="text-xs text-orange-600 flex items-center">
+                    <Clock className="w-3 h-3 mr-1" />
+                    Needs attention
+                  </p>
+                <div className="p-2 bg-orange-100 rounded-lg">
+                  <FileText className="w-6 h-6 text-orange-600" />
+          )}
+
+          {(safeHasPermission('diagnostics') || safeHasRole('admin')) && (
+            <div className="bg-gradient-to-br from-indigo-50 to-purple-50 rounded-lg shadow-sm border-2 border-indigo-200 p-4 hover:shadow-md transition-shadow cursor-pointer" onClick={() => handleNavigation('/ai-diagnostics')}>
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-gray-600">AI Efficiency</p>
+                  <p className="text-2xl font-bold text-indigo-900">{dashboardData.shopEfficiency}%</p>
+                  <p className="text-xs text-indigo-600 flex items-center">
+                    <Trophy className="w-3 h-3 mr-1" />
+                    Excellent performance
+                  </p>
+                <div className="p-2 bg-indigo-200 rounded-lg">
+                  <Brain className="w-6 h-6 text-indigo-700" />
+          )}
+
+        {/* Recent Jobs Section */}
+        {(safeHasPermission('jobs') || safeHasRole('admin')) && (
+          <div className="bg-white rounded-lg shadow-sm border mb-6">
+            <div className="p-4 border-b">
+              <div className="flex items-center justify-between">
+                <h2 className="text-lg font-semibold text-gray-900 flex items-center">
+                  <Wrench className="w-5 h-5 mr-2 text-purple-600" />
+                  Recent Jobs
+                </h2>
+                <div className="flex items-center space-x-3">
+                  {safeHasPermission('jobs') && (
+                    <button
+                      onClick={() => handleNavigation('/jobs/create')}
+                      className="flex items-center space-x-1 px-3 py-1 bg-green-600 text-white text-sm rounded-lg hover:bg-green-700 transition-colors"
+                    >
+                      <Plus className="w-4 h-4" />
+                      <span>New Job</span>
+                    </button>
+                  )}
+                  <button
+                    onClick={() => handleNavigation('/jobs')}
+                    className="text-sm text-blue-600 hover:text-blue-700 font-medium"
+                  >
+                    View All ({dashboardData.activeJobs + dashboardData.completedJobs})
+                  </button>
+            <div className="p-4">
+              <div className="space-y-4">
+                {recentJobs.slice(0, 4).map((job) => (
+                  <div key={job.id} className="bg-gray-50 p-4 rounded-lg hover:shadow-sm transition-shadow border border-gray-100">
+                    <div className="flex items-start justify-between mb-3">
+                      <div className="flex items-center space-x-2">
+                        <h3 className="font-semibold text-blue-600 text-sm flex items-center">
+                          {job.id}
+                          {job.aiAnalyzed && <Brain className="w-3 h-3 ml-1 text-purple-500" />}
+                        </h3>
+                        {getPriorityIcon(job.priority)}
+                        <span className={`px-2 py-1 rounded-full text-xs border ${getStatusColor(job.status)}`}>
+                          {job.status}
+                        </span>
+                      <div className="text-right">
+                        <p className="text-sm font-bold text-gray-900">{formatCurrency(job.amount)}</p>
+                        <p className="text-xs text-gray-500">{job.timeSpent || job.scheduledFor}</p>
+
+                    <div className="grid grid-cols-2 gap-4 mb-2">
+                      <div>
+                        <p className="text-sm font-medium text-gray-900">{job.customer}</p>
+                        <p className="text-xs text-gray-600">{job.phone}</p>
+                      <div>
+                        <p className="text-sm text-gray-700">{job.vehicle}</p>
+                        <p className="text-xs text-gray-600">Tech: {job.technician}</p>
+
+                    <p className="text-sm text-gray-800 mb-2">{job.service}</p>
+
+                    {job.aiRecommendation && (safeHasPermission('diagnostics') || safeHasRole('admin')) && (
+                      <div className="mt-2 p-3 bg-purple-50 border border-purple-200 rounded-lg">
+                        <div className="flex items-start space-x-2">
+                          <Sparkles className="w-4 h-4 text-purple-600 mt-0.5 flex-shrink-0" />
+                          <div>
+                            <p className="text-xs font-medium text-purple-800">AI Insight:</p>
+                            <p className="text-xs text-purple-700 mt-1">{job.aiRecommendation}</p>
+                    )}
+
+                    <div className="flex items-center justify-between mt-3 pt-2 border-t border-gray-200">
+                      <div className="flex items-center space-x-2">
+                        <button
+                          onClick={() => handleNavigation(`/jobs/${job.id}`)}
+                          className="text-xs text-blue-600 hover:text-blue-700 font-medium flex items-center space-x-1"
+                        >
+                          <Eye className="w-3 h-3" />
+                          <span>View</span>
+                        </button>
+                        {safeHasPermission('jobs') && (
+                          <button
+                            onClick={() => handleNavigation(`/jobs/${job.id}/edit`)}
+                            className="text-xs text-gray-600 hover:text-gray-700 font-medium flex items-center space-x-1"
+                          >
+                            <Edit3 className="w-3 h-3" />
+                            <span>Edit</span>
+                          </button>
+                        )}
+                      <div className="text-xs text-gray-500">
+                        {job.completedAt || 'In progress'}
+                ))}
+        )}
+
+        {/* AI Insights Panel */}
+        {showAIPanel && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-semibold text-gray-900 flex items-center">
+                  <Brain className="w-5 h-5 mr-2 text-purple-600" />
+                  AI Insights
+                </h3>
+                <button
+                  onClick={() => setShowAIPanel(false)}
+                  className="text-gray-400 hover:text-gray-600"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              <div className="space-y-3">
+                <div className="p-3 bg-purple-50 border border-purple-200 rounded-lg">
+                  <p className="text-sm font-medium text-purple-800">Recommendation:</p>
+                  <p className="text-sm text-purple-700 mt-1">Schedule preventive maintenance reminders for Honda Civic customers - pattern detected.</p>
+                <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                  <p className="text-sm font-medium text-blue-800">Efficiency Tip:</p>
+                  <p className="text-sm text-blue-700 mt-1">Batch brake service appointments on Tuesdays for better workflow.</p>
+                <div className="p-3 bg-green-50 border border-green-200 rounded-lg">
+                  <p className="text-sm font-medium text-green-800">Revenue Opportunity:</p>
+                  <p className="text-sm text-green-700 mt-1">3 customers due for transmission service - potential $1,350 revenue.</p>
+              <div className="mt-4 flex space-x-2">
+                {(safeHasPermission('diagnostics') || safeHasRole('admin')) && (
+                  <button
+                    onClick={() => handleNavigation('/ai-diagnostics')}
+                    className="flex-1 bg-purple-600 text-white py-2 px-4 rounded-lg hover:bg-purple-700 transition-colors"
+                  >
+                    View Full Analysis
+                  </button>
+                )}
+                <button
+                  onClick={() => setShowAIPanel(false)}
+                  className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+                >
+                  Close
+                </button>
+        )}
+
+        {/* Footer */}
+        <div className="bg-white rounded-lg shadow-sm border p-4">
+          <div className="flex flex-col sm:flex-row justify-between items-center text-sm">
+            <div className="flex flex-col sm:flex-row items-center space-y-2 sm:space-y-0 sm:space-x-4 mb-2 sm:mb-0">
+              <span className="flex items-center text-gray-600">
+                <MapPin className="w-4 h-4 mr-1" />
+                3123 Chester Ave, Bakersfield CA 93301
+              </span>
+              <a href="tel:(661) 327-4242" className="flex items-center text-blue-600 hover:text-blue-700">
+                <Phone className="w-4 h-4 mr-1" />
+                (661) 327-4242
+              </a>
+              <a href="mailto:info@eddiesautomotive.com" className="flex items-center text-blue-600 hover:text-blue-700">
+                <Mail className="w-4 h-4 mr-1" />
+                info@eddiesautomotive.com
+              </a>
+            <div className="flex items-center space-x-2 text-gray-500">
+              <Zap className="w-4 h-4 text-green-500" />
+              <span>AI-Powered • Last updated: {currentTime.toLocaleTimeString()}</span>
+              {(safeHasPermission("diagnostics") || safeHasRole("admin")) && (
+                <button
+                  onClick={() => setShowAIPanel(true)}
+                  className="ml-2 text-purple-600 hover:text-purple-700"
+                >
+                  Run AI Analysis
+                </button>
+              )}
+      </div>
+
+      {/* Global Search Modal - Commented out SearchSystem */}
+      {/* <SearchSystem isOpen={isSearchOpen} onClose={closeSearch} /> */}
+    </>
+  );
+};
+
+export default Dashboard;

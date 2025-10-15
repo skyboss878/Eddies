@@ -1,0 +1,101 @@
+/* src/styles/print.css - Add this to your project */
+
+@media print {
+  /* Hide navigation and UI elements */
+  nav, .navbar, .sidebar, button:not(.print-keep), .no-print, 
+  .bg-gray-50, .shadow-sm, .shadow-lg, .border, .rounded-lg {
+    display: none !important;
+  }
+  
+  /* Print-specific styling */
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+    font-size: 12pt;
+    line-height: 1.4;
+    color: #000;
+    background: white !important;
+  }
+  
+  .print-container {
+    width: 100% !important;
+    max-width: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    box-shadow: none !important;
+    border: none !important;
+  }
+  
+  /* Customer header for print */
+  .customer-print-header {
+    border-bottom: 2px solid #000;
+    padding-bottom: 10pt;
+    margin-bottom: 15pt;
+  }
+  
+  .customer-print-header h1 {
+    font-size: 18pt;
+    font-weight: bold;
+    margin: 0 0 5pt 0;
+  }
+  
+  .customer-print-info {
+    font-size: 11pt;
+    display: flex;
+    justify-content: space-between;
+    margin: 5pt 0;
+  }
+  
+  /* Vehicle cards for print */
+  .vehicle-print-card {
+    border: 1px solid #ccc;
+    padding: 10pt;
+    margin: 5pt 0;
+    page-break-inside: avoid;
+  }
+  
+  .vehicle-print-card h3 {
+    font-size: 14pt;
+    font-weight: bold;
+    margin: 0 0 5pt 0;
+  }
+  
+  /* Job history for print */
+  .job-print-item {
+    border-bottom: 1px solid #ddd;
+    padding: 8pt 0;
+    page-break-inside: avoid;
+  }
+  
+  .job-print-date {
+    font-weight: bold;
+    font-size: 11pt;
+  }
+  
+  .job-print-total {
+    float: right;
+    font-weight: bold;
+  }
+  
+  /* Page breaks */
+  .page-break-before {
+    page-break-before: always;
+  }
+  
+  .page-break-after {
+    page-break-after: always;
+  }
+  
+  .page-break-avoid {
+    page-break-inside: avoid;
+  }
+  
+  /* Print timestamp */
+  .print-timestamp::after {
+    content: "Printed on " attr(data-timestamp);
+    font-size: 9pt;
+    color: #666;
+    position: fixed;
+    bottom: 10pt;
+    right: 10pt;
+  }
+}

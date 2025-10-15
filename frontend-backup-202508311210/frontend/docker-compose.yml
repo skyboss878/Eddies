@@ -1,0 +1,44 @@
+version: '3.8'
+
+services:
+  frontend:
+    build: .
+    ports:
+      - "3000:80"
+    environment:
+      - NODE_ENV=production
+    depends_on:
+      - backend
+    networks:
+      - autorepair-network
+
+  backend:
+    image: autorepair-backend:latest
+    ports:
+      - "8000:8000"
+    environment:
+      - DATABASE_URL=postgresql://user:pass@postgres:5432/autorepair
+    depends_on:
+      - postgres
+    networks:
+      - autorepair-network
+
+  postgres:
+    image: postgres:15
+    environment:
+      - POSTGRES_DB=autorepair
+      - POSTGRES_USER=user
+      - POSTGRES_PASSWORD=pass
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - autorepair-network
+
+volumes:
+  postgres_data:
+
+networks:
+  autorepair-network:
+    driver: bridge

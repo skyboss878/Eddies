@@ -1,0 +1,132 @@
+// src/utils/apiEndpoints.js
+// CORRECTED - Based on actual backend endpoints
+
+export const apiEndpoints = {
+  // Base
+  root: '/',
+  health: '/api/health',
+  settings: '/api/settings',
+  
+  // Authentication (NO /auth prefix for login/register!)
+  auth: {
+    register: '/api/auth/register',
+    login: '/api/auth/login',
+    registerWithCode: '/api/auth/register-with-code',
+    me: '/api/auth/me',
+    changePassword: '/api/auth/change-password',
+    logout: '/api/auth/logout',
+    refresh: '/api/auth/refresh',
+    verify: '/api/auth/me' // Use /me for verification
+  },
+  
+  // Customers
+  customers: {
+    list: '/api/auth/customers',
+    create: '/api/auth/customers',
+    get: (id) => `/api/auth/customers/${id}`,
+    update: (id) => `/api/auth/customers/${id}`,
+    delete: (id) => `/api/auth/customers/${id}`,
+    vehicles: (id) => `/api/auth/customers/${id}/vehicles`,
+    search: '/api/auth/customers/search'
+  },
+  
+  // Vehicles
+  vehicles: {
+    list: '/api/auth/vehicles',
+    create: '/api/auth/vehicles',
+    get: (id) => `/api/auth/vehicles/${id}`,
+    update: (id) => `/api/auth/vehicles/${id}`,
+    delete: (id) => `/api/auth/vehicles/${id}`,
+    vinLookup: (vin) => `/api/auth/vehicles/vin-lookup/${vin}`
+  },
+  
+  // Jobs
+  jobs: {
+    list: '/api/auth/jobs',
+    create: '/api/auth/jobs',
+    get: (id) => `/api/auth/jobs/${id}`,
+    updateStatus: (id) => `/api/auth/jobs/${id}/status`,
+    addParts: (id) => `/api/auth/jobs/${id}/parts`,
+    addLabor: (id) => `/api/auth/jobs/${id}/labor`
+  },
+  
+  // Estimates
+  estimates: {
+    list: '/api/auth/estimates',
+    create: '/api/auth/estimates',
+    get: (id) => `/api/auth/estimates/${id}`,
+    update: (id) => `/api/auth/estimates/${id}`,
+    convertToJob: (id) => `/api/auth/estimates/${id}/convert-to-job`,
+    generateNumber: '/api/auth/estimates/generate-number'
+  },
+  
+  // Invoices
+  invoices: {
+    list: '/api/auth/invoices',
+    create: '/api/auth/invoices',
+    get: (id) => `/api/auth/invoices/${id}`,
+    update: (id) => `/api/auth/invoices/${id}`,
+    markPaid: (id) => `/api/auth/invoices/${id}/mark-paid`,
+    generateNumber: '/api/auth/invoices/generate-number'
+  },
+  
+  // Inventory & Parts
+  inventory: {
+    list: '/api/auth/parts',
+    lowStock: '/api/auth/inventory/low-stock'
+  },
+  
+  parts: {
+    list: '/api/auth/parts'
+  },
+  
+  // Dashboard & Reports (CORRECTED!)
+  dashboard: {
+    stats: '/api/auth/dashboard/stats',
+    recentActivity: '/api/auth/dashboard/recent-activity'
+  },
+  
+  reports: {
+    sales: '/api/auth/reports/sales',
+    // Note: dashboard and revenue endpoints don't exist in backend!
+    // Use dashboard.stats instead
+  },
+  
+  // Time Clock
+  timeclock: {
+    clockIn: '/api/auth/timeclock/clock-in',
+    clockOut: '/api/auth/timeclock/clock-out',
+    entries: '/api/auth/timeclock/entries',
+    status: '/api/auth/timeclock/status'
+  },
+  
+  // AI & Diagnostics
+  ai: {
+    diagnostics: '/api/ai/diagnostics',
+    history: '/api/auth/ai/diagnostics/history'
+    // Note: /api/ai/chat doesn't exist in backend!
+  },
+  
+  // OBD2
+  obd2: {
+    lookup: '/api/obd2/lookup',
+    getCode: (code) => `/api/obd2/codes/${code}`
+  },
+  
+  // Appointments
+  appointments: {
+    list: '/api/auth/appointments',
+    create: '/api/auth/appointments',
+    get: (id) => `/api/auth/appointments/${id}`,
+    update: (id) => `/api/auth/appointments/${id}`,
+    delete: (id) => `/api/auth/appointments/${id}`
+  },
+  
+  // Migration
+  migration: {
+    analyze: '/api/migration/analyze',
+    import: '/api/migration/import'
+  }
+};
+
+export default apiEndpoints;

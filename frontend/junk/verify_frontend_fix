@@ -1,0 +1,34 @@
+#!/bin/bash
+
+echo "=== VERIFYING FRONTEND FIX ==="
+echo
+
+# Check if old endpoints still exist
+echo "1. Checking for OLD endpoints (should be empty):"
+echo "================================================="
+grep -r "/ai/generate-estimate" src/ --include="*.js" --include="*.jsx" 2>/dev/null || echo "✅ No old endpoints found"
+
+echo
+echo "2. Checking for NEW endpoints (should find them):"
+echo "=================================================="
+grep -r "/api/ai/generate-full-estimate" src/ --include="*.js" --include="*.jsx" 2>/dev/null || echo "❌ New endpoints not found"
+
+echo
+echo "3. API configuration check:"
+echo "============================"
+echo "Base URL in api.js (using Vite proxy):"
+grep -A 3 -B 3 "baseURL.*getBaseURL" src/utils/api.js
+
+echo
+echo "4. Expected behavior:"
+echo "===================="
+echo "✅ In development: requests go to Vite dev server, which proxies to Flask"
+echo "✅ Frontend makes request to: /api/ai/generate-full-estimate"
+echo "✅ Vite proxy forwards to: http://localhost:5000/api/ai/generate-full-estimate"
+echo "✅ Flask handles request at: /api/ai/generate-full-estimate"
+
+echo
+echo "=== READY TO TEST ==="
+echo "Start frontend: npm start"
+echo "Start backend: python run.py (in backend directory)"
+echo "Test AI estimate generation in the app"
